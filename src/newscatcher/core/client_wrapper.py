@@ -7,9 +7,7 @@ from .http_client import AsyncHttpClient
 
 
 class BaseClientWrapper:
-    def __init__(
-        self, *, api_token: str, base_url: str, timeout: typing.Optional[float] = None
-    ):
+    def __init__(self, *, api_token: str, base_url: str, timeout: typing.Optional[float] = None):
         self._api_token = api_token
         self._base_url = base_url
         self._timeout = timeout
@@ -17,6 +15,8 @@ class BaseClientWrapper:
     def get_headers(self) -> typing.Dict[str, str]:
         headers: typing.Dict[str, str] = {
             "X-Fern-Language": "Python",
+            "X-Fern-SDK-Name": "newscatcher-sdk",
+            "X-Fern-SDK-Version": "1.0.0",
         }
         headers["x-api-token"] = self._api_token
         return headers
@@ -30,12 +30,7 @@ class BaseClientWrapper:
 
 class SyncClientWrapper(BaseClientWrapper):
     def __init__(
-        self,
-        *,
-        api_token: str,
-        base_url: str,
-        timeout: typing.Optional[float] = None,
-        httpx_client: httpx.Client,
+        self, *, api_token: str, base_url: str, timeout: typing.Optional[float] = None, httpx_client: httpx.Client
     ):
         super().__init__(api_token=api_token, base_url=base_url, timeout=timeout)
         self.httpx_client = HttpClient(
@@ -48,12 +43,7 @@ class SyncClientWrapper(BaseClientWrapper):
 
 class AsyncClientWrapper(BaseClientWrapper):
     def __init__(
-        self,
-        *,
-        api_token: str,
-        base_url: str,
-        timeout: typing.Optional[float] = None,
-        httpx_client: httpx.AsyncClient,
+        self, *, api_token: str, base_url: str, timeout: typing.Optional[float] = None, httpx_client: httpx.AsyncClient
     ):
         super().__init__(api_token=api_token, base_url=base_url, timeout=timeout)
         self.httpx_client = AsyncHttpClient(

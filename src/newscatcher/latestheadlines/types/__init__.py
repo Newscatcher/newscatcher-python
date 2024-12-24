@@ -3,17 +3,11 @@
 from .latest_headlines_get_response import LatestHeadlinesGetResponse
 from .latest_headlines_post_response import LatestHeadlinesPostResponse
 from .latest_headlines_request_by_parse_date import LatestHeadlinesRequestByParseDate
-from .latest_headlines_request_clustering_enabled import (
-    LatestHeadlinesRequestClusteringEnabled,
-)
-from .latest_headlines_request_clustering_threshold import (
-    LatestHeadlinesRequestClusteringThreshold,
-)
+from .latest_headlines_request_clustering_enabled import LatestHeadlinesRequestClusteringEnabled
+from .latest_headlines_request_clustering_threshold import LatestHeadlinesRequestClusteringThreshold
 from .latest_headlines_request_is_headline import LatestHeadlinesRequestIsHeadline
 from .latest_headlines_request_is_opinion import LatestHeadlinesRequestIsOpinion
-from .latest_headlines_request_is_paid_content import (
-    LatestHeadlinesRequestIsPaidContent,
-)
+from .latest_headlines_request_is_paid_content import LatestHeadlinesRequestIsPaidContent
 from .latest_headlines_request_page import LatestHeadlinesRequestPage
 from .latest_headlines_request_page_size import LatestHeadlinesRequestPageSize
 from .latest_headlines_request_ranked_only import LatestHeadlinesRequestRankedOnly

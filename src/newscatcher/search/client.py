@@ -537,75 +537,51 @@ class SearchClient:
                 ),
                 "published_date_precision": published_date_precision,
                 "by_parse_date": convert_and_respect_annotation_metadata(
-                    object_=by_parse_date,
-                    annotation=SearchRequestByParseDate,
-                    direction="write",
+                    object_=by_parse_date, annotation=SearchRequestByParseDate, direction="write"
                 ),
                 "sort_by": sort_by,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=SearchRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=SearchRequestRankedOnly, direction="write"
                 ),
                 "from_rank": convert_and_respect_annotation_metadata(
-                    object_=from_rank,
-                    annotation=SearchRequestFromRank,
-                    direction="write",
+                    object_=from_rank, annotation=SearchRequestFromRank, direction="write"
                 ),
                 "to_rank": convert_and_respect_annotation_metadata(
                     object_=to_rank, annotation=SearchRequestToRank, direction="write"
                 ),
                 "is_headline": convert_and_respect_annotation_metadata(
-                    object_=is_headline,
-                    annotation=SearchRequestIsHeadline,
-                    direction="write",
+                    object_=is_headline, annotation=SearchRequestIsHeadline, direction="write"
                 ),
                 "is_opinion": convert_and_respect_annotation_metadata(
-                    object_=is_opinion,
-                    annotation=SearchRequestIsOpinion,
-                    direction="write",
+                    object_=is_opinion, annotation=SearchRequestIsOpinion, direction="write"
                 ),
                 "is_paid_content": convert_and_respect_annotation_metadata(
-                    object_=is_paid_content,
-                    annotation=SearchRequestIsPaidContent,
-                    direction="write",
+                    object_=is_paid_content, annotation=SearchRequestIsPaidContent, direction="write"
                 ),
                 "parent_url": parent_url,
                 "all_links": all_links,
                 "all_domain_links": all_domain_links,
                 "word_count_min": convert_and_respect_annotation_metadata(
-                    object_=word_count_min,
-                    annotation=SearchRequestWordCountMin,
-                    direction="write",
+                    object_=word_count_min, annotation=SearchRequestWordCountMin, direction="write"
                 ),
                 "word_count_max": convert_and_respect_annotation_metadata(
-                    object_=word_count_max,
-                    annotation=SearchRequestWordCountMax,
-                    direction="write",
+                    object_=word_count_max, annotation=SearchRequestWordCountMax, direction="write"
                 ),
                 "page": convert_and_respect_annotation_metadata(
                     object_=page, annotation=SearchRequestPage, direction="write"
                 ),
                 "page_size": convert_and_respect_annotation_metadata(
-                    object_=page_size,
-                    annotation=SearchRequestPageSize,
-                    direction="write",
+                    object_=page_size, annotation=SearchRequestPageSize, direction="write"
                 ),
                 "clustering_variable": clustering_variable,
                 "clustering_enabled": convert_and_respect_annotation_metadata(
-                    object_=clustering_enabled,
-                    annotation=SearchRequestClusteringEnabled,
-                    direction="write",
+                    object_=clustering_enabled, annotation=SearchRequestClusteringEnabled, direction="write"
                 ),
                 "clustering_threshold": convert_and_respect_annotation_metadata(
-                    object_=clustering_threshold,
-                    annotation=SearchRequestClusteringThreshold,
-                    direction="write",
+                    object_=clustering_threshold, annotation=SearchRequestClusteringThreshold, direction="write"
                 ),
                 "include_nlp_data": convert_and_respect_annotation_metadata(
-                    object_=include_nlp_data,
-                    annotation=SearchRequestIncludeNlpData,
-                    direction="write",
+                    object_=include_nlp_data, annotation=SearchRequestIncludeNlpData, direction="write"
                 ),
                 "has_nlp": has_nlp,
                 "theme": theme,
@@ -1180,75 +1156,51 @@ class AsyncSearchClient:
                 ),
                 "published_date_precision": published_date_precision,
                 "by_parse_date": convert_and_respect_annotation_metadata(
-                    object_=by_parse_date,
-                    annotation=SearchRequestByParseDate,
-                    direction="write",
+                    object_=by_parse_date, annotation=SearchRequestByParseDate, direction="write"
                 ),
                 "sort_by": sort_by,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=SearchRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=SearchRequestRankedOnly, direction="write"
                 ),
                 "from_rank": convert_and_respect_annotation_metadata(
-                    object_=from_rank,
-                    annotation=SearchRequestFromRank,
-                    direction="write",
+                    object_=from_rank, annotation=SearchRequestFromRank, direction="write"
                 ),
                 "to_rank": convert_and_respect_annotation_metadata(
                     object_=to_rank, annotation=SearchRequestToRank, direction="write"
                 ),
                 "is_headline": convert_and_respect_annotation_metadata(
-                    object_=is_headline,
-                    annotation=SearchRequestIsHeadline,
-                    direction="write",
+                    object_=is_headline, annotation=SearchRequestIsHeadline, direction="write"
                 ),
                 "is_opinion": convert_and_respect_annotation_metadata(
-                    object_=is_opinion,
-                    annotation=SearchRequestIsOpinion,
-                    direction="write",
+                    object_=is_opinion, annotation=SearchRequestIsOpinion, direction="write"
                 ),
                 "is_paid_content": convert_and_respect_annotation_metadata(
-                    object_=is_paid_content,
-                    annotation=SearchRequestIsPaidContent,
-                    direction="write",
+                    object_=is_paid_content, annotation=SearchRequestIsPaidContent, direction="write"
                 ),
                 "parent_url": parent_url,
                 "all_links": all_links,
                 "all_domain_links": all_domain_links,
                 "word_count_min": convert_and_respect_annotation_metadata(
-                    object_=word_count_min,
-                    annotation=SearchRequestWordCountMin,
-                    direction="write",
+                    object_=word_count_min, annotation=SearchRequestWordCountMin, direction="write"
                 ),
                 "word_count_max": convert_and_respect_annotation_metadata(
-                    object_=word_count_max,
-                    annotation=SearchRequestWordCountMax,
-                    direction="write",
+                    object_=word_count_max, annotation=SearchRequestWordCountMax, direction="write"
                 ),
                 "page": convert_and_respect_annotation_metadata(
                     object_=page, annotation=SearchRequestPage, direction="write"
                 ),
                 "page_size": convert_and_respect_annotation_metadata(
-                    object_=page_size,
-                    annotation=SearchRequestPageSize,
-                    direction="write",
+                    object_=page_size, annotation=SearchRequestPageSize, direction="write"
                 ),
                 "clustering_variable": clustering_variable,
                 "clustering_enabled": convert_and_respect_annotation_metadata(
-                    object_=clustering_enabled,
-                    annotation=SearchRequestClusteringEnabled,
-                    direction="write",
+                    object_=clustering_enabled, annotation=SearchRequestClusteringEnabled, direction="write"
                 ),
                 "clustering_threshold": convert_and_respect_annotation_metadata(
-                    object_=clustering_threshold,
-                    annotation=SearchRequestClusteringThreshold,
-                    direction="write",
+                    object_=clustering_threshold, annotation=SearchRequestClusteringThreshold, direction="write"
                 ),
                 "include_nlp_data": convert_and_respect_annotation_metadata(
-                    object_=include_nlp_data,
-                    annotation=SearchRequestIncludeNlpData,
-                    direction="write",
+                    object_=include_nlp_data, annotation=SearchRequestIncludeNlpData, direction="write"
                 ),
                 "has_nlp": has_nlp,
                 "theme": theme,

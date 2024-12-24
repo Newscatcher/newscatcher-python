@@ -24,15 +24,7 @@ from .types import (
     ValidationErrorLocItem,
 )
 from .errors import UnprocessableEntityError
-from . import (
-    authors,
-    latestheadlines,
-    search,
-    search_link,
-    searchsimilar,
-    sources,
-    subscription,
-)
+from . import authors, latestheadlines, search, search_link, searchsimilar, sources, subscription
 from .authors import (
     AuthorSearchRequestFrom,
     AuthorSearchRequestRankedOnly,
@@ -85,6 +77,7 @@ from .searchsimilar import (
     SearchSimilarGetResponse,
     SearchSimilarPostResponse,
 )
+from .version import __version__
 
 __all__ = [
     "AdditionalSourceInfo",
@@ -155,6 +148,7 @@ __all__ = [
     "UnprocessableEntityError",
     "ValidationError",
     "ValidationErrorLocItem",
+    "__version__",
     "authors",
     "latestheadlines",
     "search",

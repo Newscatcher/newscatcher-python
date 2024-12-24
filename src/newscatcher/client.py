@@ -68,25 +68,19 @@ class NewscatcherApi:
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
     ):
-        _defaulted_timeout = (
-            timeout if timeout is not None else 60 if httpx_client is None else None
-        )
+        _defaulted_timeout = timeout if timeout is not None else 60 if httpx_client is None else None
         self._client_wrapper = SyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             api_token=api_token,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.Client(
-                timeout=_defaulted_timeout, follow_redirects=follow_redirects
-            )
+            else httpx.Client(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
             if follow_redirects is not None
             else httpx.Client(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
         self.search = SearchClient(client_wrapper=self._client_wrapper)
-        self.latestheadlines = LatestheadlinesClient(
-            client_wrapper=self._client_wrapper
-        )
+        self.latestheadlines = LatestheadlinesClient(client_wrapper=self._client_wrapper)
         self.authors = AuthorsClient(client_wrapper=self._client_wrapper)
         self.search_link = SearchLinkClient(client_wrapper=self._client_wrapper)
         self.searchsimilar = SearchsimilarClient(client_wrapper=self._client_wrapper)
@@ -141,42 +135,30 @@ class AsyncNewscatcherApi:
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
     ):
-        _defaulted_timeout = (
-            timeout if timeout is not None else 60 if httpx_client is None else None
-        )
+        _defaulted_timeout = timeout if timeout is not None else 60 if httpx_client is None else None
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
             api_token=api_token,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.AsyncClient(
-                timeout=_defaulted_timeout, follow_redirects=follow_redirects
-            )
+            else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
             if follow_redirects is not None
             else httpx.AsyncClient(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
         self.search = AsyncSearchClient(client_wrapper=self._client_wrapper)
-        self.latestheadlines = AsyncLatestheadlinesClient(
-            client_wrapper=self._client_wrapper
-        )
+        self.latestheadlines = AsyncLatestheadlinesClient(client_wrapper=self._client_wrapper)
         self.authors = AsyncAuthorsClient(client_wrapper=self._client_wrapper)
         self.search_link = AsyncSearchLinkClient(client_wrapper=self._client_wrapper)
-        self.searchsimilar = AsyncSearchsimilarClient(
-            client_wrapper=self._client_wrapper
-        )
+        self.searchsimilar = AsyncSearchsimilarClient(client_wrapper=self._client_wrapper)
         self.sources = AsyncSourcesClient(client_wrapper=self._client_wrapper)
         self.subscription = AsyncSubscriptionClient(client_wrapper=self._client_wrapper)
 
 
-def _get_base_url(
-    *, base_url: typing.Optional[str] = None, environment: NewscatcherApiEnvironment
-) -> str:
+def _get_base_url(*, base_url: typing.Optional[str] = None, environment: NewscatcherApiEnvironment) -> str:
     if base_url is not None:
         return base_url
     elif environment is not None:
         return environment.value
     else:
-        raise Exception(
-            "Please pass in either base_url or environment to construct the client"
-        )
+        raise Exception("Please pass in either base_url or environment to construct the client")

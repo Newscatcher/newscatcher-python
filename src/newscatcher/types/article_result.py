@@ -48,12 +48,8 @@ class ArticleResult(UniversalBaseModel):
     word_count: typing.Optional[int] = None
     is_opinion: typing.Optional[bool] = None
     twitter_account: typing.Optional[str] = None
-    all_links: typing.Optional[
-        DtoResponsesMoreLikeThisResponseArticleResultAllLinks
-    ] = None
-    all_domain_links: typing.Optional[
-        DtoResponsesMoreLikeThisResponseArticleResultAllDomainLinks
-    ] = None
+    all_links: typing.Optional[DtoResponsesMoreLikeThisResponseArticleResultAllLinks] = None
+    all_domain_links: typing.Optional[DtoResponsesMoreLikeThisResponseArticleResultAllDomainLinks] = None
     nlp: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
     id: str
     score: float
@@ -61,9 +57,7 @@ class ArticleResult(UniversalBaseModel):
     custom_tags: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
 
     if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(
-            extra="allow", frozen=True
-        )  # type: ignore # Pydantic v2
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:
 
         class Config:

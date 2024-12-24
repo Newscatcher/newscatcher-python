@@ -16,9 +16,7 @@ class SubscriptionClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def get(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> SubscriptionResponse:
+    def get(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
         """
         This endpoint allows you to get info about your subscription plan.
 
@@ -70,9 +68,7 @@ class SubscriptionClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def post(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> SubscriptionResponse:
+    def post(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
         """
         This endpoint allows you to get info about your subscription plan.
 
@@ -129,9 +125,7 @@ class AsyncSubscriptionClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def get(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> SubscriptionResponse:
+    async def get(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
         """
         This endpoint allows you to get info about your subscription plan.
 
@@ -191,9 +185,7 @@ class AsyncSubscriptionClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def post(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> SubscriptionResponse:
+    async def post(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
         """
         This endpoint allows you to get info about your subscription plan.
 

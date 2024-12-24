@@ -423,9 +423,7 @@ class AuthorsClient:
                 "by_parse_date": by_parse_date,
                 "sort_by": sort_by,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=AuthorSearchRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=AuthorSearchRequestRankedOnly, direction="write"
                 ),
                 "from_rank": from_rank,
                 "to_rank": to_rank,
@@ -902,9 +900,7 @@ class AsyncAuthorsClient:
                 "by_parse_date": by_parse_date,
                 "sort_by": sort_by,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=AuthorSearchRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=AuthorSearchRequestRankedOnly, direction="write"
                 ),
                 "from_rank": from_rank,
                 "to_rank": to_rank,

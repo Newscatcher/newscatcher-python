@@ -431,9 +431,7 @@ class SearchsimilarClient:
                 "published_date_precision": published_date_precision,
                 "sort_by": sort_by,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=MoreLikeThisRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=MoreLikeThisRequestRankedOnly, direction="write"
                 ),
                 "from_rank": from_rank,
                 "to_rank": to_rank,
@@ -916,9 +914,7 @@ class AsyncSearchsimilarClient:
                 "published_date_precision": published_date_precision,
                 "sort_by": sort_by,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=MoreLikeThisRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=MoreLikeThisRequestRankedOnly, direction="write"
                 ),
                 "from_rank": from_rank,
                 "to_rank": to_rank,

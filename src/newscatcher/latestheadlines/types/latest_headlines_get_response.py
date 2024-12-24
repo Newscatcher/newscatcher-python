@@ -4,6 +4,4 @@ import typing
 from ...types.clustering_search_response import ClusteringSearchResponse
 from ...types.latest_headlines_response import LatestHeadlinesResponse
 
-LatestHeadlinesGetResponse = typing.Union[
-    ClusteringSearchResponse, LatestHeadlinesResponse
-]
+LatestHeadlinesGetResponse = typing.Union[ClusteringSearchResponse, LatestHeadlinesResponse]

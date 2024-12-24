@@ -9,29 +9,17 @@ from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.http_validation_error import HttpValidationError
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
-from .types.latest_headlines_request_by_parse_date import (
-    LatestHeadlinesRequestByParseDate,
-)
+from .types.latest_headlines_request_by_parse_date import LatestHeadlinesRequestByParseDate
 from .types.latest_headlines_request_ranked_only import LatestHeadlinesRequestRankedOnly
 from .types.latest_headlines_request_is_headline import LatestHeadlinesRequestIsHeadline
 from .types.latest_headlines_request_is_opinion import LatestHeadlinesRequestIsOpinion
-from .types.latest_headlines_request_is_paid_content import (
-    LatestHeadlinesRequestIsPaidContent,
-)
-from .types.latest_headlines_request_word_count_min import (
-    LatestHeadlinesRequestWordCountMin,
-)
-from .types.latest_headlines_request_word_count_max import (
-    LatestHeadlinesRequestWordCountMax,
-)
+from .types.latest_headlines_request_is_paid_content import LatestHeadlinesRequestIsPaidContent
+from .types.latest_headlines_request_word_count_min import LatestHeadlinesRequestWordCountMin
+from .types.latest_headlines_request_word_count_max import LatestHeadlinesRequestWordCountMax
 from .types.latest_headlines_request_page import LatestHeadlinesRequestPage
 from .types.latest_headlines_request_page_size import LatestHeadlinesRequestPageSize
-from .types.latest_headlines_request_clustering_enabled import (
-    LatestHeadlinesRequestClusteringEnabled,
-)
-from .types.latest_headlines_request_clustering_threshold import (
-    LatestHeadlinesRequestClusteringThreshold,
-)
+from .types.latest_headlines_request_clustering_enabled import LatestHeadlinesRequestClusteringEnabled
+from .types.latest_headlines_request_clustering_threshold import LatestHeadlinesRequestClusteringThreshold
 from .types.latest_headlines_post_response import LatestHeadlinesPostResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..core.client_wrapper import AsyncClientWrapper
@@ -308,12 +296,8 @@ class LatestheadlinesClient:
         page: typing.Optional[LatestHeadlinesRequestPage] = OMIT,
         page_size: typing.Optional[LatestHeadlinesRequestPageSize] = OMIT,
         clustering_variable: typing.Optional[str] = OMIT,
-        clustering_enabled: typing.Optional[
-            LatestHeadlinesRequestClusteringEnabled
-        ] = OMIT,
-        clustering_threshold: typing.Optional[
-            LatestHeadlinesRequestClusteringThreshold
-        ] = OMIT,
+        clustering_enabled: typing.Optional[LatestHeadlinesRequestClusteringEnabled] = OMIT,
+        clustering_threshold: typing.Optional[LatestHeadlinesRequestClusteringThreshold] = OMIT,
         include_nlp_data: typing.Optional[bool] = OMIT,
         has_nlp: typing.Optional[bool] = OMIT,
         theme: typing.Optional[str] = OMIT,
@@ -442,9 +426,7 @@ class LatestheadlinesClient:
             json={
                 "when": when,
                 "by_parse_date": convert_and_respect_annotation_metadata(
-                    object_=by_parse_date,
-                    annotation=LatestHeadlinesRequestByParseDate,
-                    direction="write",
+                    object_=by_parse_date, annotation=LatestHeadlinesRequestByParseDate, direction="write"
                 ),
                 "sort_by": sort_by,
                 "lang": lang,
@@ -456,53 +438,35 @@ class LatestheadlinesClient:
                 "not_sources": not_sources,
                 "not_author_name": not_author_name,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=LatestHeadlinesRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=LatestHeadlinesRequestRankedOnly, direction="write"
                 ),
                 "is_headline": convert_and_respect_annotation_metadata(
-                    object_=is_headline,
-                    annotation=LatestHeadlinesRequestIsHeadline,
-                    direction="write",
+                    object_=is_headline, annotation=LatestHeadlinesRequestIsHeadline, direction="write"
                 ),
                 "is_opinion": convert_and_respect_annotation_metadata(
-                    object_=is_opinion,
-                    annotation=LatestHeadlinesRequestIsOpinion,
-                    direction="write",
+                    object_=is_opinion, annotation=LatestHeadlinesRequestIsOpinion, direction="write"
                 ),
                 "is_paid_content": convert_and_respect_annotation_metadata(
-                    object_=is_paid_content,
-                    annotation=LatestHeadlinesRequestIsPaidContent,
-                    direction="write",
+                    object_=is_paid_content, annotation=LatestHeadlinesRequestIsPaidContent, direction="write"
                 ),
                 "parent_url": parent_url,
                 "all_links": all_links,
                 "all_domain_links": all_domain_links,
                 "word_count_min": convert_and_respect_annotation_metadata(
-                    object_=word_count_min,
-                    annotation=LatestHeadlinesRequestWordCountMin,
-                    direction="write",
+                    object_=word_count_min, annotation=LatestHeadlinesRequestWordCountMin, direction="write"
                 ),
                 "word_count_max": convert_and_respect_annotation_metadata(
-                    object_=word_count_max,
-                    annotation=LatestHeadlinesRequestWordCountMax,
-                    direction="write",
+                    object_=word_count_max, annotation=LatestHeadlinesRequestWordCountMax, direction="write"
                 ),
                 "page": convert_and_respect_annotation_metadata(
-                    object_=page,
-                    annotation=LatestHeadlinesRequestPage,
-                    direction="write",
+                    object_=page, annotation=LatestHeadlinesRequestPage, direction="write"
                 ),
                 "page_size": convert_and_respect_annotation_metadata(
-                    object_=page_size,
-                    annotation=LatestHeadlinesRequestPageSize,
-                    direction="write",
+                    object_=page_size, annotation=LatestHeadlinesRequestPageSize, direction="write"
                 ),
                 "clustering_variable": clustering_variable,
                 "clustering_enabled": convert_and_respect_annotation_metadata(
-                    object_=clustering_enabled,
-                    annotation=LatestHeadlinesRequestClusteringEnabled,
-                    direction="write",
+                    object_=clustering_enabled, annotation=LatestHeadlinesRequestClusteringEnabled, direction="write"
                 ),
                 "clustering_threshold": convert_and_respect_annotation_metadata(
                     object_=clustering_threshold,
@@ -833,12 +797,8 @@ class AsyncLatestheadlinesClient:
         page: typing.Optional[LatestHeadlinesRequestPage] = OMIT,
         page_size: typing.Optional[LatestHeadlinesRequestPageSize] = OMIT,
         clustering_variable: typing.Optional[str] = OMIT,
-        clustering_enabled: typing.Optional[
-            LatestHeadlinesRequestClusteringEnabled
-        ] = OMIT,
-        clustering_threshold: typing.Optional[
-            LatestHeadlinesRequestClusteringThreshold
-        ] = OMIT,
+        clustering_enabled: typing.Optional[LatestHeadlinesRequestClusteringEnabled] = OMIT,
+        clustering_threshold: typing.Optional[LatestHeadlinesRequestClusteringThreshold] = OMIT,
         include_nlp_data: typing.Optional[bool] = OMIT,
         has_nlp: typing.Optional[bool] = OMIT,
         theme: typing.Optional[str] = OMIT,
@@ -975,9 +935,7 @@ class AsyncLatestheadlinesClient:
             json={
                 "when": when,
                 "by_parse_date": convert_and_respect_annotation_metadata(
-                    object_=by_parse_date,
-                    annotation=LatestHeadlinesRequestByParseDate,
-                    direction="write",
+                    object_=by_parse_date, annotation=LatestHeadlinesRequestByParseDate, direction="write"
                 ),
                 "sort_by": sort_by,
                 "lang": lang,
@@ -989,53 +947,35 @@ class AsyncLatestheadlinesClient:
                 "not_sources": not_sources,
                 "not_author_name": not_author_name,
                 "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only,
-                    annotation=LatestHeadlinesRequestRankedOnly,
-                    direction="write",
+                    object_=ranked_only, annotation=LatestHeadlinesRequestRankedOnly, direction="write"
                 ),
                 "is_headline": convert_and_respect_annotation_metadata(
-                    object_=is_headline,
-                    annotation=LatestHeadlinesRequestIsHeadline,
-                    direction="write",
+                    object_=is_headline, annotation=LatestHeadlinesRequestIsHeadline, direction="write"
                 ),
                 "is_opinion": convert_and_respect_annotation_metadata(
-                    object_=is_opinion,
-                    annotation=LatestHeadlinesRequestIsOpinion,
-                    direction="write",
+                    object_=is_opinion, annotation=LatestHeadlinesRequestIsOpinion, direction="write"
                 ),
                 "is_paid_content": convert_and_respect_annotation_metadata(
-                    object_=is_paid_content,
-                    annotation=LatestHeadlinesRequestIsPaidContent,
-                    direction="write",
+                    object_=is_paid_content, annotation=LatestHeadlinesRequestIsPaidContent, direction="write"
                 ),
                 "parent_url": parent_url,
                 "all_links": all_links,
                 "all_domain_links": all_domain_links,
                 "word_count_min": convert_and_respect_annotation_metadata(
-                    object_=word_count_min,
-                    annotation=LatestHeadlinesRequestWordCountMin,
-                    direction="write",
+                    object_=word_count_min, annotation=LatestHeadlinesRequestWordCountMin, direction="write"
                 ),
                 "word_count_max": convert_and_respect_annotation_metadata(
-                    object_=word_count_max,
-                    annotation=LatestHeadlinesRequestWordCountMax,
-                    direction="write",
+                    object_=word_count_max, annotation=LatestHeadlinesRequestWordCountMax, direction="write"
                 ),
                 "page": convert_and_respect_annotation_metadata(
-                    object_=page,
-                    annotation=LatestHeadlinesRequestPage,
-                    direction="write",
+                    object_=page, annotation=LatestHeadlinesRequestPage, direction="write"
                 ),
                 "page_size": convert_and_respect_annotation_metadata(
-                    object_=page_size,
-                    annotation=LatestHeadlinesRequestPageSize,
-                    direction="write",
+                    object_=page_size, annotation=LatestHeadlinesRequestPageSize, direction="write"
                 ),
                 "clustering_variable": clustering_variable,
                 "clustering_enabled": convert_and_respect_annotation_metadata(
-                    object_=clustering_enabled,
-                    annotation=LatestHeadlinesRequestClusteringEnabled,
-                    direction="write",
+                    object_=clustering_enabled, annotation=LatestHeadlinesRequestClusteringEnabled, direction="write"
                 ),
                 "clustering_threshold": convert_and_respect_annotation_metadata(
                     object_=clustering_threshold,

@@ -2,6 +2,4 @@
 
 import typing
 
-DtoResponsesMoreLikeThisResponseArticleResultAllLinks = typing.Union[
-    typing.List[str], str
-]
+DtoResponsesMoreLikeThisResponseArticleResultAllLinks = typing.Union[typing.List[str], str]
