@@ -2,16 +2,64 @@
 
 import typing
 from ..core.client_wrapper import SyncClientWrapper
+import datetime as dt
+from .types.authors_get_request_published_date_precision import AuthorsGetRequestPublishedDatePrecision
+from .types.authors_get_request_sort_by import AuthorsGetRequestSortBy
 from ..core.request_options import RequestOptions
 from .types.authors_get_response import AuthorsGetResponse
+from ..core.datetime_utils import serialize_datetime
 from ..core.pydantic_utilities import parse_obj_as
+from ..errors.bad_request_error import BadRequestError
+from ..types.error import Error
+from ..errors.unauthorized_error import UnauthorizedError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.http_validation_error import HttpValidationError
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..errors.internal_server_error import InternalServerError
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
-from .types.author_search_request_from import AuthorSearchRequestFrom
-from .types.author_search_request_to import AuthorSearchRequestTo
-from .types.author_search_request_ranked_only import AuthorSearchRequestRankedOnly
+from ..types.author_name import AuthorName
+from ..types.not_author_name import NotAuthorName
+from ..types.predefined_sources import PredefinedSources
+from ..types.sources import Sources
+from ..types.not_sources import NotSources
+from ..types.lang import Lang
+from ..types.not_lang import NotLang
+from ..types.countries import Countries
+from ..types.not_countries import NotCountries
+from ..types.from_ import From
+from ..types.to import To
+from ..types.published_date_precision import PublishedDatePrecision
+from ..types.by_parse_date import ByParseDate
+from ..types.sort_by import SortBy
+from ..types.ranked_only import RankedOnly
+from ..types.from_rank import FromRank
+from ..types.to_rank import ToRank
+from ..types.is_headline import IsHeadline
+from ..types.is_opinion import IsOpinion
+from ..types.is_paid_content import IsPaidContent
+from ..types.parent_url import ParentUrl
+from ..types.all_links import AllLinks
+from ..types.all_domain_links import AllDomainLinks
+from ..types.word_count_min import WordCountMin
+from ..types.word_count_max import WordCountMax
+from ..types.page import Page
+from ..types.page_size import PageSize
+from ..types.include_nlp_data import IncludeNlpData
+from ..types.has_nlp import HasNlp
+from ..types.theme import Theme
+from ..types.not_theme import NotTheme
+from ..types.ner_name import NerName
+from ..types.title_sentiment_min import TitleSentimentMin
+from ..types.title_sentiment_max import TitleSentimentMax
+from ..types.content_sentiment_min import ContentSentimentMin
+from ..types.content_sentiment_max import ContentSentimentMax
+from ..types.iptc_tags import IptcTags
+from ..types.not_iptc_tags import NotIptcTags
+from ..types.iab_tags import IabTags
+from ..types.not_iab_tags import NotIabTags
+from ..types.custom_tags import CustomTags
 from .types.authors_post_response import AuthorsPostResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..core.client_wrapper import AsyncClientWrapper
@@ -28,32 +76,28 @@ class AuthorsClient:
         self,
         *,
         author_name: str,
-        sources: str,
-        predefined_sources: str,
-        not_sources: str,
-        lang: str,
-        not_lang: str,
-        countries: str,
-        not_countries: str,
-        parent_url: str,
-        all_links: str,
-        all_domain_links: str,
-        iptc_tags: str,
-        not_iptc_tags: str,
-        iab_tags: str,
-        not_iab_tags: str,
         not_author_name: typing.Optional[str] = None,
-        from_: typing.Optional[str] = None,
-        to: typing.Optional[str] = None,
-        published_date_precision: typing.Optional[str] = None,
+        predefined_sources: typing.Optional[str] = None,
+        sources: typing.Optional[str] = None,
+        not_sources: typing.Optional[str] = None,
+        lang: typing.Optional[str] = None,
+        not_lang: typing.Optional[str] = None,
+        countries: typing.Optional[str] = None,
+        not_countries: typing.Optional[str] = None,
+        from_: typing.Optional[dt.datetime] = None,
+        to: typing.Optional[dt.datetime] = None,
+        published_date_precision: typing.Optional[AuthorsGetRequestPublishedDatePrecision] = None,
         by_parse_date: typing.Optional[bool] = None,
-        sort_by: typing.Optional[str] = None,
-        ranked_only: typing.Optional[str] = None,
+        sort_by: typing.Optional[AuthorsGetRequestSortBy] = None,
+        ranked_only: typing.Optional[bool] = None,
         from_rank: typing.Optional[int] = None,
         to_rank: typing.Optional[int] = None,
         is_headline: typing.Optional[bool] = None,
         is_opinion: typing.Optional[bool] = None,
         is_paid_content: typing.Optional[bool] = None,
+        parent_url: typing.Optional[str] = None,
+        all_links: typing.Optional[str] = None,
+        all_domain_links: typing.Optional[str] = None,
         word_count_min: typing.Optional[int] = None,
         word_count_max: typing.Optional[int] = None,
         page: typing.Optional[int] = None,
@@ -62,94 +106,311 @@ class AuthorsClient:
         has_nlp: typing.Optional[bool] = None,
         theme: typing.Optional[str] = None,
         not_theme: typing.Optional[str] = None,
+        ner_name: typing.Optional[str] = None,
         title_sentiment_min: typing.Optional[float] = None,
         title_sentiment_max: typing.Optional[float] = None,
         content_sentiment_min: typing.Optional[float] = None,
         content_sentiment_max: typing.Optional[float] = None,
+        iptc_tags: typing.Optional[str] = None,
+        not_iptc_tags: typing.Optional[str] = None,
+        iab_tags: typing.Optional[str] = None,
+        not_iab_tags: typing.Optional[str] = None,
+        custom_tags: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AuthorsGetResponse:
         """
-        This endpoint allows you to search for articles by author. You need to specify the author name. You can also filter by language, country, source, and more.
+        Searches for articles written by a specified author. You can filter results by language, country, source, and more.
 
         Parameters
         ----------
         author_name : str
-
-        sources : str
-
-        predefined_sources : str
-
-        not_sources : str
-
-        lang : str
-
-        not_lang : str
-
-        countries : str
-
-        not_countries : str
-
-        parent_url : str
-
-        all_links : str
-
-        all_domain_links : str
-
-        iptc_tags : str
-
-        not_iptc_tags : str
-
-        iab_tags : str
-
-        not_iab_tags : str
+            The name of the author to search for. This parameter returns exact matches only.
 
         not_author_name : typing.Optional[str]
+            The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
 
-        from_ : typing.Optional[str]
+            Example: `"John Doe, Jane Doe"`
 
-        to : typing.Optional[str]
+        predefined_sources : typing.Optional[str]
+            Predefined top news sources per country.
 
-        published_date_precision : typing.Optional[str]
+            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+
+            Examples:
+            - `"top 100 US"`
+            - `"top 33 AT"`
+            - `"top 50 US, top 20 GB"`
+            - `"top 33 AT, top 50 IT"`
+
+        sources : typing.Optional[str]
+            One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
+
+            Examples:
+            - `"nytimes.com"`
+            - `"theguardian.com, finance.yahoo.com"`
+
+        not_sources : typing.Optional[str]
+            The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string.
+
+            Example: `"cnn.com, wsj.com"`
+
+        lang : typing.Optional[str]
+            The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
+
+            Example: `"en, es"`
+
+            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+
+        not_lang : typing.Optional[str]
+            The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string.
+
+            Example: `"fr, de"`
+
+            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+
+        countries : typing.Optional[str]
+            The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
+
+            Example: `"US, CA"`
+
+            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+
+        not_countries : typing.Optional[str]
+            The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string.
+
+            Example:`"US, CA"`
+
+            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+
+        from_ : typing.Optional[dt.datetime]
+            The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC.
+
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
+
+            **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+
+        to : typing.Optional[dt.datetime]
+            The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC.
+
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
+
+            **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+
+        published_date_precision : typing.Optional[AuthorsGetRequestPublishedDatePrecision]
+            The precision of the published date. There are three types:
+            - `full`: The day and time of an article is correctly identified with the appropriate timezone.
+            - `timezone unknown`: The day and time of an article is correctly identified without timezone.
+            - `date`: Only the day is identified without an exact time.
 
         by_parse_date : typing.Optional[bool]
+            If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
 
-        sort_by : typing.Optional[str]
+        sort_by : typing.Optional[AuthorsGetRequestSortBy]
+            The sorting order of the results. Possible values are:
+            - `relevancy`: The most relevant results first.
+            - `date`: The most recently published results first.
+            - `rank`: The results from the highest-ranked sources first.
 
-        ranked_only : typing.Optional[str]
+        ranked_only : typing.Optional[bool]
+            If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
 
         from_rank : typing.Optional[int]
+            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
 
         to_rank : typing.Optional[int]
+            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
 
         is_headline : typing.Optional[bool]
+            If true, only returns articles that were posted on the home page of a given news domain.
 
         is_opinion : typing.Optional[bool]
+            If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
 
         is_paid_content : typing.Optional[bool]
+            If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
+
+        parent_url : typing.Optional[str]
+            The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
+
+            Example: `"wsj.com/politics, wsj.com/tech"`
+
+        all_links : typing.Optional[str]
+            The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
+
+            Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
+
+            For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+
+        all_domain_links : typing.Optional[str]
+            The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
+
+            Example: `"who.int, nih.gov"`
+
+            For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
 
         word_count_min : typing.Optional[int]
+            The minimum number of words an article must contain. To be used for avoiding articles with small content.
 
         word_count_max : typing.Optional[int]
+            The maximum number of words an article can contain. To be used for avoiding articles with large content.
 
         page : typing.Optional[int]
+            The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles.
+
+            For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
 
         page_size : typing.Optional[int]
+            The number of articles to return per page.
 
         include_nlp_data : typing.Optional[bool]
+            If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
+
+            The NLP layer includes:
+            - Theme: General topic of the article.
+            - Summary: A concise overview of the article content.
+            - Sentiment: Separate scores for title and content (range: -1 to 1).
+            - Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
+            - IPTC tags: Standardized news category tags.
+            - IAB tags: Content categories for digital advertising.
+
+            **Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         has_nlp : typing.Optional[bool]
+            If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
+
+            **Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         theme : typing.Optional[str]
+            Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
+
+            Example: `"Finance, Tech"`
+
+            **Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+            Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
 
         not_theme : typing.Optional[str]
+            Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string.
+
+            Example: `"Crime, Tech"`
+
+            **Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+        ner_name : typing.Optional[str]
+            The name of person, organization, location, product or other named entity to search for. To specify multiple names use a comma-separated string.
+
+            Example: `"Tesla, Amazon"`
 
         title_sentiment_min : typing.Optional[float]
+            Filters articles based on the minimum sentiment score of their titles.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         title_sentiment_max : typing.Optional[float]
+            Filters articles based on the maximum sentiment score of their titles.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         content_sentiment_min : typing.Optional[float]
+            Filters articles based on the minimum sentiment score of their content.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         content_sentiment_max : typing.Optional[float]
+            Filters articles based on the maximum sentiment score of their content.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+        iptc_tags : typing.Optional[str]
+            Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs.
+
+            Example: `"20000199, 20000209"`
+
+            **Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+
+        not_iptc_tags : typing.Optional[str]
+            Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs.
+
+            Example: `"20000205, 20000209"`
+
+            **Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+
+        iab_tags : typing.Optional[str]
+            Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string.
+
+            Example: `"Business, Events"`
+
+            **Note**: The `iab_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
+
+        not_iab_tags : typing.Optional[str]
+            Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string.
+
+            Example: `"Agriculture, Metals"`
+
+            **Note**: The `not_iab_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
+
+        custom_tags : typing.Optional[str]
+            Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern:
+
+            - `custom_tags.taxonomy=Tag1,Tag2,Tag3`, where `taxonomy` is the taxonomy name and `Tag1,Tag2,Tag3` is a comma-separated list of tags.
+
+            Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
+
+            To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -157,31 +418,34 @@ class AuthorsClient:
         Returns
         -------
         AuthorsGetResponse
-            Successful Response
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
 
         Examples
         --------
+        import datetime
+
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.authors.get(
-            author_name="author_name",
-            sources="sources",
-            predefined_sources="predefined_sources",
-            not_sources="not_sources",
-            lang="lang",
-            not_lang="not_lang",
-            countries="countries",
-            not_countries="not_countries",
-            parent_url="parent_url",
-            all_links="all_links",
-            all_domain_links="all_domain_links",
-            iptc_tags="iptc_tags",
-            not_iptc_tags="not_iptc_tags",
-            iab_tags="iab_tags",
-            not_iab_tags="not_iab_tags",
+            author_name="Jane Smith",
+            predefined_sources="top 100 US, top 5 GB",
+            from_=datetime.datetime.fromisoformat(
+                "2024-07-01 00:00:00+00:00",
+            ),
+            to=datetime.datetime.fromisoformat(
+                "2024-07-01 00:00:00+00:00",
+            ),
+            theme="Business,Finance",
+            not_theme="Crime",
+            ner_name="Tesla",
+            iptc_tags="20000199,20000209",
+            not_iptc_tags="20000205,20000209",
+            iab_tags="Business,Events",
+            not_iab_tags="Agriculture,Metals",
+            custom_tags="Tag1,Tag2,Tag3",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -190,15 +454,15 @@ class AuthorsClient:
             params={
                 "author_name": author_name,
                 "not_author_name": not_author_name,
-                "sources": sources,
                 "predefined_sources": predefined_sources,
+                "sources": sources,
                 "not_sources": not_sources,
                 "lang": lang,
                 "not_lang": not_lang,
                 "countries": countries,
                 "not_countries": not_countries,
-                "from_": from_,
-                "to_": to,
+                "from_": serialize_datetime(from_) if from_ is not None else None,
+                "to_": serialize_datetime(to) if to is not None else None,
                 "published_date_precision": published_date_precision,
                 "by_parse_date": by_parse_date,
                 "sort_by": sort_by,
@@ -219,6 +483,7 @@ class AuthorsClient:
                 "has_nlp": has_nlp,
                 "theme": theme,
                 "not_theme": not_theme,
+                "ner_name": ner_name,
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
@@ -227,6 +492,7 @@ class AuthorsClient:
                 "not_iptc_tags": not_iptc_tags,
                 "iab_tags": iab_tags,
                 "not_iab_tags": not_iab_tags,
+                "custom_tags": custom_tags,
             },
             request_options=request_options,
         )
@@ -239,12 +505,72 @@ class AuthorsClient:
                         object_=_response.json(),
                     ),
                 )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -257,129 +583,135 @@ class AuthorsClient:
     def post(
         self,
         *,
-        author_name: str,
-        not_author_name: typing.Optional[str] = OMIT,
-        sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        predefined_sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        lang: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_lang: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        countries: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_countries: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        from_: typing.Optional[AuthorSearchRequestFrom] = OMIT,
-        to: typing.Optional[AuthorSearchRequestTo] = OMIT,
-        published_date_precision: typing.Optional[str] = OMIT,
-        by_parse_date: typing.Optional[bool] = OMIT,
-        sort_by: typing.Optional[str] = OMIT,
-        ranked_only: typing.Optional[AuthorSearchRequestRankedOnly] = OMIT,
-        from_rank: typing.Optional[int] = OMIT,
-        to_rank: typing.Optional[int] = OMIT,
-        is_headline: typing.Optional[bool] = OMIT,
-        is_opinion: typing.Optional[bool] = OMIT,
-        is_paid_content: typing.Optional[bool] = OMIT,
-        parent_url: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        all_links: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        all_domain_links: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        word_count_min: typing.Optional[int] = OMIT,
-        word_count_max: typing.Optional[int] = OMIT,
-        page: typing.Optional[int] = OMIT,
-        page_size: typing.Optional[int] = OMIT,
-        include_nlp_data: typing.Optional[bool] = OMIT,
-        has_nlp: typing.Optional[bool] = OMIT,
-        theme: typing.Optional[str] = OMIT,
-        not_theme: typing.Optional[str] = OMIT,
-        title_sentiment_min: typing.Optional[float] = OMIT,
-        title_sentiment_max: typing.Optional[float] = OMIT,
-        content_sentiment_min: typing.Optional[float] = OMIT,
-        content_sentiment_max: typing.Optional[float] = OMIT,
-        iptc_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_iptc_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        iab_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_iab_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
+        author_name: AuthorName,
+        not_author_name: typing.Optional[NotAuthorName] = OMIT,
+        predefined_sources: typing.Optional[PredefinedSources] = OMIT,
+        sources: typing.Optional[Sources] = OMIT,
+        not_sources: typing.Optional[NotSources] = OMIT,
+        lang: typing.Optional[Lang] = OMIT,
+        not_lang: typing.Optional[NotLang] = OMIT,
+        countries: typing.Optional[Countries] = OMIT,
+        not_countries: typing.Optional[NotCountries] = OMIT,
+        from_: typing.Optional[From] = OMIT,
+        to: typing.Optional[To] = OMIT,
+        published_date_precision: typing.Optional[PublishedDatePrecision] = OMIT,
+        by_parse_date: typing.Optional[ByParseDate] = OMIT,
+        sort_by: typing.Optional[SortBy] = OMIT,
+        ranked_only: typing.Optional[RankedOnly] = OMIT,
+        from_rank: typing.Optional[FromRank] = OMIT,
+        to_rank: typing.Optional[ToRank] = OMIT,
+        is_headline: typing.Optional[IsHeadline] = OMIT,
+        is_opinion: typing.Optional[IsOpinion] = OMIT,
+        is_paid_content: typing.Optional[IsPaidContent] = OMIT,
+        parent_url: typing.Optional[ParentUrl] = OMIT,
+        all_links: typing.Optional[AllLinks] = OMIT,
+        all_domain_links: typing.Optional[AllDomainLinks] = OMIT,
+        word_count_min: typing.Optional[WordCountMin] = OMIT,
+        word_count_max: typing.Optional[WordCountMax] = OMIT,
+        page: typing.Optional[Page] = OMIT,
+        page_size: typing.Optional[PageSize] = OMIT,
+        include_nlp_data: typing.Optional[IncludeNlpData] = OMIT,
+        has_nlp: typing.Optional[HasNlp] = OMIT,
+        theme: typing.Optional[Theme] = OMIT,
+        not_theme: typing.Optional[NotTheme] = OMIT,
+        ner_name: typing.Optional[NerName] = OMIT,
+        title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
+        title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
+        content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
+        iptc_tags: typing.Optional[IptcTags] = OMIT,
+        not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
+        iab_tags: typing.Optional[IabTags] = OMIT,
+        not_iab_tags: typing.Optional[NotIabTags] = OMIT,
+        custom_tags: typing.Optional[CustomTags] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AuthorsPostResponse:
         """
-        This endpoint allows you to search for articles by author. You need to specify the author name. You can also filter by language, country, source, and more.
+        Searches for articles by author. You can filter results by language, country, source, and more.
 
         Parameters
         ----------
-        author_name : str
+        author_name : AuthorName
 
-        not_author_name : typing.Optional[str]
+        not_author_name : typing.Optional[NotAuthorName]
 
-        sources : typing.Optional[typing.Optional[typing.Any]]
+        predefined_sources : typing.Optional[PredefinedSources]
 
-        predefined_sources : typing.Optional[typing.Optional[typing.Any]]
+        sources : typing.Optional[Sources]
 
-        not_sources : typing.Optional[typing.Optional[typing.Any]]
+        not_sources : typing.Optional[NotSources]
 
-        lang : typing.Optional[typing.Optional[typing.Any]]
+        lang : typing.Optional[Lang]
 
-        not_lang : typing.Optional[typing.Optional[typing.Any]]
+        not_lang : typing.Optional[NotLang]
 
-        countries : typing.Optional[typing.Optional[typing.Any]]
+        countries : typing.Optional[Countries]
 
-        not_countries : typing.Optional[typing.Optional[typing.Any]]
+        not_countries : typing.Optional[NotCountries]
 
-        from_ : typing.Optional[AuthorSearchRequestFrom]
+        from_ : typing.Optional[From]
 
-        to : typing.Optional[AuthorSearchRequestTo]
+        to : typing.Optional[To]
 
-        published_date_precision : typing.Optional[str]
+        published_date_precision : typing.Optional[PublishedDatePrecision]
 
-        by_parse_date : typing.Optional[bool]
+        by_parse_date : typing.Optional[ByParseDate]
 
-        sort_by : typing.Optional[str]
+        sort_by : typing.Optional[SortBy]
 
-        ranked_only : typing.Optional[AuthorSearchRequestRankedOnly]
+        ranked_only : typing.Optional[RankedOnly]
 
-        from_rank : typing.Optional[int]
+        from_rank : typing.Optional[FromRank]
 
-        to_rank : typing.Optional[int]
+        to_rank : typing.Optional[ToRank]
 
-        is_headline : typing.Optional[bool]
+        is_headline : typing.Optional[IsHeadline]
 
-        is_opinion : typing.Optional[bool]
+        is_opinion : typing.Optional[IsOpinion]
 
-        is_paid_content : typing.Optional[bool]
+        is_paid_content : typing.Optional[IsPaidContent]
 
-        parent_url : typing.Optional[typing.Optional[typing.Any]]
+        parent_url : typing.Optional[ParentUrl]
 
-        all_links : typing.Optional[typing.Optional[typing.Any]]
+        all_links : typing.Optional[AllLinks]
 
-        all_domain_links : typing.Optional[typing.Optional[typing.Any]]
+        all_domain_links : typing.Optional[AllDomainLinks]
 
-        word_count_min : typing.Optional[int]
+        word_count_min : typing.Optional[WordCountMin]
 
-        word_count_max : typing.Optional[int]
+        word_count_max : typing.Optional[WordCountMax]
 
-        page : typing.Optional[int]
+        page : typing.Optional[Page]
 
-        page_size : typing.Optional[int]
+        page_size : typing.Optional[PageSize]
 
-        include_nlp_data : typing.Optional[bool]
+        include_nlp_data : typing.Optional[IncludeNlpData]
 
-        has_nlp : typing.Optional[bool]
+        has_nlp : typing.Optional[HasNlp]
 
-        theme : typing.Optional[str]
+        theme : typing.Optional[Theme]
 
-        not_theme : typing.Optional[str]
+        not_theme : typing.Optional[NotTheme]
 
-        title_sentiment_min : typing.Optional[float]
+        ner_name : typing.Optional[NerName]
 
-        title_sentiment_max : typing.Optional[float]
+        title_sentiment_min : typing.Optional[TitleSentimentMin]
 
-        content_sentiment_min : typing.Optional[float]
+        title_sentiment_max : typing.Optional[TitleSentimentMax]
 
-        content_sentiment_max : typing.Optional[float]
+        content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        iptc_tags : typing.Optional[typing.Optional[typing.Any]]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
-        not_iptc_tags : typing.Optional[typing.Optional[typing.Any]]
+        iptc_tags : typing.Optional[IptcTags]
 
-        iab_tags : typing.Optional[typing.Optional[typing.Any]]
+        not_iptc_tags : typing.Optional[NotIptcTags]
 
-        not_iab_tags : typing.Optional[typing.Optional[typing.Any]]
+        iab_tags : typing.Optional[IabTags]
+
+        not_iab_tags : typing.Optional[NotIabTags]
+
+        custom_tags : typing.Optional[CustomTags]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -387,17 +719,27 @@ class AuthorsClient:
         Returns
         -------
         AuthorsPostResponse
-            Successful Response
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
 
         Examples
         --------
+        import datetime
+
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.authors.post(
-            author_name="author_name",
+            author_name="Joanna Stern",
+            sources=["wsj.com", "nytimes.com"],
+            lang="en",
+            from_=datetime.datetime.fromisoformat(
+                "2024-01-01 00:00:00+00:00",
+            ),
+            to=datetime.datetime.fromisoformat(
+                "2024-06-30 00:00:00+00:00",
+            ),
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -405,50 +747,78 @@ class AuthorsClient:
             method="POST",
             json={
                 "author_name": author_name,
-                "not_author_name": not_author_name,
-                "sources": sources,
-                "predefined_sources": predefined_sources,
-                "not_sources": not_sources,
-                "lang": lang,
-                "not_lang": not_lang,
-                "countries": countries,
-                "not_countries": not_countries,
-                "from_": convert_and_respect_annotation_metadata(
-                    object_=from_, annotation=AuthorSearchRequestFrom, direction="write"
+                "not_author_name": convert_and_respect_annotation_metadata(
+                    object_=not_author_name, annotation=NotAuthorName, direction="write"
                 ),
-                "to_": convert_and_respect_annotation_metadata(
-                    object_=to, annotation=AuthorSearchRequestTo, direction="write"
+                "predefined_sources": convert_and_respect_annotation_metadata(
+                    object_=predefined_sources, annotation=PredefinedSources, direction="write"
                 ),
+                "sources": convert_and_respect_annotation_metadata(
+                    object_=sources, annotation=Sources, direction="write"
+                ),
+                "not_sources": convert_and_respect_annotation_metadata(
+                    object_=not_sources, annotation=NotSources, direction="write"
+                ),
+                "lang": convert_and_respect_annotation_metadata(object_=lang, annotation=Lang, direction="write"),
+                "not_lang": convert_and_respect_annotation_metadata(
+                    object_=not_lang, annotation=NotLang, direction="write"
+                ),
+                "countries": convert_and_respect_annotation_metadata(
+                    object_=countries, annotation=Countries, direction="write"
+                ),
+                "not_countries": convert_and_respect_annotation_metadata(
+                    object_=not_countries, annotation=NotCountries, direction="write"
+                ),
+                "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
+                "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "published_date_precision": published_date_precision,
                 "by_parse_date": by_parse_date,
                 "sort_by": sort_by,
-                "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only, annotation=AuthorSearchRequestRankedOnly, direction="write"
-                ),
+                "ranked_only": ranked_only,
                 "from_rank": from_rank,
                 "to_rank": to_rank,
                 "is_headline": is_headline,
                 "is_opinion": is_opinion,
                 "is_paid_content": is_paid_content,
-                "parent_url": parent_url,
-                "all_links": all_links,
-                "all_domain_links": all_domain_links,
+                "parent_url": convert_and_respect_annotation_metadata(
+                    object_=parent_url, annotation=ParentUrl, direction="write"
+                ),
+                "all_links": convert_and_respect_annotation_metadata(
+                    object_=all_links, annotation=AllLinks, direction="write"
+                ),
+                "all_domain_links": convert_and_respect_annotation_metadata(
+                    object_=all_domain_links, annotation=AllDomainLinks, direction="write"
+                ),
                 "word_count_min": word_count_min,
                 "word_count_max": word_count_max,
                 "page": page,
                 "page_size": page_size,
                 "include_nlp_data": include_nlp_data,
                 "has_nlp": has_nlp,
-                "theme": theme,
-                "not_theme": not_theme,
+                "theme": convert_and_respect_annotation_metadata(object_=theme, annotation=Theme, direction="write"),
+                "not_theme": convert_and_respect_annotation_metadata(
+                    object_=not_theme, annotation=NotTheme, direction="write"
+                ),
+                "ner_name": ner_name,
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
                 "content_sentiment_max": content_sentiment_max,
-                "iptc_tags": iptc_tags,
-                "not_iptc_tags": not_iptc_tags,
-                "iab_tags": iab_tags,
-                "not_iab_tags": not_iab_tags,
+                "iptc_tags": convert_and_respect_annotation_metadata(
+                    object_=iptc_tags, annotation=IptcTags, direction="write"
+                ),
+                "not_iptc_tags": convert_and_respect_annotation_metadata(
+                    object_=not_iptc_tags, annotation=NotIptcTags, direction="write"
+                ),
+                "iab_tags": convert_and_respect_annotation_metadata(
+                    object_=iab_tags, annotation=IabTags, direction="write"
+                ),
+                "not_iab_tags": convert_and_respect_annotation_metadata(
+                    object_=not_iab_tags, annotation=NotIabTags, direction="write"
+                ),
+                "custom_tags": convert_and_respect_annotation_metadata(
+                    object_=custom_tags, annotation=CustomTags, direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -465,12 +835,72 @@ class AuthorsClient:
                         object_=_response.json(),
                     ),
                 )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -489,32 +919,28 @@ class AsyncAuthorsClient:
         self,
         *,
         author_name: str,
-        sources: str,
-        predefined_sources: str,
-        not_sources: str,
-        lang: str,
-        not_lang: str,
-        countries: str,
-        not_countries: str,
-        parent_url: str,
-        all_links: str,
-        all_domain_links: str,
-        iptc_tags: str,
-        not_iptc_tags: str,
-        iab_tags: str,
-        not_iab_tags: str,
         not_author_name: typing.Optional[str] = None,
-        from_: typing.Optional[str] = None,
-        to: typing.Optional[str] = None,
-        published_date_precision: typing.Optional[str] = None,
+        predefined_sources: typing.Optional[str] = None,
+        sources: typing.Optional[str] = None,
+        not_sources: typing.Optional[str] = None,
+        lang: typing.Optional[str] = None,
+        not_lang: typing.Optional[str] = None,
+        countries: typing.Optional[str] = None,
+        not_countries: typing.Optional[str] = None,
+        from_: typing.Optional[dt.datetime] = None,
+        to: typing.Optional[dt.datetime] = None,
+        published_date_precision: typing.Optional[AuthorsGetRequestPublishedDatePrecision] = None,
         by_parse_date: typing.Optional[bool] = None,
-        sort_by: typing.Optional[str] = None,
-        ranked_only: typing.Optional[str] = None,
+        sort_by: typing.Optional[AuthorsGetRequestSortBy] = None,
+        ranked_only: typing.Optional[bool] = None,
         from_rank: typing.Optional[int] = None,
         to_rank: typing.Optional[int] = None,
         is_headline: typing.Optional[bool] = None,
         is_opinion: typing.Optional[bool] = None,
         is_paid_content: typing.Optional[bool] = None,
+        parent_url: typing.Optional[str] = None,
+        all_links: typing.Optional[str] = None,
+        all_domain_links: typing.Optional[str] = None,
         word_count_min: typing.Optional[int] = None,
         word_count_max: typing.Optional[int] = None,
         page: typing.Optional[int] = None,
@@ -523,94 +949,311 @@ class AsyncAuthorsClient:
         has_nlp: typing.Optional[bool] = None,
         theme: typing.Optional[str] = None,
         not_theme: typing.Optional[str] = None,
+        ner_name: typing.Optional[str] = None,
         title_sentiment_min: typing.Optional[float] = None,
         title_sentiment_max: typing.Optional[float] = None,
         content_sentiment_min: typing.Optional[float] = None,
         content_sentiment_max: typing.Optional[float] = None,
+        iptc_tags: typing.Optional[str] = None,
+        not_iptc_tags: typing.Optional[str] = None,
+        iab_tags: typing.Optional[str] = None,
+        not_iab_tags: typing.Optional[str] = None,
+        custom_tags: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AuthorsGetResponse:
         """
-        This endpoint allows you to search for articles by author. You need to specify the author name. You can also filter by language, country, source, and more.
+        Searches for articles written by a specified author. You can filter results by language, country, source, and more.
 
         Parameters
         ----------
         author_name : str
-
-        sources : str
-
-        predefined_sources : str
-
-        not_sources : str
-
-        lang : str
-
-        not_lang : str
-
-        countries : str
-
-        not_countries : str
-
-        parent_url : str
-
-        all_links : str
-
-        all_domain_links : str
-
-        iptc_tags : str
-
-        not_iptc_tags : str
-
-        iab_tags : str
-
-        not_iab_tags : str
+            The name of the author to search for. This parameter returns exact matches only.
 
         not_author_name : typing.Optional[str]
+            The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
 
-        from_ : typing.Optional[str]
+            Example: `"John Doe, Jane Doe"`
 
-        to : typing.Optional[str]
+        predefined_sources : typing.Optional[str]
+            Predefined top news sources per country.
 
-        published_date_precision : typing.Optional[str]
+            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+
+            Examples:
+            - `"top 100 US"`
+            - `"top 33 AT"`
+            - `"top 50 US, top 20 GB"`
+            - `"top 33 AT, top 50 IT"`
+
+        sources : typing.Optional[str]
+            One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
+
+            Examples:
+            - `"nytimes.com"`
+            - `"theguardian.com, finance.yahoo.com"`
+
+        not_sources : typing.Optional[str]
+            The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string.
+
+            Example: `"cnn.com, wsj.com"`
+
+        lang : typing.Optional[str]
+            The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
+
+            Example: `"en, es"`
+
+            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+
+        not_lang : typing.Optional[str]
+            The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string.
+
+            Example: `"fr, de"`
+
+            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+
+        countries : typing.Optional[str]
+            The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
+
+            Example: `"US, CA"`
+
+            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+
+        not_countries : typing.Optional[str]
+            The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string.
+
+            Example:`"US, CA"`
+
+            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+
+        from_ : typing.Optional[dt.datetime]
+            The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC.
+
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
+
+            **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+
+        to : typing.Optional[dt.datetime]
+            The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC.
+
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
+
+            **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+
+        published_date_precision : typing.Optional[AuthorsGetRequestPublishedDatePrecision]
+            The precision of the published date. There are three types:
+            - `full`: The day and time of an article is correctly identified with the appropriate timezone.
+            - `timezone unknown`: The day and time of an article is correctly identified without timezone.
+            - `date`: Only the day is identified without an exact time.
 
         by_parse_date : typing.Optional[bool]
+            If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
 
-        sort_by : typing.Optional[str]
+        sort_by : typing.Optional[AuthorsGetRequestSortBy]
+            The sorting order of the results. Possible values are:
+            - `relevancy`: The most relevant results first.
+            - `date`: The most recently published results first.
+            - `rank`: The results from the highest-ranked sources first.
 
-        ranked_only : typing.Optional[str]
+        ranked_only : typing.Optional[bool]
+            If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
 
         from_rank : typing.Optional[int]
+            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
 
         to_rank : typing.Optional[int]
+            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
 
         is_headline : typing.Optional[bool]
+            If true, only returns articles that were posted on the home page of a given news domain.
 
         is_opinion : typing.Optional[bool]
+            If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
 
         is_paid_content : typing.Optional[bool]
+            If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
+
+        parent_url : typing.Optional[str]
+            The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
+
+            Example: `"wsj.com/politics, wsj.com/tech"`
+
+        all_links : typing.Optional[str]
+            The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
+
+            Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
+
+            For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+
+        all_domain_links : typing.Optional[str]
+            The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
+
+            Example: `"who.int, nih.gov"`
+
+            For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
 
         word_count_min : typing.Optional[int]
+            The minimum number of words an article must contain. To be used for avoiding articles with small content.
 
         word_count_max : typing.Optional[int]
+            The maximum number of words an article can contain. To be used for avoiding articles with large content.
 
         page : typing.Optional[int]
+            The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles.
+
+            For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
 
         page_size : typing.Optional[int]
+            The number of articles to return per page.
 
         include_nlp_data : typing.Optional[bool]
+            If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
+
+            The NLP layer includes:
+            - Theme: General topic of the article.
+            - Summary: A concise overview of the article content.
+            - Sentiment: Separate scores for title and content (range: -1 to 1).
+            - Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
+            - IPTC tags: Standardized news category tags.
+            - IAB tags: Content categories for digital advertising.
+
+            **Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         has_nlp : typing.Optional[bool]
+            If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
+
+            **Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         theme : typing.Optional[str]
+            Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
+
+            Example: `"Finance, Tech"`
+
+            **Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+            Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
 
         not_theme : typing.Optional[str]
+            Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string.
+
+            Example: `"Crime, Tech"`
+
+            **Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+        ner_name : typing.Optional[str]
+            The name of person, organization, location, product or other named entity to search for. To specify multiple names use a comma-separated string.
+
+            Example: `"Tesla, Amazon"`
 
         title_sentiment_min : typing.Optional[float]
+            Filters articles based on the minimum sentiment score of their titles.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         title_sentiment_max : typing.Optional[float]
+            Filters articles based on the maximum sentiment score of their titles.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         content_sentiment_min : typing.Optional[float]
+            Filters articles based on the minimum sentiment score of their content.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
 
         content_sentiment_max : typing.Optional[float]
+            Filters articles based on the maximum sentiment score of their content.
+
+            Range is `-1.0` to `1.0`, where:
+            - Negative values indicate negative sentiment.
+            - Positive values indicate positive sentiment.
+            - Values close to 0 indicate neutral sentiment.
+
+            **Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
+
+            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+        iptc_tags : typing.Optional[str]
+            Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs.
+
+            Example: `"20000199, 20000209"`
+
+            **Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+
+        not_iptc_tags : typing.Optional[str]
+            Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs.
+
+            Example: `"20000205, 20000209"`
+
+            **Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+
+        iab_tags : typing.Optional[str]
+            Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string.
+
+            Example: `"Business, Events"`
+
+            **Note**: The `iab_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
+
+        not_iab_tags : typing.Optional[str]
+            Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string.
+
+            Example: `"Agriculture, Metals"`
+
+            **Note**: The `not_iab_tags` parameter is only available if tags are included in your subscription plan.
+
+            To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
+
+        custom_tags : typing.Optional[str]
+            Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern:
+
+            - `custom_tags.taxonomy=Tag1,Tag2,Tag3`, where `taxonomy` is the taxonomy name and `Tag1,Tag2,Tag3` is a comma-separated list of tags.
+
+            Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
+
+            To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -618,36 +1261,38 @@ class AsyncAuthorsClient:
         Returns
         -------
         AuthorsGetResponse
-            Successful Response
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
 
         Examples
         --------
         import asyncio
+        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
             await client.authors.get(
-                author_name="author_name",
-                sources="sources",
-                predefined_sources="predefined_sources",
-                not_sources="not_sources",
-                lang="lang",
-                not_lang="not_lang",
-                countries="countries",
-                not_countries="not_countries",
-                parent_url="parent_url",
-                all_links="all_links",
-                all_domain_links="all_domain_links",
-                iptc_tags="iptc_tags",
-                not_iptc_tags="not_iptc_tags",
-                iab_tags="iab_tags",
-                not_iab_tags="not_iab_tags",
+                author_name="Jane Smith",
+                predefined_sources="top 100 US, top 5 GB",
+                from_=datetime.datetime.fromisoformat(
+                    "2024-07-01 00:00:00+00:00",
+                ),
+                to=datetime.datetime.fromisoformat(
+                    "2024-07-01 00:00:00+00:00",
+                ),
+                theme="Business,Finance",
+                not_theme="Crime",
+                ner_name="Tesla",
+                iptc_tags="20000199,20000209",
+                not_iptc_tags="20000205,20000209",
+                iab_tags="Business,Events",
+                not_iab_tags="Agriculture,Metals",
+                custom_tags="Tag1,Tag2,Tag3",
             )
 
 
@@ -659,15 +1304,15 @@ class AsyncAuthorsClient:
             params={
                 "author_name": author_name,
                 "not_author_name": not_author_name,
-                "sources": sources,
                 "predefined_sources": predefined_sources,
+                "sources": sources,
                 "not_sources": not_sources,
                 "lang": lang,
                 "not_lang": not_lang,
                 "countries": countries,
                 "not_countries": not_countries,
-                "from_": from_,
-                "to_": to,
+                "from_": serialize_datetime(from_) if from_ is not None else None,
+                "to_": serialize_datetime(to) if to is not None else None,
                 "published_date_precision": published_date_precision,
                 "by_parse_date": by_parse_date,
                 "sort_by": sort_by,
@@ -688,6 +1333,7 @@ class AsyncAuthorsClient:
                 "has_nlp": has_nlp,
                 "theme": theme,
                 "not_theme": not_theme,
+                "ner_name": ner_name,
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
@@ -696,6 +1342,7 @@ class AsyncAuthorsClient:
                 "not_iptc_tags": not_iptc_tags,
                 "iab_tags": iab_tags,
                 "not_iab_tags": not_iab_tags,
+                "custom_tags": custom_tags,
             },
             request_options=request_options,
         )
@@ -708,12 +1355,72 @@ class AsyncAuthorsClient:
                         object_=_response.json(),
                     ),
                 )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -726,129 +1433,135 @@ class AsyncAuthorsClient:
     async def post(
         self,
         *,
-        author_name: str,
-        not_author_name: typing.Optional[str] = OMIT,
-        sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        predefined_sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        lang: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_lang: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        countries: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_countries: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        from_: typing.Optional[AuthorSearchRequestFrom] = OMIT,
-        to: typing.Optional[AuthorSearchRequestTo] = OMIT,
-        published_date_precision: typing.Optional[str] = OMIT,
-        by_parse_date: typing.Optional[bool] = OMIT,
-        sort_by: typing.Optional[str] = OMIT,
-        ranked_only: typing.Optional[AuthorSearchRequestRankedOnly] = OMIT,
-        from_rank: typing.Optional[int] = OMIT,
-        to_rank: typing.Optional[int] = OMIT,
-        is_headline: typing.Optional[bool] = OMIT,
-        is_opinion: typing.Optional[bool] = OMIT,
-        is_paid_content: typing.Optional[bool] = OMIT,
-        parent_url: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        all_links: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        all_domain_links: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        word_count_min: typing.Optional[int] = OMIT,
-        word_count_max: typing.Optional[int] = OMIT,
-        page: typing.Optional[int] = OMIT,
-        page_size: typing.Optional[int] = OMIT,
-        include_nlp_data: typing.Optional[bool] = OMIT,
-        has_nlp: typing.Optional[bool] = OMIT,
-        theme: typing.Optional[str] = OMIT,
-        not_theme: typing.Optional[str] = OMIT,
-        title_sentiment_min: typing.Optional[float] = OMIT,
-        title_sentiment_max: typing.Optional[float] = OMIT,
-        content_sentiment_min: typing.Optional[float] = OMIT,
-        content_sentiment_max: typing.Optional[float] = OMIT,
-        iptc_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_iptc_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        iab_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        not_iab_tags: typing.Optional[typing.Optional[typing.Any]] = OMIT,
+        author_name: AuthorName,
+        not_author_name: typing.Optional[NotAuthorName] = OMIT,
+        predefined_sources: typing.Optional[PredefinedSources] = OMIT,
+        sources: typing.Optional[Sources] = OMIT,
+        not_sources: typing.Optional[NotSources] = OMIT,
+        lang: typing.Optional[Lang] = OMIT,
+        not_lang: typing.Optional[NotLang] = OMIT,
+        countries: typing.Optional[Countries] = OMIT,
+        not_countries: typing.Optional[NotCountries] = OMIT,
+        from_: typing.Optional[From] = OMIT,
+        to: typing.Optional[To] = OMIT,
+        published_date_precision: typing.Optional[PublishedDatePrecision] = OMIT,
+        by_parse_date: typing.Optional[ByParseDate] = OMIT,
+        sort_by: typing.Optional[SortBy] = OMIT,
+        ranked_only: typing.Optional[RankedOnly] = OMIT,
+        from_rank: typing.Optional[FromRank] = OMIT,
+        to_rank: typing.Optional[ToRank] = OMIT,
+        is_headline: typing.Optional[IsHeadline] = OMIT,
+        is_opinion: typing.Optional[IsOpinion] = OMIT,
+        is_paid_content: typing.Optional[IsPaidContent] = OMIT,
+        parent_url: typing.Optional[ParentUrl] = OMIT,
+        all_links: typing.Optional[AllLinks] = OMIT,
+        all_domain_links: typing.Optional[AllDomainLinks] = OMIT,
+        word_count_min: typing.Optional[WordCountMin] = OMIT,
+        word_count_max: typing.Optional[WordCountMax] = OMIT,
+        page: typing.Optional[Page] = OMIT,
+        page_size: typing.Optional[PageSize] = OMIT,
+        include_nlp_data: typing.Optional[IncludeNlpData] = OMIT,
+        has_nlp: typing.Optional[HasNlp] = OMIT,
+        theme: typing.Optional[Theme] = OMIT,
+        not_theme: typing.Optional[NotTheme] = OMIT,
+        ner_name: typing.Optional[NerName] = OMIT,
+        title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
+        title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
+        content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
+        iptc_tags: typing.Optional[IptcTags] = OMIT,
+        not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
+        iab_tags: typing.Optional[IabTags] = OMIT,
+        not_iab_tags: typing.Optional[NotIabTags] = OMIT,
+        custom_tags: typing.Optional[CustomTags] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AuthorsPostResponse:
         """
-        This endpoint allows you to search for articles by author. You need to specify the author name. You can also filter by language, country, source, and more.
+        Searches for articles by author. You can filter results by language, country, source, and more.
 
         Parameters
         ----------
-        author_name : str
+        author_name : AuthorName
 
-        not_author_name : typing.Optional[str]
+        not_author_name : typing.Optional[NotAuthorName]
 
-        sources : typing.Optional[typing.Optional[typing.Any]]
+        predefined_sources : typing.Optional[PredefinedSources]
 
-        predefined_sources : typing.Optional[typing.Optional[typing.Any]]
+        sources : typing.Optional[Sources]
 
-        not_sources : typing.Optional[typing.Optional[typing.Any]]
+        not_sources : typing.Optional[NotSources]
 
-        lang : typing.Optional[typing.Optional[typing.Any]]
+        lang : typing.Optional[Lang]
 
-        not_lang : typing.Optional[typing.Optional[typing.Any]]
+        not_lang : typing.Optional[NotLang]
 
-        countries : typing.Optional[typing.Optional[typing.Any]]
+        countries : typing.Optional[Countries]
 
-        not_countries : typing.Optional[typing.Optional[typing.Any]]
+        not_countries : typing.Optional[NotCountries]
 
-        from_ : typing.Optional[AuthorSearchRequestFrom]
+        from_ : typing.Optional[From]
 
-        to : typing.Optional[AuthorSearchRequestTo]
+        to : typing.Optional[To]
 
-        published_date_precision : typing.Optional[str]
+        published_date_precision : typing.Optional[PublishedDatePrecision]
 
-        by_parse_date : typing.Optional[bool]
+        by_parse_date : typing.Optional[ByParseDate]
 
-        sort_by : typing.Optional[str]
+        sort_by : typing.Optional[SortBy]
 
-        ranked_only : typing.Optional[AuthorSearchRequestRankedOnly]
+        ranked_only : typing.Optional[RankedOnly]
 
-        from_rank : typing.Optional[int]
+        from_rank : typing.Optional[FromRank]
 
-        to_rank : typing.Optional[int]
+        to_rank : typing.Optional[ToRank]
 
-        is_headline : typing.Optional[bool]
+        is_headline : typing.Optional[IsHeadline]
 
-        is_opinion : typing.Optional[bool]
+        is_opinion : typing.Optional[IsOpinion]
 
-        is_paid_content : typing.Optional[bool]
+        is_paid_content : typing.Optional[IsPaidContent]
 
-        parent_url : typing.Optional[typing.Optional[typing.Any]]
+        parent_url : typing.Optional[ParentUrl]
 
-        all_links : typing.Optional[typing.Optional[typing.Any]]
+        all_links : typing.Optional[AllLinks]
 
-        all_domain_links : typing.Optional[typing.Optional[typing.Any]]
+        all_domain_links : typing.Optional[AllDomainLinks]
 
-        word_count_min : typing.Optional[int]
+        word_count_min : typing.Optional[WordCountMin]
 
-        word_count_max : typing.Optional[int]
+        word_count_max : typing.Optional[WordCountMax]
 
-        page : typing.Optional[int]
+        page : typing.Optional[Page]
 
-        page_size : typing.Optional[int]
+        page_size : typing.Optional[PageSize]
 
-        include_nlp_data : typing.Optional[bool]
+        include_nlp_data : typing.Optional[IncludeNlpData]
 
-        has_nlp : typing.Optional[bool]
+        has_nlp : typing.Optional[HasNlp]
 
-        theme : typing.Optional[str]
+        theme : typing.Optional[Theme]
 
-        not_theme : typing.Optional[str]
+        not_theme : typing.Optional[NotTheme]
 
-        title_sentiment_min : typing.Optional[float]
+        ner_name : typing.Optional[NerName]
 
-        title_sentiment_max : typing.Optional[float]
+        title_sentiment_min : typing.Optional[TitleSentimentMin]
 
-        content_sentiment_min : typing.Optional[float]
+        title_sentiment_max : typing.Optional[TitleSentimentMax]
 
-        content_sentiment_max : typing.Optional[float]
+        content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        iptc_tags : typing.Optional[typing.Optional[typing.Any]]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
-        not_iptc_tags : typing.Optional[typing.Optional[typing.Any]]
+        iptc_tags : typing.Optional[IptcTags]
 
-        iab_tags : typing.Optional[typing.Optional[typing.Any]]
+        not_iptc_tags : typing.Optional[NotIptcTags]
 
-        not_iab_tags : typing.Optional[typing.Optional[typing.Any]]
+        iab_tags : typing.Optional[IabTags]
+
+        not_iab_tags : typing.Optional[NotIabTags]
+
+        custom_tags : typing.Optional[CustomTags]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -856,22 +1569,31 @@ class AsyncAuthorsClient:
         Returns
         -------
         AuthorsPostResponse
-            Successful Response
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
 
         Examples
         --------
         import asyncio
+        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
             await client.authors.post(
-                author_name="author_name",
+                author_name="Joanna Stern",
+                sources=["wsj.com", "nytimes.com"],
+                lang="en",
+                from_=datetime.datetime.fromisoformat(
+                    "2024-01-01 00:00:00+00:00",
+                ),
+                to=datetime.datetime.fromisoformat(
+                    "2024-06-30 00:00:00+00:00",
+                ),
             )
 
 
@@ -882,50 +1604,78 @@ class AsyncAuthorsClient:
             method="POST",
             json={
                 "author_name": author_name,
-                "not_author_name": not_author_name,
-                "sources": sources,
-                "predefined_sources": predefined_sources,
-                "not_sources": not_sources,
-                "lang": lang,
-                "not_lang": not_lang,
-                "countries": countries,
-                "not_countries": not_countries,
-                "from_": convert_and_respect_annotation_metadata(
-                    object_=from_, annotation=AuthorSearchRequestFrom, direction="write"
+                "not_author_name": convert_and_respect_annotation_metadata(
+                    object_=not_author_name, annotation=NotAuthorName, direction="write"
                 ),
-                "to_": convert_and_respect_annotation_metadata(
-                    object_=to, annotation=AuthorSearchRequestTo, direction="write"
+                "predefined_sources": convert_and_respect_annotation_metadata(
+                    object_=predefined_sources, annotation=PredefinedSources, direction="write"
                 ),
+                "sources": convert_and_respect_annotation_metadata(
+                    object_=sources, annotation=Sources, direction="write"
+                ),
+                "not_sources": convert_and_respect_annotation_metadata(
+                    object_=not_sources, annotation=NotSources, direction="write"
+                ),
+                "lang": convert_and_respect_annotation_metadata(object_=lang, annotation=Lang, direction="write"),
+                "not_lang": convert_and_respect_annotation_metadata(
+                    object_=not_lang, annotation=NotLang, direction="write"
+                ),
+                "countries": convert_and_respect_annotation_metadata(
+                    object_=countries, annotation=Countries, direction="write"
+                ),
+                "not_countries": convert_and_respect_annotation_metadata(
+                    object_=not_countries, annotation=NotCountries, direction="write"
+                ),
+                "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
+                "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "published_date_precision": published_date_precision,
                 "by_parse_date": by_parse_date,
                 "sort_by": sort_by,
-                "ranked_only": convert_and_respect_annotation_metadata(
-                    object_=ranked_only, annotation=AuthorSearchRequestRankedOnly, direction="write"
-                ),
+                "ranked_only": ranked_only,
                 "from_rank": from_rank,
                 "to_rank": to_rank,
                 "is_headline": is_headline,
                 "is_opinion": is_opinion,
                 "is_paid_content": is_paid_content,
-                "parent_url": parent_url,
-                "all_links": all_links,
-                "all_domain_links": all_domain_links,
+                "parent_url": convert_and_respect_annotation_metadata(
+                    object_=parent_url, annotation=ParentUrl, direction="write"
+                ),
+                "all_links": convert_and_respect_annotation_metadata(
+                    object_=all_links, annotation=AllLinks, direction="write"
+                ),
+                "all_domain_links": convert_and_respect_annotation_metadata(
+                    object_=all_domain_links, annotation=AllDomainLinks, direction="write"
+                ),
                 "word_count_min": word_count_min,
                 "word_count_max": word_count_max,
                 "page": page,
                 "page_size": page_size,
                 "include_nlp_data": include_nlp_data,
                 "has_nlp": has_nlp,
-                "theme": theme,
-                "not_theme": not_theme,
+                "theme": convert_and_respect_annotation_metadata(object_=theme, annotation=Theme, direction="write"),
+                "not_theme": convert_and_respect_annotation_metadata(
+                    object_=not_theme, annotation=NotTheme, direction="write"
+                ),
+                "ner_name": ner_name,
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
                 "content_sentiment_max": content_sentiment_max,
-                "iptc_tags": iptc_tags,
-                "not_iptc_tags": not_iptc_tags,
-                "iab_tags": iab_tags,
-                "not_iab_tags": not_iab_tags,
+                "iptc_tags": convert_and_respect_annotation_metadata(
+                    object_=iptc_tags, annotation=IptcTags, direction="write"
+                ),
+                "not_iptc_tags": convert_and_respect_annotation_metadata(
+                    object_=not_iptc_tags, annotation=NotIptcTags, direction="write"
+                ),
+                "iab_tags": convert_and_respect_annotation_metadata(
+                    object_=iab_tags, annotation=IabTags, direction="write"
+                ),
+                "not_iab_tags": convert_and_respect_annotation_metadata(
+                    object_=not_iab_tags, annotation=NotIabTags, direction="write"
+                ),
+                "custom_tags": convert_and_respect_annotation_metadata(
+                    object_=custom_tags, annotation=CustomTags, direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -942,12 +1692,72 @@ class AsyncAuthorsClient:
                         object_=_response.json(),
                     ),
                 )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )

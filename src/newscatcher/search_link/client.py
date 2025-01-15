@@ -2,16 +2,26 @@
 
 import typing
 from ..core.client_wrapper import SyncClientWrapper
+from ..types.from_ import From
+from ..types.to import To
 from ..core.request_options import RequestOptions
-from ..types.search_response import SearchResponse
+from ..types.search_response_dto import SearchResponseDto
+from ..core.serialization import convert_and_respect_annotation_metadata
 from ..core.pydantic_utilities import parse_obj_as
+from ..errors.bad_request_error import BadRequestError
+from ..types.error import Error
+from ..errors.unauthorized_error import UnauthorizedError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.http_validation_error import HttpValidationError
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..errors.internal_server_error import InternalServerError
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
-from .types.search_url_request_from import SearchUrlRequestFrom
-from .types.search_url_request_to import SearchUrlRequestTo
-from ..core.serialization import convert_and_respect_annotation_metadata
+from ..types.ids import Ids
+from ..types.links import Links
+from ..types.page import Page
+from ..types.page_size import PageSize
 from ..core.client_wrapper import AsyncClientWrapper
 
 # this is used as the default value for optional parameters
@@ -25,49 +35,69 @@ class SearchLinkClient:
     def search_url_get(
         self,
         *,
-        ids: str,
-        links: str,
-        from_: typing.Optional[str] = None,
-        to: typing.Optional[str] = None,
+        ids: typing.Optional[str] = None,
+        links: typing.Optional[str] = None,
+        from_: typing.Optional[From] = None,
+        to: typing.Optional[To] = None,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchResponse:
+    ) -> SearchResponseDto:
         """
-        This endpoint allows you to search for articles. You can search for articles by id(s) or link(s).
+        Searches for articles based on specified links or IDs. You can filter results by date range.
 
         Parameters
         ----------
-        ids : str
+        ids : typing.Optional[str]
+            The Newscatcher article ID (corresponds to the `_id` field in API response) or a list of article IDs to search for. To specify multiple IDs, use a comma-separated string.
 
-        links : str
+            Example: `"1234567890abcdef, abcdef1234567890"`
 
-        from_ : typing.Optional[str]
+            **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
 
-        to : typing.Optional[str]
+        links : typing.Optional[str]
+            The article link or list of article links to search for. To specify multiple links, use a comma-separated string.
+
+            Example: `"https://example.com/article1, https://example.com/article2"`
+
+            **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
+
+        from_ : typing.Optional[From]
+
+        to : typing.Optional[To]
 
         page : typing.Optional[int]
+            The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles.
+
+            For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
 
         page_size : typing.Optional[int]
+            The number of articles to return per page.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SearchResponse
-            Successful Response
+        SearchResponseDto
+            A successful response containing articles that match the provided links or IDs.
 
         Examples
         --------
+        import datetime
+
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.search_link.search_url_get(
-            ids="ids",
-            links="links",
+            from_=datetime.datetime.fromisoformat(
+                "2024-07-01 00:00:00+00:00",
+            ),
+            to=datetime.datetime.fromisoformat(
+                "2024-01-01 00:00:00+00:00",
+            ),
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -76,8 +106,8 @@ class SearchLinkClient:
             params={
                 "ids": ids,
                 "links": links,
-                "from_": from_,
-                "to_": to,
+                "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
+                "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
                 "page_size": page_size,
             },
@@ -86,18 +116,78 @@ class SearchLinkClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SearchResponse,
+                    SearchResponseDto,
                     parse_obj_as(
-                        type_=SearchResponse,  # type: ignore
+                        type_=SearchResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -110,60 +200,83 @@ class SearchLinkClient:
     def search_url_post(
         self,
         *,
-        ids: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        links: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        from_: typing.Optional[SearchUrlRequestFrom] = OMIT,
-        to: typing.Optional[SearchUrlRequestTo] = OMIT,
-        page: typing.Optional[int] = OMIT,
-        page_size: typing.Optional[int] = OMIT,
+        ids: typing.Optional[Ids] = OMIT,
+        links: typing.Optional[Links] = OMIT,
+        from_: typing.Optional[From] = OMIT,
+        to: typing.Optional[To] = OMIT,
+        page: typing.Optional[Page] = OMIT,
+        page_size: typing.Optional[PageSize] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchResponse:
+    ) -> SearchResponseDto:
         """
-        This endpoint allows you to search for articles. You can search for articles by id(s) or link(s).
+        Searches for articles using their ID(s) or link(s).
 
         Parameters
         ----------
-        ids : typing.Optional[typing.Optional[typing.Any]]
+        ids : typing.Optional[Ids]
 
-        links : typing.Optional[typing.Optional[typing.Any]]
+        links : typing.Optional[Links]
 
-        from_ : typing.Optional[SearchUrlRequestFrom]
+        from_ : typing.Optional[From]
+            The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
 
-        to : typing.Optional[SearchUrlRequestTo]
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
 
-        page : typing.Optional[int]
 
-        page_size : typing.Optional[int]
+        to : typing.Optional[To]
+            The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
+
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
+
+
+        page : typing.Optional[Page]
+
+        page_size : typing.Optional[PageSize]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SearchResponse
-            Successful Response
+        SearchResponseDto
+            A successful response containing articles that match the provided links or IDs.
 
         Examples
         --------
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
-        client.search_link.search_url_post()
+        client.search_link.search_url_post(
+            ids=[
+                "8ea8a784568ffaa05cb6d1ab2d2e84dd",
+                "0146a551ef05ab1c494a55e806e3ce64",
+            ],
+            links=[
+                "https://www.nytimes.com/2024/08/30/technology/ai-chatbot-chatgpt-manipulation.html",
+                "https://www.bbc.com/news/articles/c39k379grzlo",
+            ],
+        )
         """
         _response = self._client_wrapper.httpx_client.request(
             "api/search_by_link",
             method="POST",
             json={
-                "ids": ids,
-                "links": links,
-                "from_": convert_and_respect_annotation_metadata(
-                    object_=from_, annotation=SearchUrlRequestFrom, direction="write"
-                ),
-                "to_": convert_and_respect_annotation_metadata(
-                    object_=to, annotation=SearchUrlRequestTo, direction="write"
-                ),
+                "ids": convert_and_respect_annotation_metadata(object_=ids, annotation=Ids, direction="write"),
+                "links": convert_and_respect_annotation_metadata(object_=links, annotation=Links, direction="write"),
+                "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
+                "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
                 "page_size": page_size,
             },
@@ -176,18 +289,78 @@ class SearchLinkClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SearchResponse,
+                    SearchResponseDto,
                     parse_obj_as(
-                        type_=SearchResponse,  # type: ignore
+                        type_=SearchResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -205,54 +378,73 @@ class AsyncSearchLinkClient:
     async def search_url_get(
         self,
         *,
-        ids: str,
-        links: str,
-        from_: typing.Optional[str] = None,
-        to: typing.Optional[str] = None,
+        ids: typing.Optional[str] = None,
+        links: typing.Optional[str] = None,
+        from_: typing.Optional[From] = None,
+        to: typing.Optional[To] = None,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchResponse:
+    ) -> SearchResponseDto:
         """
-        This endpoint allows you to search for articles. You can search for articles by id(s) or link(s).
+        Searches for articles based on specified links or IDs. You can filter results by date range.
 
         Parameters
         ----------
-        ids : str
+        ids : typing.Optional[str]
+            The Newscatcher article ID (corresponds to the `_id` field in API response) or a list of article IDs to search for. To specify multiple IDs, use a comma-separated string.
 
-        links : str
+            Example: `"1234567890abcdef, abcdef1234567890"`
 
-        from_ : typing.Optional[str]
+            **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
 
-        to : typing.Optional[str]
+        links : typing.Optional[str]
+            The article link or list of article links to search for. To specify multiple links, use a comma-separated string.
+
+            Example: `"https://example.com/article1, https://example.com/article2"`
+
+            **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
+
+        from_ : typing.Optional[From]
+
+        to : typing.Optional[To]
 
         page : typing.Optional[int]
+            The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles.
+
+            For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
 
         page_size : typing.Optional[int]
+            The number of articles to return per page.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SearchResponse
-            Successful Response
+        SearchResponseDto
+            A successful response containing articles that match the provided links or IDs.
 
         Examples
         --------
         import asyncio
+        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
             await client.search_link.search_url_get(
-                ids="ids",
-                links="links",
+                from_=datetime.datetime.fromisoformat(
+                    "2024-07-01 00:00:00+00:00",
+                ),
+                to=datetime.datetime.fromisoformat(
+                    "2024-01-01 00:00:00+00:00",
+                ),
             )
 
 
@@ -264,8 +456,8 @@ class AsyncSearchLinkClient:
             params={
                 "ids": ids,
                 "links": links,
-                "from_": from_,
-                "to_": to,
+                "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
+                "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
                 "page_size": page_size,
             },
@@ -274,18 +466,78 @@ class AsyncSearchLinkClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SearchResponse,
+                    SearchResponseDto,
                     parse_obj_as(
-                        type_=SearchResponse,  # type: ignore
+                        type_=SearchResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -298,38 +550,56 @@ class AsyncSearchLinkClient:
     async def search_url_post(
         self,
         *,
-        ids: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        links: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        from_: typing.Optional[SearchUrlRequestFrom] = OMIT,
-        to: typing.Optional[SearchUrlRequestTo] = OMIT,
-        page: typing.Optional[int] = OMIT,
-        page_size: typing.Optional[int] = OMIT,
+        ids: typing.Optional[Ids] = OMIT,
+        links: typing.Optional[Links] = OMIT,
+        from_: typing.Optional[From] = OMIT,
+        to: typing.Optional[To] = OMIT,
+        page: typing.Optional[Page] = OMIT,
+        page_size: typing.Optional[PageSize] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchResponse:
+    ) -> SearchResponseDto:
         """
-        This endpoint allows you to search for articles. You can search for articles by id(s) or link(s).
+        Searches for articles using their ID(s) or link(s).
 
         Parameters
         ----------
-        ids : typing.Optional[typing.Optional[typing.Any]]
+        ids : typing.Optional[Ids]
 
-        links : typing.Optional[typing.Optional[typing.Any]]
+        links : typing.Optional[Links]
 
-        from_ : typing.Optional[SearchUrlRequestFrom]
+        from_ : typing.Optional[From]
+            The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
 
-        to : typing.Optional[SearchUrlRequestTo]
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
 
-        page : typing.Optional[int]
 
-        page_size : typing.Optional[int]
+        to : typing.Optional[To]
+            The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
+
+            Formats with examples:
+            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
+            - YYYY-MM-dd: `2024-07-01`
+            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
+            - YYYY/mm/dd: `2024/07/01`
+            - English phrases: `1 day ago`, `today`
+
+
+        page : typing.Optional[Page]
+
+        page_size : typing.Optional[PageSize]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SearchResponse
-            Successful Response
+        SearchResponseDto
+            A successful response containing articles that match the provided links or IDs.
 
         Examples
         --------
@@ -338,12 +608,21 @@ class AsyncSearchLinkClient:
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
-            await client.search_link.search_url_post()
+            await client.search_link.search_url_post(
+                ids=[
+                    "8ea8a784568ffaa05cb6d1ab2d2e84dd",
+                    "0146a551ef05ab1c494a55e806e3ce64",
+                ],
+                links=[
+                    "https://www.nytimes.com/2024/08/30/technology/ai-chatbot-chatgpt-manipulation.html",
+                    "https://www.bbc.com/news/articles/c39k379grzlo",
+                ],
+            )
 
 
         asyncio.run(main())
@@ -352,14 +631,10 @@ class AsyncSearchLinkClient:
             "api/search_by_link",
             method="POST",
             json={
-                "ids": ids,
-                "links": links,
-                "from_": convert_and_respect_annotation_metadata(
-                    object_=from_, annotation=SearchUrlRequestFrom, direction="write"
-                ),
-                "to_": convert_and_respect_annotation_metadata(
-                    object_=to, annotation=SearchUrlRequestTo, direction="write"
-                ),
+                "ids": convert_and_respect_annotation_metadata(object_=ids, annotation=Ids, direction="write"),
+                "links": convert_and_respect_annotation_metadata(object_=links, annotation=Links, direction="write"),
+                "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
+                "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
                 "page_size": page_size,
             },
@@ -372,18 +647,78 @@ class AsyncSearchLinkClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SearchResponse,
+                    SearchResponseDto,
                     parse_obj_as(
-                        type_=SearchResponse,  # type: ignore
+                        type_=SearchResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )

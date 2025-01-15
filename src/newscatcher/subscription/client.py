@@ -3,10 +3,16 @@
 from ..core.client_wrapper import SyncClientWrapper
 import typing
 from ..core.request_options import RequestOptions
-from ..types.subscription_response import SubscriptionResponse
+from ..types.subscription_response_dto import SubscriptionResponseDto
 from ..core.pydantic_utilities import parse_obj_as
+from ..errors.bad_request_error import BadRequestError
+from ..types.error import Error
+from ..errors.unauthorized_error import UnauthorizedError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.http_validation_error import HttpValidationError
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..errors.internal_server_error import InternalServerError
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper
@@ -16,9 +22,9 @@ class SubscriptionClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def get(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
+    def get(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponseDto:
         """
-        This endpoint allows you to get info about your subscription plan.
+        Retrieves information about your subscription plan.
 
         Parameters
         ----------
@@ -27,15 +33,15 @@ class SubscriptionClient:
 
         Returns
         -------
-        SubscriptionResponse
-            Successful Response
+        SubscriptionResponseDto
+            A successful response containing information about the current subscription plan.
 
         Examples
         --------
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.subscription.get()
         """
@@ -47,18 +53,78 @@ class SubscriptionClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SubscriptionResponse,
+                    SubscriptionResponseDto,
                     parse_obj_as(
-                        type_=SubscriptionResponse,  # type: ignore
+                        type_=SubscriptionResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -68,9 +134,9 @@ class SubscriptionClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def post(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
+    def post(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponseDto:
         """
-        This endpoint allows you to get info about your subscription plan.
+        Retrieves information about your subscription plan.
 
         Parameters
         ----------
@@ -79,15 +145,15 @@ class SubscriptionClient:
 
         Returns
         -------
-        SubscriptionResponse
-            Successful Response
+        SubscriptionResponseDto
+            A successful response containing information about the current subscription plan.
 
         Examples
         --------
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.subscription.post()
         """
@@ -99,18 +165,78 @@ class SubscriptionClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SubscriptionResponse,
+                    SubscriptionResponseDto,
                     parse_obj_as(
-                        type_=SubscriptionResponse,  # type: ignore
+                        type_=SubscriptionResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -125,9 +251,9 @@ class AsyncSubscriptionClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def get(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
+    async def get(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponseDto:
         """
-        This endpoint allows you to get info about your subscription plan.
+        Retrieves information about your subscription plan.
 
         Parameters
         ----------
@@ -136,8 +262,8 @@ class AsyncSubscriptionClient:
 
         Returns
         -------
-        SubscriptionResponse
-            Successful Response
+        SubscriptionResponseDto
+            A successful response containing information about the current subscription plan.
 
         Examples
         --------
@@ -146,7 +272,7 @@ class AsyncSubscriptionClient:
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
@@ -164,18 +290,78 @@ class AsyncSubscriptionClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SubscriptionResponse,
+                    SubscriptionResponseDto,
                     parse_obj_as(
-                        type_=SubscriptionResponse,  # type: ignore
+                        type_=SubscriptionResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -185,9 +371,9 @@ class AsyncSubscriptionClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def post(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponse:
+    async def post(self, *, request_options: typing.Optional[RequestOptions] = None) -> SubscriptionResponseDto:
         """
-        This endpoint allows you to get info about your subscription plan.
+        Retrieves information about your subscription plan.
 
         Parameters
         ----------
@@ -196,8 +382,8 @@ class AsyncSubscriptionClient:
 
         Returns
         -------
-        SubscriptionResponse
-            Successful Response
+        SubscriptionResponseDto
+            A successful response containing information about the current subscription plan.
 
         Examples
         --------
@@ -206,7 +392,7 @@ class AsyncSubscriptionClient:
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
@@ -224,18 +410,78 @@ class AsyncSubscriptionClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SubscriptionResponse,
+                    SubscriptionResponseDto,
                     parse_obj_as(
-                        type_=SubscriptionResponse,  # type: ignore
+                        type_=SubscriptionResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )

@@ -2,13 +2,32 @@
 
 import typing
 from ..core.client_wrapper import SyncClientWrapper
+from .types.sources_get_request_news_domain_type import SourcesGetRequestNewsDomainType
 from ..core.request_options import RequestOptions
-from ..types.source_response import SourceResponse
+from ..types.sources_response_dto import SourcesResponseDto
 from ..core.pydantic_utilities import parse_obj_as
+from ..errors.bad_request_error import BadRequestError
+from ..types.error import Error
+from ..errors.unauthorized_error import UnauthorizedError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.http_validation_error import HttpValidationError
+from ..errors.too_many_requests_error import TooManyRequestsError
+from ..errors.internal_server_error import InternalServerError
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
+from ..types.lang import Lang
+from ..types.countries import Countries
+from ..types.predefined_sources import PredefinedSources
+from ..types.source_name import SourceName
+from ..types.source_url import SourceUrl
+from ..types.include_additional_info import IncludeAdditionalInfo
+from ..types.is_news_domain import IsNewsDomain
+from ..types.news_domain_type import NewsDomainType
+from ..types.news_type import NewsType
+from ..types.from_rank import FromRank
+from ..types.to_rank import ToRank
+from ..core.serialization import convert_and_respect_annotation_metadata
 from ..core.client_wrapper import AsyncClientWrapper
 
 # this is used as the default value for optional parameters
@@ -22,69 +41,113 @@ class SourcesClient:
     def get(
         self,
         *,
-        lang: str,
-        countries: str,
-        predefined_sources: str,
-        source_name: str,
-        source_url: str,
-        news_domain_type: str,
-        news_type: str,
+        lang: typing.Optional[str] = None,
+        countries: typing.Optional[str] = None,
+        predefined_sources: typing.Optional[str] = None,
+        source_name: typing.Optional[str] = None,
+        source_url: typing.Optional[str] = None,
         include_additional_info: typing.Optional[bool] = None,
+        is_news_domain: typing.Optional[bool] = None,
+        news_domain_type: typing.Optional[SourcesGetRequestNewsDomainType] = None,
+        news_type: typing.Optional[str] = None,
         from_rank: typing.Optional[int] = None,
         to_rank: typing.Optional[int] = None,
-        is_news_domain: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SourceResponse:
+    ) -> SourcesResponseDto:
         """
-        This endpoint allows you to get the list of sources that are available in the database. You can filter the sources by language and country. The maximum number of sources displayed is set according to your plan. You can find the list of plans and their features here: https://newscatcherapi.com/news-api#news-api-pricing
+        Retrieves a list of sources based on specified criteria such as language, country, rank, and more.
 
         Parameters
         ----------
-        lang : str
+        lang : typing.Optional[str]
+            The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-        countries : str
+            Example: `"en, es"`
 
-        predefined_sources : str
+            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
 
-        source_name : str
+        countries : typing.Optional[str]
+            The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-        source_url : str
+            Example: `"US, CA"`
 
-        news_domain_type : str
+            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
 
-        news_type : str
+        predefined_sources : typing.Optional[str]
+            Predefined top news sources per country.
+
+            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+
+            Examples:
+            - `"top 100 US"`
+            - `"top 33 AT"`
+            - `"top 50 US, top 20 GB"`
+            - `"top 33 AT, top 50 IT"`
+
+        source_name : typing.Optional[str]
+            Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
+
+            Example: `"sport, tech"`
+
+            **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
+
+        source_url : typing.Optional[str]
+            The domain(s) of the news publication to search for.
+
+            **Caution**:  When specifying the `source_url` parameter,
+            you can only use `include_additional_info` as an extra parameter.
 
         include_additional_info : typing.Optional[bool]
-
-        from_rank : typing.Optional[int]
-
-        to_rank : typing.Optional[int]
+            If true, returns the following additional datapoints about each news source:
+            - `nb_articles_for_7d`: The number of articles published by the source in the last week.
+            - `country`: Source country of origin.
+            - `rank`: SEO rank.
+            - `is_news_domain`: Boolean indicating if the source is a news domain.
+            - `news_domain_type`: Type of news domain (e.g., "Original Content").
+            - `news_type`: Category of news (e.g., "General News Outlets").
 
         is_news_domain : typing.Optional[bool]
+            If true, filters results to include only news domains.
+
+        news_domain_type : typing.Optional[SourcesGetRequestNewsDomainType]
+            Filters results based on the news domain type. Possible values are:
+            - `Original Content`: Sources that produce their own content.
+            - `Aggregator`: Sources that collect content from various other sources.
+            - `Press Releases`: Sources primarily publishing press releases.
+            - `Republisher`: Sources that republish content from other sources.
+            - `Other`: Sources that don't fit into main categories.
+
+        news_type : typing.Optional[str]
+            Filters results based on the news type. Multiple types can be specified using a comma-separated string.
+
+            Example: `"General News Outlets,Tech News and Updates"`
+
+            For a complete list of available news types, see [Enumerated parameters > News type](/docs/v3/api-reference/overview/enumerated-parameters#news-type-news-type).
+
+        from_rank : typing.Optional[int]
+            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+
+        to_rank : typing.Optional[int]
+            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SourceResponse
-            Successful Response
+        SourcesResponseDto
+            A successful response containing a list of news sources that match the specified criteria.
 
         Examples
         --------
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.sources.get(
-            lang="lang",
-            countries="countries",
-            predefined_sources="predefined_sources",
-            source_name="source_name",
-            source_url="source_url",
-            news_domain_type="news_domain_type",
-            news_type="news_type",
+            predefined_sources="top 100 US, top 5 GB",
+            source_url="bbc.com",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -94,32 +157,92 @@ class SourcesClient:
                 "lang": lang,
                 "countries": countries,
                 "predefined_sources": predefined_sources,
-                "include_additional_info": include_additional_info,
-                "from_rank": from_rank,
-                "to_rank": to_rank,
                 "source_name": source_name,
                 "source_url": source_url,
+                "include_additional_info": include_additional_info,
                 "is_news_domain": is_news_domain,
                 "news_domain_type": news_domain_type,
                 "news_type": news_type,
+                "from_rank": from_rank,
+                "to_rank": to_rank,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SourceResponse,
+                    SourcesResponseDto,
                     parse_obj_as(
-                        type_=SourceResponse,  # type: ignore
+                        type_=SourcesResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -132,78 +255,94 @@ class SourcesClient:
     def post(
         self,
         *,
-        lang: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        countries: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        predefined_sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        include_additional_info: typing.Optional[bool] = OMIT,
-        from_rank: typing.Optional[int] = OMIT,
-        to_rank: typing.Optional[int] = OMIT,
-        source_name: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        source_url: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        is_news_domain: typing.Optional[bool] = OMIT,
-        news_domain_type: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        news_type: typing.Optional[typing.Optional[typing.Any]] = OMIT,
+        lang: typing.Optional[Lang] = OMIT,
+        countries: typing.Optional[Countries] = OMIT,
+        predefined_sources: typing.Optional[PredefinedSources] = OMIT,
+        source_name: typing.Optional[SourceName] = OMIT,
+        source_url: typing.Optional[SourceUrl] = OMIT,
+        include_additional_info: typing.Optional[IncludeAdditionalInfo] = OMIT,
+        is_news_domain: typing.Optional[IsNewsDomain] = OMIT,
+        news_domain_type: typing.Optional[NewsDomainType] = OMIT,
+        news_type: typing.Optional[NewsType] = OMIT,
+        from_rank: typing.Optional[FromRank] = OMIT,
+        to_rank: typing.Optional[ToRank] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SourceResponse:
+    ) -> SourcesResponseDto:
         """
-        This endpoint allows you to get the list of sources that are available in the database. You can filter the sources by language and country. The maximum number of sources displayed is set according to your plan. You can find the list of plans and their features here: https://newscatcherapi.com/news-api#news-api-pricing
+        Retrieves the list of sources available in the database. You can filter the sources by language, country, and more.
 
         Parameters
         ----------
-        lang : typing.Optional[typing.Optional[typing.Any]]
+        lang : typing.Optional[Lang]
 
-        countries : typing.Optional[typing.Optional[typing.Any]]
+        countries : typing.Optional[Countries]
 
-        predefined_sources : typing.Optional[typing.Optional[typing.Any]]
+        predefined_sources : typing.Optional[PredefinedSources]
 
-        include_additional_info : typing.Optional[bool]
+        source_name : typing.Optional[SourceName]
 
-        from_rank : typing.Optional[int]
+        source_url : typing.Optional[SourceUrl]
 
-        to_rank : typing.Optional[int]
+        include_additional_info : typing.Optional[IncludeAdditionalInfo]
 
-        source_name : typing.Optional[typing.Optional[typing.Any]]
+        is_news_domain : typing.Optional[IsNewsDomain]
 
-        source_url : typing.Optional[typing.Optional[typing.Any]]
+        news_domain_type : typing.Optional[NewsDomainType]
 
-        is_news_domain : typing.Optional[bool]
+        news_type : typing.Optional[NewsType]
 
-        news_domain_type : typing.Optional[typing.Optional[typing.Any]]
+        from_rank : typing.Optional[FromRank]
 
-        news_type : typing.Optional[typing.Optional[typing.Any]]
+        to_rank : typing.Optional[ToRank]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SourceResponse
-            Successful Response
+        SourcesResponseDto
+            A successful response containing a list of news sources that match the specified criteria.
 
         Examples
         --------
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
-        client.sources.post()
+        client.sources.post(
+            predefined_sources=["top 50 US"],
+            include_additional_info=True,
+            is_news_domain=True,
+            news_domain_type="Original Content",
+            news_type="General News Outlets",
+        )
         """
         _response = self._client_wrapper.httpx_client.request(
             "api/sources",
             method="POST",
             json={
-                "lang": lang,
-                "countries": countries,
-                "predefined_sources": predefined_sources,
+                "lang": convert_and_respect_annotation_metadata(object_=lang, annotation=Lang, direction="write"),
+                "countries": convert_and_respect_annotation_metadata(
+                    object_=countries, annotation=Countries, direction="write"
+                ),
+                "predefined_sources": convert_and_respect_annotation_metadata(
+                    object_=predefined_sources, annotation=PredefinedSources, direction="write"
+                ),
+                "source_name": convert_and_respect_annotation_metadata(
+                    object_=source_name, annotation=SourceName, direction="write"
+                ),
+                "source_url": convert_and_respect_annotation_metadata(
+                    object_=source_url, annotation=SourceUrl, direction="write"
+                ),
                 "include_additional_info": include_additional_info,
-                "from_rank": from_rank,
-                "to_rank": to_rank,
-                "source_name": source_name,
-                "source_url": source_url,
                 "is_news_domain": is_news_domain,
                 "news_domain_type": news_domain_type,
-                "news_type": news_type,
+                "news_type": convert_and_respect_annotation_metadata(
+                    object_=news_type, annotation=NewsType, direction="write"
+                ),
+                "from_rank": from_rank,
+                "to_rank": to_rank,
             },
             headers={
                 "content-type": "application/json",
@@ -214,18 +353,78 @@ class SourcesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SourceResponse,
+                    SourcesResponseDto,
                     parse_obj_as(
-                        type_=SourceResponse,  # type: ignore
+                        type_=SourcesResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -243,53 +442,102 @@ class AsyncSourcesClient:
     async def get(
         self,
         *,
-        lang: str,
-        countries: str,
-        predefined_sources: str,
-        source_name: str,
-        source_url: str,
-        news_domain_type: str,
-        news_type: str,
+        lang: typing.Optional[str] = None,
+        countries: typing.Optional[str] = None,
+        predefined_sources: typing.Optional[str] = None,
+        source_name: typing.Optional[str] = None,
+        source_url: typing.Optional[str] = None,
         include_additional_info: typing.Optional[bool] = None,
+        is_news_domain: typing.Optional[bool] = None,
+        news_domain_type: typing.Optional[SourcesGetRequestNewsDomainType] = None,
+        news_type: typing.Optional[str] = None,
         from_rank: typing.Optional[int] = None,
         to_rank: typing.Optional[int] = None,
-        is_news_domain: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SourceResponse:
+    ) -> SourcesResponseDto:
         """
-        This endpoint allows you to get the list of sources that are available in the database. You can filter the sources by language and country. The maximum number of sources displayed is set according to your plan. You can find the list of plans and their features here: https://newscatcherapi.com/news-api#news-api-pricing
+        Retrieves a list of sources based on specified criteria such as language, country, rank, and more.
 
         Parameters
         ----------
-        lang : str
+        lang : typing.Optional[str]
+            The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-        countries : str
+            Example: `"en, es"`
 
-        predefined_sources : str
+            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
 
-        source_name : str
+        countries : typing.Optional[str]
+            The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-        source_url : str
+            Example: `"US, CA"`
 
-        news_domain_type : str
+            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
 
-        news_type : str
+        predefined_sources : typing.Optional[str]
+            Predefined top news sources per country.
+
+            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+
+            Examples:
+            - `"top 100 US"`
+            - `"top 33 AT"`
+            - `"top 50 US, top 20 GB"`
+            - `"top 33 AT, top 50 IT"`
+
+        source_name : typing.Optional[str]
+            Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
+
+            Example: `"sport, tech"`
+
+            **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
+
+        source_url : typing.Optional[str]
+            The domain(s) of the news publication to search for.
+
+            **Caution**:  When specifying the `source_url` parameter,
+            you can only use `include_additional_info` as an extra parameter.
 
         include_additional_info : typing.Optional[bool]
-
-        from_rank : typing.Optional[int]
-
-        to_rank : typing.Optional[int]
+            If true, returns the following additional datapoints about each news source:
+            - `nb_articles_for_7d`: The number of articles published by the source in the last week.
+            - `country`: Source country of origin.
+            - `rank`: SEO rank.
+            - `is_news_domain`: Boolean indicating if the source is a news domain.
+            - `news_domain_type`: Type of news domain (e.g., "Original Content").
+            - `news_type`: Category of news (e.g., "General News Outlets").
 
         is_news_domain : typing.Optional[bool]
+            If true, filters results to include only news domains.
+
+        news_domain_type : typing.Optional[SourcesGetRequestNewsDomainType]
+            Filters results based on the news domain type. Possible values are:
+            - `Original Content`: Sources that produce their own content.
+            - `Aggregator`: Sources that collect content from various other sources.
+            - `Press Releases`: Sources primarily publishing press releases.
+            - `Republisher`: Sources that republish content from other sources.
+            - `Other`: Sources that don't fit into main categories.
+
+        news_type : typing.Optional[str]
+            Filters results based on the news type. Multiple types can be specified using a comma-separated string.
+
+            Example: `"General News Outlets,Tech News and Updates"`
+
+            For a complete list of available news types, see [Enumerated parameters > News type](/docs/v3/api-reference/overview/enumerated-parameters#news-type-news-type).
+
+        from_rank : typing.Optional[int]
+            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+
+        to_rank : typing.Optional[int]
+            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SourceResponse
-            Successful Response
+        SourcesResponseDto
+            A successful response containing a list of news sources that match the specified criteria.
 
         Examples
         --------
@@ -298,19 +546,14 @@ class AsyncSourcesClient:
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
             await client.sources.get(
-                lang="lang",
-                countries="countries",
-                predefined_sources="predefined_sources",
-                source_name="source_name",
-                source_url="source_url",
-                news_domain_type="news_domain_type",
-                news_type="news_type",
+                predefined_sources="top 100 US, top 5 GB",
+                source_url="bbc.com",
             )
 
 
@@ -323,32 +566,92 @@ class AsyncSourcesClient:
                 "lang": lang,
                 "countries": countries,
                 "predefined_sources": predefined_sources,
-                "include_additional_info": include_additional_info,
-                "from_rank": from_rank,
-                "to_rank": to_rank,
                 "source_name": source_name,
                 "source_url": source_url,
+                "include_additional_info": include_additional_info,
                 "is_news_domain": is_news_domain,
                 "news_domain_type": news_domain_type,
                 "news_type": news_type,
+                "from_rank": from_rank,
+                "to_rank": to_rank,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SourceResponse,
+                    SourcesResponseDto,
                     parse_obj_as(
-                        type_=SourceResponse,  # type: ignore
+                        type_=SourcesResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
@@ -361,53 +664,53 @@ class AsyncSourcesClient:
     async def post(
         self,
         *,
-        lang: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        countries: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        predefined_sources: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        include_additional_info: typing.Optional[bool] = OMIT,
-        from_rank: typing.Optional[int] = OMIT,
-        to_rank: typing.Optional[int] = OMIT,
-        source_name: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        source_url: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        is_news_domain: typing.Optional[bool] = OMIT,
-        news_domain_type: typing.Optional[typing.Optional[typing.Any]] = OMIT,
-        news_type: typing.Optional[typing.Optional[typing.Any]] = OMIT,
+        lang: typing.Optional[Lang] = OMIT,
+        countries: typing.Optional[Countries] = OMIT,
+        predefined_sources: typing.Optional[PredefinedSources] = OMIT,
+        source_name: typing.Optional[SourceName] = OMIT,
+        source_url: typing.Optional[SourceUrl] = OMIT,
+        include_additional_info: typing.Optional[IncludeAdditionalInfo] = OMIT,
+        is_news_domain: typing.Optional[IsNewsDomain] = OMIT,
+        news_domain_type: typing.Optional[NewsDomainType] = OMIT,
+        news_type: typing.Optional[NewsType] = OMIT,
+        from_rank: typing.Optional[FromRank] = OMIT,
+        to_rank: typing.Optional[ToRank] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SourceResponse:
+    ) -> SourcesResponseDto:
         """
-        This endpoint allows you to get the list of sources that are available in the database. You can filter the sources by language and country. The maximum number of sources displayed is set according to your plan. You can find the list of plans and their features here: https://newscatcherapi.com/news-api#news-api-pricing
+        Retrieves the list of sources available in the database. You can filter the sources by language, country, and more.
 
         Parameters
         ----------
-        lang : typing.Optional[typing.Optional[typing.Any]]
+        lang : typing.Optional[Lang]
 
-        countries : typing.Optional[typing.Optional[typing.Any]]
+        countries : typing.Optional[Countries]
 
-        predefined_sources : typing.Optional[typing.Optional[typing.Any]]
+        predefined_sources : typing.Optional[PredefinedSources]
 
-        include_additional_info : typing.Optional[bool]
+        source_name : typing.Optional[SourceName]
 
-        from_rank : typing.Optional[int]
+        source_url : typing.Optional[SourceUrl]
 
-        to_rank : typing.Optional[int]
+        include_additional_info : typing.Optional[IncludeAdditionalInfo]
 
-        source_name : typing.Optional[typing.Optional[typing.Any]]
+        is_news_domain : typing.Optional[IsNewsDomain]
 
-        source_url : typing.Optional[typing.Optional[typing.Any]]
+        news_domain_type : typing.Optional[NewsDomainType]
 
-        is_news_domain : typing.Optional[bool]
+        news_type : typing.Optional[NewsType]
 
-        news_domain_type : typing.Optional[typing.Optional[typing.Any]]
+        from_rank : typing.Optional[FromRank]
 
-        news_type : typing.Optional[typing.Optional[typing.Any]]
+        to_rank : typing.Optional[ToRank]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SourceResponse
-            Successful Response
+        SourcesResponseDto
+            A successful response containing a list of news sources that match the specified criteria.
 
         Examples
         --------
@@ -416,12 +719,18 @@ class AsyncSourcesClient:
         from newscatcher import AsyncNewscatcherApi
 
         client = AsyncNewscatcherApi(
-            api_token="YOUR_API_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
-            await client.sources.post()
+            await client.sources.post(
+                predefined_sources=["top 50 US"],
+                include_additional_info=True,
+                is_news_domain=True,
+                news_domain_type="Original Content",
+                news_type="General News Outlets",
+            )
 
 
         asyncio.run(main())
@@ -430,17 +739,27 @@ class AsyncSourcesClient:
             "api/sources",
             method="POST",
             json={
-                "lang": lang,
-                "countries": countries,
-                "predefined_sources": predefined_sources,
+                "lang": convert_and_respect_annotation_metadata(object_=lang, annotation=Lang, direction="write"),
+                "countries": convert_and_respect_annotation_metadata(
+                    object_=countries, annotation=Countries, direction="write"
+                ),
+                "predefined_sources": convert_and_respect_annotation_metadata(
+                    object_=predefined_sources, annotation=PredefinedSources, direction="write"
+                ),
+                "source_name": convert_and_respect_annotation_metadata(
+                    object_=source_name, annotation=SourceName, direction="write"
+                ),
+                "source_url": convert_and_respect_annotation_metadata(
+                    object_=source_url, annotation=SourceUrl, direction="write"
+                ),
                 "include_additional_info": include_additional_info,
-                "from_rank": from_rank,
-                "to_rank": to_rank,
-                "source_name": source_name,
-                "source_url": source_url,
                 "is_news_domain": is_news_domain,
                 "news_domain_type": news_domain_type,
-                "news_type": news_type,
+                "news_type": convert_and_respect_annotation_metadata(
+                    object_=news_type, annotation=NewsType, direction="write"
+                ),
+                "from_rank": from_rank,
+                "to_rank": to_rank,
             },
             headers={
                 "content-type": "application/json",
@@ -451,18 +770,78 @@ class AsyncSourcesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    SourceResponse,
+                    SourcesResponseDto,
                     parse_obj_as(
-                        type_=SourceResponse,  # type: ignore
+                        type_=SourcesResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
+                )
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 408:
+                raise RequestTimeoutError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
                 )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     typing.cast(
-                        HttpValidationError,
+                        Error,
                         parse_obj_as(
-                            type_=HttpValidationError,  # type: ignore
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    )
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    typing.cast(
+                        str,
+                        parse_obj_as(
+                            type_=str,  # type: ignore
                             object_=_response.json(),
                         ),
                     )
