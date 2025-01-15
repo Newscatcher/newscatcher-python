@@ -10,6 +10,7 @@ from .authors.client import AuthorsClient
 from .search_link.client import SearchLinkClient
 from .searchsimilar.client import SearchsimilarClient
 from .sources.client import SourcesClient
+from .aggregation.client import AggregationClient
 from .subscription.client import SubscriptionClient
 from .core.client_wrapper import AsyncClientWrapper
 from .search.client import AsyncSearchClient
@@ -18,6 +19,7 @@ from .authors.client import AsyncAuthorsClient
 from .search_link.client import AsyncSearchLinkClient
 from .searchsimilar.client import AsyncSearchsimilarClient
 from .sources.client import AsyncSourcesClient
+from .aggregation.client import AsyncAggregationClient
 from .subscription.client import AsyncSubscriptionClient
 
 
@@ -39,7 +41,7 @@ class NewscatcherApi:
 
 
 
-    api_token : str
+    api_key : str
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -54,7 +56,7 @@ class NewscatcherApi:
     from newscatcher import NewscatcherApi
 
     client = NewscatcherApi(
-        api_token="YOUR_API_TOKEN",
+        api_key="YOUR_API_KEY",
     )
     """
 
@@ -63,7 +65,7 @@ class NewscatcherApi:
         *,
         base_url: typing.Optional[str] = None,
         environment: NewscatcherApiEnvironment = NewscatcherApiEnvironment.DEFAULT,
-        api_token: str,
+        api_key: str,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
@@ -71,7 +73,7 @@ class NewscatcherApi:
         _defaulted_timeout = timeout if timeout is not None else 60 if httpx_client is None else None
         self._client_wrapper = SyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
-            api_token=api_token,
+            api_key=api_key,
             httpx_client=httpx_client
             if httpx_client is not None
             else httpx.Client(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
@@ -85,6 +87,7 @@ class NewscatcherApi:
         self.search_link = SearchLinkClient(client_wrapper=self._client_wrapper)
         self.searchsimilar = SearchsimilarClient(client_wrapper=self._client_wrapper)
         self.sources = SourcesClient(client_wrapper=self._client_wrapper)
+        self.aggregation = AggregationClient(client_wrapper=self._client_wrapper)
         self.subscription = SubscriptionClient(client_wrapper=self._client_wrapper)
 
 
@@ -106,7 +109,7 @@ class AsyncNewscatcherApi:
 
 
 
-    api_token : str
+    api_key : str
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -121,7 +124,7 @@ class AsyncNewscatcherApi:
     from newscatcher import AsyncNewscatcherApi
 
     client = AsyncNewscatcherApi(
-        api_token="YOUR_API_TOKEN",
+        api_key="YOUR_API_KEY",
     )
     """
 
@@ -130,7 +133,7 @@ class AsyncNewscatcherApi:
         *,
         base_url: typing.Optional[str] = None,
         environment: NewscatcherApiEnvironment = NewscatcherApiEnvironment.DEFAULT,
-        api_token: str,
+        api_key: str,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
@@ -138,7 +141,7 @@ class AsyncNewscatcherApi:
         _defaulted_timeout = timeout if timeout is not None else 60 if httpx_client is None else None
         self._client_wrapper = AsyncClientWrapper(
             base_url=_get_base_url(base_url=base_url, environment=environment),
-            api_token=api_token,
+            api_key=api_key,
             httpx_client=httpx_client
             if httpx_client is not None
             else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
@@ -152,6 +155,7 @@ class AsyncNewscatcherApi:
         self.search_link = AsyncSearchLinkClient(client_wrapper=self._client_wrapper)
         self.searchsimilar = AsyncSearchsimilarClient(client_wrapper=self._client_wrapper)
         self.sources = AsyncSourcesClient(client_wrapper=self._client_wrapper)
+        self.aggregation = AsyncAggregationClient(client_wrapper=self._client_wrapper)
         self.subscription = AsyncSubscriptionClient(client_wrapper=self._client_wrapper)
 
 

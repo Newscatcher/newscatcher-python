@@ -2,19 +2,31 @@
 
 from ..core.pydantic_utilities import UniversalBaseModel
 import typing
+import pydantic
 from .additional_source_info import AdditionalSourceInfo
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
-import pydantic
 
 
 class SourceInfo(UniversalBaseModel):
     """
-    "SourceInfo DTO class.
+    The data model for information about a news source.
     """
 
-    name_source: typing.Optional[str] = None
-    domain_url: str
-    logo: typing.Optional[str] = None
+    name_source: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The name of the news source.
+    """
+
+    domain_url: str = pydantic.Field()
+    """
+    The domain URL of the news source.
+    """
+
+    logo: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The logo of the news source.
+    """
+
     additional_info: typing.Optional[AdditionalSourceInfo] = None
 
     if IS_PYDANTIC_V2:

@@ -24,13 +24,25 @@ A full reference for this library is available [here](./reference.md).
 Instantiate and use the client with the following:
 
 ```python
+import datetime
+
 from newscatcher import NewscatcherApi
 
 client = NewscatcherApi(
-    api_token="YOUR_API_TOKEN",
+    api_key="YOUR_API_KEY",
 )
 client.search.post(
-    q="q",
+    q="renewable energy",
+    predefined_sources=["top 50 US"],
+    lang=["en"],
+    from_=datetime.datetime.fromisoformat(
+        "2024-01-01 00:00:00+00:00",
+    ),
+    to=datetime.datetime.fromisoformat(
+        "2024-06-30 00:00:00+00:00",
+    ),
+    additional_domain_info=True,
+    is_news_domain=True,
 )
 ```
 
@@ -40,17 +52,28 @@ The SDK also exports an `async` client so that you can make non-blocking calls t
 
 ```python
 import asyncio
+import datetime
 
 from newscatcher import AsyncNewscatcherApi
 
 client = AsyncNewscatcherApi(
-    api_token="YOUR_API_TOKEN",
+    api_key="YOUR_API_KEY",
 )
 
 
 async def main() -> None:
     await client.search.post(
-        q="q",
+        q="renewable energy",
+        predefined_sources=["top 50 US"],
+        lang=["en"],
+        from_=datetime.datetime.fromisoformat(
+            "2024-01-01 00:00:00+00:00",
+        ),
+        to=datetime.datetime.fromisoformat(
+            "2024-06-30 00:00:00+00:00",
+        ),
+        additional_domain_info=True,
+        is_news_domain=True,
     )
 
 
