@@ -424,7 +424,7 @@ class SearchsimilarClient:
         Returns
         -------
         SearchSimilarGetResponse
-            A successful response containing articles similar to the specified query. If no matches, returns a failded search response according to the defined schema.
+            A successful response containing articles similar to the specified query. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
@@ -728,7 +728,7 @@ class SearchsimilarClient:
         Returns
         -------
         SearchSimilarPostResponse
-            A successful response containing articles similar to the specified query. If no matches, returns a failded search response according to the defined schema.
+            A successful response containing articles similar to the specified query. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
@@ -1262,7 +1262,7 @@ class AsyncSearchsimilarClient:
         Returns
         -------
         SearchSimilarGetResponse
-            A successful response containing articles similar to the specified query. If no matches, returns a failded search response according to the defined schema.
+            A successful response containing articles similar to the specified query. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
@@ -1573,7 +1573,7 @@ class AsyncSearchsimilarClient:
         Returns
         -------
         SearchSimilarPostResponse
-            A successful response containing articles similar to the specified query. If no matches, returns a failded search response according to the defined schema.
+            A successful response containing articles similar to the specified query. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------

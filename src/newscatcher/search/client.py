@@ -780,7 +780,7 @@ class SearchClient:
         title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
         title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
         content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
-        content_sentient_max: typing.Optional[ContentSentimentMax] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
         iptc_tags: typing.Optional[IptcTags] = OMIT,
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         iab_tags: typing.Optional[IabTags] = OMIT,
@@ -888,7 +888,7 @@ class SearchClient:
 
         content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        content_sentient_max : typing.Optional[ContentSentimentMax]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         iptc_tags : typing.Optional[IptcTags]
 
@@ -1018,7 +1018,7 @@ class SearchClient:
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
-                "content_sentient_max": content_sentient_max,
+                "content_sentiment_max": content_sentiment_max,
                 "iptc_tags": convert_and_respect_annotation_metadata(
                     object_=iptc_tags, annotation=IptcTags, direction="write"
                 ),
@@ -1831,7 +1831,7 @@ class AsyncSearchClient:
         title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
         title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
         content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
-        content_sentient_max: typing.Optional[ContentSentimentMax] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
         iptc_tags: typing.Optional[IptcTags] = OMIT,
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         iab_tags: typing.Optional[IabTags] = OMIT,
@@ -1939,7 +1939,7 @@ class AsyncSearchClient:
 
         content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        content_sentient_max : typing.Optional[ContentSentimentMax]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         iptc_tags : typing.Optional[IptcTags]
 
@@ -2076,7 +2076,7 @@ class AsyncSearchClient:
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
-                "content_sentient_max": content_sentient_max,
+                "content_sentiment_max": content_sentiment_max,
                 "iptc_tags": convert_and_respect_annotation_metadata(
                     object_=iptc_tags, annotation=IptcTags, direction="write"
                 ),

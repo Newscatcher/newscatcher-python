@@ -1271,7 +1271,7 @@ client.search.post(
 <dl>
 <dd>
 
-**content_sentient_max:** `typing.Optional[ContentSentimentMax]` 
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>
@@ -6130,7 +6130,7 @@ client.aggregation.post(
 <dl>
 <dd>
 
-**content_sentient_max:** `typing.Optional[ContentSentimentMax]` 
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>

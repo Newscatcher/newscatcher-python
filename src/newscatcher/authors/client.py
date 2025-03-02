@@ -418,7 +418,7 @@ class AuthorsClient:
         Returns
         -------
         AuthorsGetResponse
-            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
@@ -719,7 +719,7 @@ class AuthorsClient:
         Returns
         -------
         AuthorsPostResponse
-            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
@@ -1261,7 +1261,7 @@ class AsyncAuthorsClient:
         Returns
         -------
         AuthorsGetResponse
-            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
@@ -1569,7 +1569,7 @@ class AsyncAuthorsClient:
         Returns
         -------
         AuthorsPostResponse
-            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failded search response according to the defined schema.
+            Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
         --------
