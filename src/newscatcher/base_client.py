@@ -23,7 +23,7 @@ from .aggregation.client import AsyncAggregationClient
 from .subscription.client import AsyncSubscriptionClient
 
 
-class NewscatcherApi:
+class BaseNewscatcherApi:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
@@ -91,7 +91,7 @@ class NewscatcherApi:
         self.subscription = SubscriptionClient(client_wrapper=self._client_wrapper)
 
 
-class AsyncNewscatcherApi:
+class AsyncBaseNewscatcherApi:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
