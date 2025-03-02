@@ -450,7 +450,7 @@ class AggregationClient:
         Returns
         -------
         AggregationGetResponse
-            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failded aggregation response according to the defined schema.
+            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
         --------
@@ -652,7 +652,7 @@ class AggregationClient:
         title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
         title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
         content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
-        content_sentient_max: typing.Optional[ContentSentimentMax] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
         iptc_tags: typing.Optional[IptcTags] = OMIT,
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         aggregation_by: typing.Optional[AggregationBy] = OMIT,
@@ -741,7 +741,7 @@ class AggregationClient:
 
         content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        content_sentient_max : typing.Optional[ContentSentimentMax]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         iptc_tags : typing.Optional[IptcTags]
 
@@ -755,7 +755,7 @@ class AggregationClient:
         Returns
         -------
         AggregationPostResponse
-            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failded aggregation response according to the defined schema.
+            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
         --------
@@ -851,7 +851,7 @@ class AggregationClient:
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
-                "content_sentient_max": content_sentient_max,
+                "content_sentiment_max": content_sentiment_max,
                 "iptc_tags": convert_and_respect_annotation_metadata(
                     object_=iptc_tags, annotation=IptcTags, direction="write"
                 ),
@@ -1330,7 +1330,7 @@ class AsyncAggregationClient:
         Returns
         -------
         AggregationGetResponse
-            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failded aggregation response according to the defined schema.
+            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
         --------
@@ -1539,7 +1539,7 @@ class AsyncAggregationClient:
         title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
         title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
         content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
-        content_sentient_max: typing.Optional[ContentSentimentMax] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
         iptc_tags: typing.Optional[IptcTags] = OMIT,
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         aggregation_by: typing.Optional[AggregationBy] = OMIT,
@@ -1628,7 +1628,7 @@ class AsyncAggregationClient:
 
         content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        content_sentient_max : typing.Optional[ContentSentimentMax]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         iptc_tags : typing.Optional[IptcTags]
 
@@ -1642,7 +1642,7 @@ class AsyncAggregationClient:
         Returns
         -------
         AggregationPostResponse
-            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failded aggregation response according to the defined schema.
+            A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
         --------
@@ -1745,7 +1745,7 @@ class AsyncAggregationClient:
                 "title_sentiment_min": title_sentiment_min,
                 "title_sentiment_max": title_sentiment_max,
                 "content_sentiment_min": content_sentiment_min,
-                "content_sentient_max": content_sentient_max,
+                "content_sentiment_max": content_sentiment_max,
                 "iptc_tags": convert_and_respect_annotation_metadata(
                     object_=iptc_tags, annotation=IptcTags, direction="write"
                 ),
