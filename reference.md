@@ -3633,7 +3633,6 @@ Formats with examples:
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
 - English phrases: `1 day ago`, `today`
-
     
 </dd>
 </dl>
@@ -3651,7 +3650,6 @@ Formats with examples:
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
 - English phrases: `1 day ago`, `today`
-
     
 </dd>
 </dl>
