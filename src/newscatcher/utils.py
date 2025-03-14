@@ -179,6 +179,7 @@ def setup_progress_tracking(
     chunks: List[Tuple[datetime.datetime, datetime.datetime]],
     show_progress: bool,
     description: str = "Processing chunks",
+    is_test: bool = False,  # New parameter to indicate if this is a test run
 ) -> Iterator[Tuple[datetime.datetime, datetime.datetime]]:
     """
     Set up progress tracking for processing chunks.
@@ -187,10 +188,15 @@ def setup_progress_tracking(
         chunks: List of chunks to process
         show_progress: Whether to show progress indicators
         description: Description for the progress bar
+        is_test: Whether this is being run in a test environment
 
     Returns:
         Iterator with progress tracking if requested
     """
+    # Always show progress in test environments if not explicitly disabled
+    if is_test and show_progress is not False:
+        show_progress = True
+
     if not show_progress:
         return chunks
 

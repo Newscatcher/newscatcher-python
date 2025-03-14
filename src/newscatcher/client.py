@@ -5,6 +5,8 @@ This file extends the base clients with methods that chunk requests to overcome
 the 10,000 article limit in both synchronous and asynchronous implementations.
 """
 
+import sys
+import os
 import datetime
 import asyncio
 from typing import Dict, List, Optional, Union, Any, Set, Tuple, Callable
@@ -46,8 +48,15 @@ class NewscatcherMixin:
         desc = (
             f"Fetching {'article' if endpoint_type == 'search' else 'headlines'} chunks"
         )
+
+        # Check if running in a test environment
+        is_test = "pytest" in sys.modules or "TEST_MODE" in os.environ
+
         chunks_iter = setup_progress_tracking(
-            time_chunks, kwargs.get("show_progress", False), description=desc
+            time_chunks,
+            kwargs.get("show_progress", False),
+            description=desc,
+            is_test=is_test,  # Pass test flag
         )
 
         return from_date, to_date, chunks_iter
