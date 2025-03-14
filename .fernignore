@@ -4,4 +4,7 @@ LICENSE
 # Ignore custom SDK code
 src/newscatcher/client.py
 src/newscatcher/utils.py
-tests/custom/test_client.py
+
+# Custom tests
+tests/custom
+tests/integration
