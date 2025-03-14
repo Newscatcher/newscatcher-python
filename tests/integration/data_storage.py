@@ -1,0 +1,247 @@
+"""
+Test data storage utility for Newscatcher SDK.
+
+This module provides utilities for saving and loading API responses for testing.
+It supports caching responses to reduce API calls during development and testing.
+"""
+
+import os
+import json
+import hashlib
+import datetime
+from pathlib import Path
+from typing import Dict, Any, Optional, Union
+
+# Type aliases
+ResponseData = Dict[str, Any]
+
+
+class DataManager:
+    """
+    Manager for test data storage and retrieval.
+
+    This class handles saving and loading API responses for testing purposes,
+    enabling caching of responses to reduce API calls during development.
+    """
+
+    def __init__(self, data_dir: str = "./tests/data"):
+        """
+        Initialize the DataManager.
+
+        Args:
+            data_dir: Directory to store cached API responses
+        """
+        self.data_dir = Path(data_dir)
+
+        # Create the data directory if it doesn't exist
+        if not self.data_dir.exists():
+            self.data_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create subdirectories for different endpoints
+        for endpoint in ["search", "latestheadlines", "other"]:
+            endpoint_dir = self.data_dir / endpoint
+            if not endpoint_dir.exists():
+                endpoint_dir.mkdir(exist_ok=True)
+
+    def _generate_cache_key(self, endpoint: str, params: Dict[str, Any]) -> str:
+        """
+        Generate a unique cache key for the request parameters.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+            params: Request parameters
+
+        Returns:
+            A unique cache key for the parameters
+        """
+        # Create a string representation of the parameters
+        param_str = json.dumps(params, sort_keys=True)
+
+        # Generate a hash of the parameters
+        param_hash = hashlib.md5(param_str.encode()).hexdigest()
+
+        return param_hash
+
+    def get_cache_path(self, endpoint: str, params: Dict[str, Any]) -> Path:
+        """
+        Get the cache file path for the request parameters.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+            params: Request parameters
+
+        Returns:
+            Path to the cache file
+        """
+        cache_key = self._generate_cache_key(endpoint, params)
+
+        # Use a subdirectory for the endpoint
+        if endpoint in ["search", "latestheadlines"]:
+            endpoint_dir = self.data_dir / endpoint
+        else:
+            endpoint_dir = self.data_dir / "other"
+
+        return endpoint_dir / f"{cache_key}.json"
+
+    def save_response(
+        self,
+        endpoint: str,
+        params: Dict[str, Any],
+        response: ResponseData,
+        expiry_days: int = 7,
+    ) -> Path:
+        """
+        Save an API response to the cache.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+            params: Request parameters
+            response: API response data
+            expiry_days: Number of days until the cache expires
+
+        Returns:
+            Path to the saved cache file
+        """
+        cache_path = self.get_cache_path(endpoint, params)
+
+        # Add metadata to the cached response
+        cache_data = {
+            "metadata": {
+                "endpoint": endpoint,
+                "params": params,
+                "cached_at": datetime.datetime.now().isoformat(),
+                "expires_at": (
+                    datetime.datetime.now() + datetime.timedelta(days=expiry_days)
+                ).isoformat(),
+            },
+            "response": response,
+        }
+
+        # Save to file
+        with open(cache_path, "w") as f:
+            json.dump(cache_data, f, indent=2)
+
+        return cache_path
+
+    def load_response(
+        self, endpoint: str, params: Dict[str, Any], ignore_expiry: bool = False
+    ) -> Optional[ResponseData]:
+        """
+        Load an API response from the cache.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+            params: Request parameters
+            ignore_expiry: Whether to ignore the cache expiry date
+
+        Returns:
+            Cached API response or None if not found or expired
+        """
+        cache_path = self.get_cache_path(endpoint, params)
+
+        # Check if cache file exists
+        if not cache_path.exists():
+            return None
+
+        # Load from file
+        with open(cache_path, "r") as f:
+            cache_data = json.load(f)
+
+        # Check if cache is expired
+        if not ignore_expiry:
+            expires_at = datetime.datetime.fromisoformat(
+                cache_data["metadata"]["expires_at"]
+            )
+            if datetime.datetime.now() > expires_at:
+                return None
+
+        return cache_data["response"]
+
+    def clear_cache(self, endpoint: Optional[str] = None) -> int:
+        """
+        Clear the cache for a specific endpoint or all endpoints.
+
+        Args:
+            endpoint: Optional endpoint to clear cache for,
+                     if None, clears all cache
+
+        Returns:
+            Number of cache files removed
+        """
+        count = 0
+
+        if endpoint:
+            # Clear cache for specific endpoint
+            if endpoint in ["search", "latestheadlines"]:
+                endpoint_dir = self.data_dir / endpoint
+            else:
+                endpoint_dir = self.data_dir / "other"
+
+            if endpoint_dir.exists():
+                for cache_file in endpoint_dir.glob("*.json"):
+                    cache_file.unlink()
+                    count += 1
+        else:
+            # Clear all cache
+            for endpoint_dir in self.data_dir.glob("*"):
+                if endpoint_dir.is_dir():
+                    for cache_file in endpoint_dir.glob("*.json"):
+                        cache_file.unlink()
+                        count += 1
+
+        return count
+
+    def get_all_responses(
+        self, endpoint: Optional[str] = None
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Get all cached responses for a specific endpoint or all endpoints.
+
+        Args:
+            endpoint: Optional endpoint to get responses for,
+                    if None, gets all responses
+
+        Returns:
+            Dictionary of cache keys to cached responses
+        """
+        responses = {}
+
+        if endpoint:
+            # Get responses for specific endpoint
+            if endpoint in ["search", "latestheadlines"]:
+                endpoint_dir = self.data_dir / endpoint
+            else:
+                endpoint_dir = self.data_dir / "other"
+
+            if endpoint_dir.exists():
+                for cache_file in endpoint_dir.glob("*.json"):
+                    with open(cache_file, "r") as f:
+                        responses[cache_file.stem] = json.load(f)
+        else:
+            # Get all responses
+            for endpoint_dir in self.data_dir.glob("*"):
+                if endpoint_dir.is_dir():
+                    for cache_file in endpoint_dir.glob("*.json"):
+                        with open(cache_file, "r") as f:
+                            responses[cache_file.stem] = json.load(f)
+
+        return responses
+
+
+# Convenience function to get a data manager instance
+def get_data_manager(data_dir: Optional[str] = None) -> DataManager:
+    """
+    Get a DataManager instance.
+
+    Args:
+        data_dir: Optional directory to store cached API responses
+
+    Returns:
+        DataManager instance
+    """
+    if data_dir:
+        return DataManager(data_dir)
+
+    # Try to get directory from environment
+    data_dir = os.environ.get("TEST_DATA_DIR", "./tests/data")
+    return DataManager(data_dir)
