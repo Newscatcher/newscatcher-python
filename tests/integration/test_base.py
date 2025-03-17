@@ -10,7 +10,8 @@ import sys
 import json
 import pytest
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union, ClassVar, Type
+
 from pathlib import Path
 
 # Set up logging
@@ -22,7 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 # Import required modules
 try:
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv  # type: ignore
 
     # Try to load from .env file in various locations
     env_paths = [".env", "../.env", "../../.env"]
@@ -48,8 +49,16 @@ from newscatcher import NewscatcherApi, AsyncNewscatcherApi
 class TestBase:
     """Base class for Newscatcher integration tests."""
 
+    # Declare class variables with type annotations
+    api_key: ClassVar[Optional[str]]
+    timeout: ClassVar[int]
+    test_mode: ClassVar[str]
+    test_data_dir: ClassVar[str]
+    data_manager: ClassVar[DataManager]
+    client: ClassVar[Optional[NewscatcherApi]]
+
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test environment."""
         # Get API key from environment
         cls.api_key = os.environ.get("NEWSCATCHER_API_KEY")
@@ -83,6 +92,7 @@ class TestBase:
             )
         else:
             logger.warning("No API key found - tests will be skipped")
+            cls.client = None
 
     def run_test_with_cache(
         self,
@@ -157,24 +167,41 @@ class TestBase:
                 return mock_response
 
         # No cache or mock, make a real API call
-        if not hasattr(self, "client") or (
-            self.test_mode != "mock" and not self.api_key
+        if (
+            not hasattr(self, "client")
+            or self.client is None
+            or (self.test_mode != "mock" and not self.api_key)
         ):
             pytest.skip("No API key available for live tests")
 
         try:
             # Get the method to call
-            method = getattr(getattr(self.client, endpoint), method_name)
+            if self.client is not None:
+                endpoint_obj = getattr(self.client, endpoint, None)
+                if endpoint_obj is not None:
+                    method = getattr(endpoint_obj, method_name, None)
+                    if method is not None:
+                        # Make the API call
+                        logger.info(f"Making live API call to {endpoint}")
+                        response = method(**params)
 
-            # Make the API call
-            logger.info(f"Making live API call to {endpoint}")
-            response = method(**params)
+                        # Cache the response if test mode is cache
+                        if self.test_mode == "cache" or use_cache:
+                            self.data_manager.save_response(endpoint, params, response)
 
-            # Cache the response if test mode is cache
-            if self.test_mode == "cache" or use_cache:
-                self.data_manager.save_response(endpoint, params, response)
+                        return response
+                    else:
+                        raise AttributeError(
+                            f"Method {method_name} not found on {endpoint}"
+                        )
+                else:
+                    raise AttributeError(f"Endpoint {endpoint} not found on client")
+            else:
+                pytest.skip("Client is not initialized")
 
-            return response
+            # This return is to satisfy the type checker
+            return {}
+
         except Exception as e:
             logger.error(f"Error making API call to {endpoint}: {str(e)}")
             if self.test_mode == "mock":
@@ -200,8 +227,16 @@ class TestBase:
 class AsyncTestBase:
     """Base class for asynchronous Newscatcher integration tests."""
 
+    # Declare class variables with type annotations
+    api_key: ClassVar[Optional[str]]
+    timeout: ClassVar[int]
+    test_mode: ClassVar[str]
+    test_data_dir: ClassVar[str]
+    data_manager: ClassVar[DataManager]
+    client: ClassVar[Optional[AsyncNewscatcherApi]]
+
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test environment."""
         # Get API key from environment
         cls.api_key = os.environ.get("NEWSCATCHER_API_KEY")
@@ -235,6 +270,7 @@ class AsyncTestBase:
             )
         else:
             logger.warning("No API key found for async tests - tests will be skipped")
+            cls.client = None
 
     async def run_test_with_cache(
         self,
@@ -309,24 +345,41 @@ class AsyncTestBase:
                 return mock_response
 
         # No cache or mock, make a real API call
-        if not hasattr(self, "client") or (
-            self.test_mode != "mock" and not self.api_key
+        if (
+            not hasattr(self, "client")
+            or self.client is None
+            or (self.test_mode != "mock" and not self.api_key)
         ):
             pytest.skip("No API key available for async live tests")
 
         try:
             # Get the method to call
-            method = getattr(getattr(self.client, endpoint), method_name)
+            if self.client is not None:
+                endpoint_obj = getattr(self.client, endpoint, None)
+                if endpoint_obj is not None:
+                    method = getattr(endpoint_obj, method_name, None)
+                    if method is not None:
+                        # Make the API call
+                        logger.info(f"Making async live API call to {endpoint}")
+                        response = await method(**params)
 
-            # Make the API call
-            logger.info(f"Making async live API call to {endpoint}")
-            response = await method(**params)
+                        # Cache the response if test mode is cache
+                        if self.test_mode == "cache" or use_cache:
+                            self.data_manager.save_response(endpoint, params, response)
 
-            # Cache the response if test mode is cache
-            if self.test_mode == "cache" or use_cache:
-                self.data_manager.save_response(endpoint, params, response)
+                        return response
+                    else:
+                        raise AttributeError(
+                            f"Method {method_name} not found on {endpoint}"
+                        )
+                else:
+                    raise AttributeError(f"Endpoint {endpoint} not found on client")
+            else:
+                pytest.skip("Async client is not initialized")
 
-            return response
+            # This return is to satisfy the type checker
+            return {}
+
         except Exception as e:
             logger.error(f"Error making async API call to {endpoint}: {str(e)}")
             if self.test_mode == "mock":
