@@ -9,5 +9,5 @@ src/newscatcher/utils.py
 # Custom tests
 tests/custom
 tests/integration
-
+test-mock-mode.sh
 .env.template
