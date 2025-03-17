@@ -29,7 +29,7 @@ def load_env_file(env_path: Optional[str] = None) -> None:
         env_path: Optional path to .env file
     """
     try:
-        from dotenv import load_dotenv
+        from dotenv import load_dotenv  # type: ignore
 
         if env_path and os.path.exists(env_path):
             load_dotenv(env_path)
