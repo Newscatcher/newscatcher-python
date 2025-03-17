@@ -163,3 +163,4 @@ cython_debug/
 
 # Newscatcher test data
 tests/data/
+tests/mocks/
