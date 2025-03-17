@@ -1,6 +1,7 @@
-name: ci
+name: Newscatcher SDK CI/CD
 
-on: [push]
+on: [push, pull_request]
+
 jobs:
   compile:
     runs-on: ubuntu-20.04
@@ -15,10 +16,15 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
-        run: poetry install
+        run: |
+          # Install the base dependencies through poetry
+          poetry install
+          # Install additional dependencies directly for the CI process
+          pip install types-tqdm python-dotenv python-dateutil tqdm types-python-dateutil
       - name: Compile
         run: poetry run mypy .
-  test:
+
+  test-utils:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repo
@@ -32,12 +38,42 @@ jobs:
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
         run: poetry install
-
-      - name: Test
+      - name: Test utils
         run: poetry run pytest -rP tests/utils
 
+  test-custom:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install the package in development mode
+          pip install -e .
+          # Install test dependencies
+          pip install pytest pytest-asyncio
+          # Install additional dependencies
+          pip install python-dateutil tqdm python-dotenv
+      - name: Generate mock data
+        run: |
+          # Create mocks directory
+          mkdir -p tests/mocks
+          # Run the mock data generation script
+          python -c "$(cat test-mock-mode.sh | sed -n '/python -c/,/EOF/p' | grep -v 'python -c' | grep -v EOF)"
+      - name: Run custom tests
+        env:
+          NEWSCATCHER_API_KEY: ${{ secrets.NEWSCATCHER_API_KEY }}
+          TEST_MODE: "mock" # Use mock mode in CI
+        run: |
+          pytest tests/custom tests/integration -v
+
   publish:
-    needs: [compile, test]
+    needs: [compile, test-utils, test-custom]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-20.04
     steps:
