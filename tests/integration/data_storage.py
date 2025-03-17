@@ -109,6 +109,42 @@ class DataManager:
         """
         cache_path = self.get_cache_path(endpoint, params)
 
+        # Convert response to a serializable format if it's not already
+        serializable_response = response
+        if not isinstance(response, dict) and not isinstance(response, list):
+            # Try to convert object to dict using various methods
+            try:
+                # Method 1: Try __dict__ attribute if available
+                if hasattr(response, "__dict__"):
+                    serializable_response = {**response.__dict__}
+                # Method 2: Try to_dict method if available
+                elif hasattr(response, "to_dict") and callable(
+                    getattr(response, "to_dict")
+                ):
+                    serializable_response = response.to_dict()
+                # Method 3: Extract public attributes
+                else:
+                    serializable_response = {}
+                    for attr in dir(response):
+                        if not attr.startswith("_") and not callable(
+                            getattr(response, attr)
+                        ):
+                            try:
+                                value = getattr(response, attr)
+                                # Check if the value is JSON serializable
+                                json.dumps({attr: value})
+                                serializable_response[attr] = value
+                            except (TypeError, OverflowError):
+                                # Skip attributes that can't be serialized
+                                serializable_response[attr] = str(value)
+            except Exception as e:
+                # Fallback to string representation if all else fails
+                serializable_response = {
+                    "error": f"Could not serialize response: {str(e)}",
+                    "response_type": str(type(response)),
+                    "string_representation": str(response),
+                }
+
         # Add metadata to the cached response
         cache_data = {
             "metadata": {
@@ -119,12 +155,24 @@ class DataManager:
                     datetime.datetime.now() + datetime.timedelta(days=expiry_days)
                 ).isoformat(),
             },
-            "response": response,
+            "response": serializable_response,
         }
 
         # Save to file
-        with open(cache_path, "w") as f:
-            json.dump(cache_data, f, indent=2)
+        try:
+            with open(cache_path, "w") as f:
+                json.dump(cache_data, f, indent=2)
+        except (TypeError, OverflowError) as e:
+            # If we still can't serialize, save a simplified version
+            simplified_cache_data = {
+                "metadata": cache_data["metadata"],
+                "response": {
+                    "error": f"Failed to serialize response: {str(e)}",
+                    "response_type": str(type(response)),
+                },
+            }
+            with open(cache_path, "w") as f:
+                json.dump(simplified_cache_data, f, indent=2)
 
         return cache_path
 
