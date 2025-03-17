@@ -1,2 +1,17 @@
 LICENSE
 .gitignore
+README.md
+
+# Ignore custom SDK code
+src/newscatcher/client.py
+src/newscatcher/utils.py
+
+# Custom tests
+tests/custom
+tests/integration
+test-mock-mode.sh
+.env.template
+mypy.ini
+
+# CI/CD
+ci.yml
