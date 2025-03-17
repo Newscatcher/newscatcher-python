@@ -32,10 +32,15 @@ class DataManager:
             data_dir: Directory to store cached API responses
         """
         self.data_dir = Path(data_dir)
+        self.mock_dir = Path("tests/mocks")
 
         # Create the data directory if it doesn't exist
         if not self.data_dir.exists():
             self.data_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create the mocks directory if it doesn't exist
+        if not self.mock_dir.exists():
+            self.mock_dir.mkdir(parents=True, exist_ok=True)
 
         # Create subdirectories for different endpoints
         for endpoint in ["search", "latestheadlines", "other"]:
@@ -141,6 +146,12 @@ class DataManager:
 
         # Check if cache file exists
         if not cache_path.exists():
+            # Try to load from mock data as fallback
+            mock_path = self.mock_dir / f"{endpoint}.json"
+            if mock_path.exists():
+                with open(mock_path, "r") as f:
+                    mock_data = json.load(f)
+                    return mock_data
             return None
 
         # Load from file
@@ -156,6 +167,93 @@ class DataManager:
                 return None
 
         return cache_data["response"]
+
+    def save_mock_response(self, endpoint: str, response: ResponseData) -> Path:
+        """
+        Save a mock response for an endpoint.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+            response: Mock response data
+
+        Returns:
+            Path to the saved mock file
+        """
+        mock_path = self.mock_dir / f"{endpoint}.json"
+
+        # Save to file
+        with open(mock_path, "w") as f:
+            json.dump(response, f, indent=2)
+
+        return mock_path
+
+    def load_mock_response(self, endpoint: str) -> Optional[ResponseData]:
+        """
+        Load a mock response for an endpoint.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+
+        Returns:
+            Mock response or None if not found
+        """
+        mock_path = self.mock_dir / f"{endpoint}.json"
+
+        # Check if mock file exists
+        if not mock_path.exists():
+            return None
+
+        # Load from file
+        with open(mock_path, "r") as f:
+            return json.load(f)
+
+    def generate_mock_response(self, endpoint: str) -> ResponseData:
+        """
+        Generate a mock response for an endpoint.
+
+        Args:
+            endpoint: API endpoint (search, latestheadlines, etc.)
+
+        Returns:
+            Generated mock response
+        """
+        # Create a simple mock response based on the endpoint
+        mock_response = {
+            "status": "ok",
+            "total_hits": 100,
+            "total_pages": 2,
+            "page": 1,
+            "page_size": 50,
+            "articles": [
+                {
+                    "id": f"mock1_{endpoint}",
+                    "title": f"Mock {endpoint.title()} 1",
+                    "summary": f"This is a mock summary for {endpoint} 1",
+                    "published_date": "2025-03-15T12:00:00Z",
+                    "link": f"https://example.com/{endpoint}/1",
+                    "language": "en",
+                    "author": "Mock Author",
+                    "authors": ["Mock Author"],
+                    "score": 0.95,
+                },
+                {
+                    "id": f"mock2_{endpoint}",
+                    "title": f"Mock {endpoint.title()} 2",
+                    "summary": f"This is a mock summary for {endpoint} 2",
+                    "published_date": "2025-03-16T12:00:00Z",
+                    "link": f"https://example.com/{endpoint}/2",
+                    "language": "en",
+                    "author": "Mock Author 2",
+                    "authors": ["Mock Author 2"],
+                    "score": 0.92,
+                },
+            ],
+        }
+
+        # Save the mock response for future use
+        self.save_mock_response(endpoint, mock_response)
+
+        return mock_response
 
     def clear_cache(self, endpoint: Optional[str] = None) -> int:
         """
@@ -188,6 +286,22 @@ class DataManager:
                     for cache_file in endpoint_dir.glob("*.json"):
                         cache_file.unlink()
                         count += 1
+
+        return count
+
+    def clear_mocks(self) -> int:
+        """
+        Clear all mock responses.
+
+        Returns:
+            Number of mock files removed
+        """
+        count = 0
+
+        if self.mock_dir.exists():
+            for mock_file in self.mock_dir.glob("*.json"):
+                mock_file.unlink()
+                count += 1
 
         return count
 
