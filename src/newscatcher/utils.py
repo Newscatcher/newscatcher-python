@@ -203,8 +203,8 @@ def setup_progress_tracking(
     total_chunks = len(chunks)
 
     try:
-        # Try to use tqdm if available
-        from tqdm import tqdm
+        # Try to use tqdm if available, with type ignore for import
+        from tqdm import tqdm  # type: ignore
 
         return tqdm(chunks, desc=description, total=total_chunks)
     except ImportError:
