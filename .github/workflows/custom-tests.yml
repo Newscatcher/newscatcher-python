@@ -1,0 +1,29 @@
+name: Custom Tests
+
+on: [push, pull_request]
+
+jobs:
+  custom-tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install the package in development mode
+          pip install -e .
+          # Install test dependencies
+          pip install pytest pytest-asyncio
+          # Install additional dependencies
+          pip install python-dateutil tqdm
+      - name: Run custom tests
+        env:
+          NEWSCATCHER_API_KEY: ${{ secrets.NEWSCATCHER_API_KEY }}
+          TEST_MODE: "mock" # Use mock mode in CI
+        run: |
+          pytest tests/custom tests/integration -v
