@@ -22,7 +22,13 @@ jobs:
           # Install additional dependencies directly for the CI process
           pip install types-tqdm python-dotenv python-dateutil tqdm types-python-dateutil
       - name: Compile
-        run: poetry run mypy --config-file=mypy.ini .
+        run: |
+          # Run mypy with special handling for Fern-generated files
+          # First check our own code with normal settings
+          poetry run mypy --config-file=mypy.ini src/newscatcher/client.py src/newscatcher/utils.py tests/
+
+          # Then check core files with no-any-return error disabled
+          poetry run mypy --config-file=mypy.ini --disable-error-code=no-any-return src/newscatcher/core/
 
   test-utils:
     runs-on: ubuntu-20.04

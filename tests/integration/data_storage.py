@@ -10,7 +10,7 @@ import json
 import hashlib
 import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
+from typing import Dict, Any, Optional, Union, cast, List
 
 # Type aliases
 ResponseData = Dict[str, Any]
@@ -92,7 +92,7 @@ class DataManager:
         self,
         endpoint: str,
         params: Dict[str, Any],
-        response: ResponseData,
+        response: Any,
         expiry_days: int = 7,
     ) -> Path:
         """
@@ -110,8 +110,12 @@ class DataManager:
         cache_path = self.get_cache_path(endpoint, params)
 
         # Convert response to a serializable format if it's not already
-        serializable_response = response
-        if not isinstance(response, dict) and not isinstance(response, list):
+        serializable_response: Dict[str, Any] = {}
+        if isinstance(response, dict):
+            serializable_response = response
+        elif isinstance(response, list):
+            serializable_response = {"items": response}
+        else:
             # Try to convert object to dict using various methods
             try:
                 # Method 1: Try __dict__ attribute if available
@@ -124,7 +128,6 @@ class DataManager:
                     serializable_response = response.to_dict()
                 # Method 3: Extract public attributes
                 else:
-                    serializable_response = {}
                     for attr in dir(response):
                         if not attr.startswith("_") and not callable(
                             getattr(response, attr)
@@ -199,7 +202,7 @@ class DataManager:
             if mock_path.exists():
                 with open(mock_path, "r") as f:
                     mock_data = json.load(f)
-                    return mock_data
+                    return cast(ResponseData, mock_data)
             return None
 
         # Load from file
@@ -214,7 +217,7 @@ class DataManager:
             if datetime.datetime.now() > expires_at:
                 return None
 
-        return cache_data["response"]
+        return cast(ResponseData, cache_data["response"])
 
     def save_mock_response(self, endpoint: str, response: ResponseData) -> Path:
         """
@@ -253,7 +256,7 @@ class DataManager:
 
         # Load from file
         with open(mock_path, "r") as f:
-            return json.load(f)
+            return cast(ResponseData, json.load(f))
 
     def generate_mock_response(self, endpoint: str) -> ResponseData:
         """
@@ -266,7 +269,7 @@ class DataManager:
             Generated mock response
         """
         # Create a simple mock response based on the endpoint
-        mock_response = {
+        mock_response: ResponseData = {
             "status": "ok",
             "total_hits": 100,
             "total_pages": 2,
@@ -366,7 +369,7 @@ class DataManager:
         Returns:
             Dictionary of cache keys to cached responses
         """
-        responses = {}
+        responses: Dict[str, Dict[str, Any]] = {}
 
         if endpoint:
             # Get responses for specific endpoint

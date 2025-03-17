@@ -6,9 +6,11 @@ progress tracking, and formatting that are used by the Newscatcher client.
 """
 
 import datetime
-from typing import List, Tuple, Union, Iterator, Optional, Dict, Any, Set
+from typing import List, Tuple, Union, Iterator, Optional, Dict, Any, Set, TypeVar, cast
 from dateutil.parser import parse as parse_date
 from dateutil.relativedelta import relativedelta
+
+T = TypeVar("T")
 
 
 def parse_time_parameters(
@@ -206,7 +208,11 @@ def setup_progress_tracking(
         # Try to use tqdm if available, with type ignore for import
         from tqdm import tqdm  # type: ignore
 
-        return tqdm(chunks, desc=description, total=total_chunks)
+        # Use cast to help mypy understand the return type
+        return cast(
+            Iterator[Tuple[datetime.datetime, datetime.datetime]],
+            tqdm(chunks, desc=description, total=total_chunks),
+        )
     except ImportError:
         # Fall back to simple terminal output
         print(f"{description}: {total_chunks} chunks")
@@ -214,7 +220,7 @@ def setup_progress_tracking(
             print(f"Processing chunk 1/{total_chunks}...", end="", flush=True)
 
         # Create a wrapper to provide progress updates
-        def progress_wrapper():
+        def progress_wrapper() -> Iterator[Tuple[datetime.datetime, datetime.datetime]]:
             for i, chunk in enumerate(chunks):
                 yield chunk
                 # Update progress

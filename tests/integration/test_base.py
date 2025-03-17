@@ -10,7 +10,7 @@ import sys
 import json
 import pytest
 import logging
-from typing import Dict, Any, Optional, Union, ClassVar, Type
+from typing import Dict, Any, Optional, Union, ClassVar, Type, cast
 
 from pathlib import Path
 
@@ -122,7 +122,7 @@ class TestBase:
             cached_response = self.data_manager.load_response(endpoint, params)
             if cached_response:
                 logger.info(f"Using cached response for {endpoint}")
-                return cached_response
+                return cast(Dict[str, Any], cached_response)
 
         # If we're in mock mode and no cache, try to use mock data
         if self.test_mode == "mock":
@@ -133,13 +133,13 @@ class TestBase:
             if mock_path.exists():
                 with open(mock_path, "r") as f:
                     logger.info(f"Using mock data for {endpoint}")
-                    return json.load(f)
+                    return cast(Dict[str, Any], json.load(f))
             else:
                 # Create mocks directory if it doesn't exist
                 os.makedirs(mock_dir, exist_ok=True)
 
                 # Create a simple mock response
-                mock_response = {
+                mock_response: Dict[str, Any] = {
                     "status": "ok",
                     "total_hits": 100,
                     "total_pages": 2,
@@ -189,7 +189,17 @@ class TestBase:
                         if self.test_mode == "cache" or use_cache:
                             self.data_manager.save_response(endpoint, params, response)
 
-                        return response
+                        # Convert response to Dict[str, Any] if it's not already
+                        if isinstance(response, dict):
+                            return cast(Dict[str, Any], response)
+                        elif hasattr(response, "__dict__"):
+                            # Convert object to dictionary
+                            return cast(Dict[str, Any], response.__dict__)
+                        else:
+                            # Try to serialize to JSON and then back to dictionary
+                            return cast(
+                                Dict[str, Any], json.loads(json.dumps(response))
+                            )
                     else:
                         raise AttributeError(
                             f"Method {method_name} not found on {endpoint}"
@@ -199,14 +209,14 @@ class TestBase:
             else:
                 pytest.skip("Client is not initialized")
 
-            # This return is to satisfy the type checker
+            # This return is to satisfy the type checker - this line is not reachable
             return {}
 
         except Exception as e:
             logger.error(f"Error making API call to {endpoint}: {str(e)}")
             if self.test_mode == "mock":
                 # Create a simple mock response in case of error
-                return {
+                mock_error_response: Dict[str, Any] = {
                     "status": "ok",
                     "total_hits": 10,
                     "total_pages": 1,
@@ -220,6 +230,7 @@ class TestBase:
                         }
                     ],
                 }
+                return mock_error_response
             else:
                 raise
 
@@ -300,7 +311,7 @@ class AsyncTestBase:
             cached_response = self.data_manager.load_response(endpoint, params)
             if cached_response:
                 logger.info(f"Using cached response for {endpoint}")
-                return cached_response
+                return cast(Dict[str, Any], cached_response)
 
         # If we're in mock mode and no cache, try to use mock data
         if self.test_mode == "mock":
@@ -311,13 +322,13 @@ class AsyncTestBase:
             if mock_path.exists():
                 with open(mock_path, "r") as f:
                     logger.info(f"Using mock data for {endpoint}")
-                    return json.load(f)
+                    return cast(Dict[str, Any], json.load(f))
             else:
                 # Create mocks directory if it doesn't exist
                 os.makedirs(mock_dir, exist_ok=True)
 
                 # Create a simple mock response
-                mock_response = {
+                mock_response: Dict[str, Any] = {
                     "status": "ok",
                     "total_hits": 100,
                     "total_pages": 2,
@@ -367,7 +378,17 @@ class AsyncTestBase:
                         if self.test_mode == "cache" or use_cache:
                             self.data_manager.save_response(endpoint, params, response)
 
-                        return response
+                        # Convert response to Dict[str, Any] if it's not already
+                        if isinstance(response, dict):
+                            return cast(Dict[str, Any], response)
+                        elif hasattr(response, "__dict__"):
+                            # Convert object to dictionary
+                            return cast(Dict[str, Any], response.__dict__)
+                        else:
+                            # Try to serialize to JSON and then back to dictionary
+                            return cast(
+                                Dict[str, Any], json.loads(json.dumps(response))
+                            )
                     else:
                         raise AttributeError(
                             f"Method {method_name} not found on {endpoint}"
@@ -377,14 +398,14 @@ class AsyncTestBase:
             else:
                 pytest.skip("Async client is not initialized")
 
-            # This return is to satisfy the type checker
+            # This return is to satisfy the type checker - this line is not reachable
             return {}
 
         except Exception as e:
             logger.error(f"Error making async API call to {endpoint}: {str(e)}")
             if self.test_mode == "mock":
                 # Create a simple mock response in case of error
-                return {
+                mock_error_response: Dict[str, Any] = {
                     "status": "ok",
                     "total_hits": 10,
                     "total_pages": 1,
@@ -398,5 +419,6 @@ class AsyncTestBase:
                         }
                     ],
                 }
+                return mock_error_response
             else:
                 raise

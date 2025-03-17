@@ -12,3 +12,6 @@ tests/integration
 test-mock-mode.sh
 .env.template
 mypy.ini
+
+# CI/CD
+ci.yml
