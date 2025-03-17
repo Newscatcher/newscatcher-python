@@ -19,6 +19,7 @@ from .utils import (
     setup_progress_tracking,
     format_datetime,
     calculate_when_param,
+    safe_get_articles,
 )
 
 
@@ -232,29 +233,33 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                     q=q, from_=chunk_from, to=chunk_to, page=1, **request_params
                 )
 
-                # Process first page of results
-                processed_articles, current_count, should_continue = (
-                    self._process_articles(
-                        first_page_response.articles,
-                        seen_ids,
-                        deduplicate,
-                        max_articles,
-                        current_count,
-                    )
-                )
+                # Get articles safely
+                articles = safe_get_articles(first_page_response)
 
-                all_articles.extend(processed_articles)
+                # Default total_pages if we can't find articles
+                total_pages = getattr(first_page_response, "total_pages", 1)
 
-                # Stop if we've reached the limit
-                if not should_continue:
-                    if show_progress:
-                        print(
-                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                # Process articles if any were found
+                if articles:
+                    processed_articles, current_count, should_continue = (
+                        self._process_articles(
+                            articles,  # Use the safely retrieved articles
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
                         )
-                    break
+                    )
 
-                # Calculate total pages
-                total_pages = first_page_response.total_pages
+                    all_articles.extend(processed_articles)
+
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(
+                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                            )
+                        break
 
                 # If there are more pages, fetch them
                 if total_pages > 1:
@@ -268,26 +273,30 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                                 **request_params,
                             )
 
-                            # Process this page of results
-                            processed_articles, current_count, should_continue = (
-                                self._process_articles(
-                                    page_response.articles,
-                                    seen_ids,
-                                    deduplicate,
-                                    max_articles,
-                                    current_count,
-                                )
-                            )
+                            # Get articles safely from page response
+                            page_articles = safe_get_articles(page_response)
 
-                            all_articles.extend(processed_articles)
-
-                            # Stop if we've reached the limit
-                            if not should_continue:
-                                if show_progress:
-                                    print(
-                                        f"\nReached maximum article limit ({max_articles}). Stopping."
+                            # Process articles if any were found
+                            if page_articles:
+                                processed_articles, current_count, should_continue = (
+                                    self._process_articles(
+                                        page_articles,  # Use the safely retrieved articles
+                                        seen_ids,
+                                        deduplicate,
+                                        max_articles,
+                                        current_count,
                                     )
-                                break
+                                )
+
+                                all_articles.extend(processed_articles)
+
+                                # Stop if we've reached the limit
+                                if not should_continue:
+                                    if show_progress:
+                                        print(
+                                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                                        )
+                                    break
 
                         except Exception as e:
                             print(f"Error fetching page {page}: {str(e)}")
@@ -372,29 +381,33 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                     when=when_param, page=1, **request_params
                 )
 
-                # Process first page of results
-                processed_articles, current_count, should_continue = (
-                    self._process_articles(
-                        first_page_response.articles,
-                        seen_ids,
-                        deduplicate,
-                        max_articles,
-                        current_count,
-                    )
-                )
+                # Get articles safely
+                articles = safe_get_articles(first_page_response)
 
-                all_articles.extend(processed_articles)
+                # Default total_pages if we can't find articles
+                total_pages = getattr(first_page_response, "total_pages", 1)
 
-                # Stop if we've reached the limit
-                if not should_continue:
-                    if show_progress:
-                        print(
-                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                # Process articles if any were found
+                if articles:
+                    processed_articles, current_count, should_continue = (
+                        self._process_articles(
+                            articles,  # Use the safely retrieved articles
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
                         )
-                    break
+                    )
 
-                # Calculate total pages
-                total_pages = first_page_response.total_pages
+                    all_articles.extend(processed_articles)
+
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(
+                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                            )
+                        break
 
                 # If there are more pages, fetch them
                 if total_pages > 1:
@@ -404,26 +417,30 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                                 when=when_param, page=page, **request_params
                             )
 
-                            # Process this page of results
-                            processed_articles, current_count, should_continue = (
-                                self._process_articles(
-                                    page_response.articles,
-                                    seen_ids,
-                                    deduplicate,
-                                    max_articles,
-                                    current_count,
-                                )
-                            )
+                            # Get articles safely from page response
+                            page_articles = safe_get_articles(page_response)
 
-                            all_articles.extend(processed_articles)
-
-                            # Stop if we've reached the limit
-                            if not should_continue:
-                                if show_progress:
-                                    print(
-                                        f"\nReached maximum article limit ({max_articles}). Stopping."
+                            # Process articles if any were found
+                            if page_articles:
+                                processed_articles, current_count, should_continue = (
+                                    self._process_articles(
+                                        page_articles,  # Use the safely retrieved articles
+                                        seen_ids,
+                                        deduplicate,
+                                        max_articles,
+                                        current_count,
                                     )
-                                break
+                                )
+
+                                all_articles.extend(processed_articles)
+
+                                # Stop if we've reached the limit
+                                if not should_continue:
+                                    if show_progress:
+                                        print(
+                                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                                        )
+                                    break
 
                         except Exception as e:
                             print(f"Error fetching page {page}: {str(e)}")
@@ -536,7 +553,9 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
             # Process successful results
             for result in batch_results:
                 if not isinstance(result, Exception):
-                    all_articles.extend(result.articles)
+                    articles = safe_get_articles(result)
+                    if articles:
+                        all_articles.extend(articles)
                 else:
                     print(f"Error fetching a page: {str(result)}")
 
@@ -622,29 +641,33 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                     q=q, from_=chunk_from, to=chunk_to, page=1, **request_params
                 )
 
-                # Process first page of results
-                processed_articles, current_count, should_continue = (
-                    await self._process_articles(
-                        first_page_response.articles,
-                        seen_ids,
-                        deduplicate,
-                        max_articles,
-                        current_count,
-                    )
-                )
+                # Get articles safely
+                articles = safe_get_articles(first_page_response)
 
-                all_articles.extend(processed_articles)
+                # Default total_pages if we can't find articles
+                total_pages = getattr(first_page_response, "total_pages", 1)
 
-                # Stop if we've reached the limit
-                if not should_continue:
-                    if show_progress:
-                        print(
-                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                # Process articles if any were found
+                if articles:
+                    processed_articles, current_count, should_continue = (
+                        await self._process_articles(
+                            articles,  # Use the safely retrieved articles
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
                         )
-                    break
+                    )
 
-                # Calculate total pages
-                total_pages = first_page_response.total_pages
+                    all_articles.extend(processed_articles)
+
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(
+                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                            )
+                        break
 
                 # If there are more pages, fetch them concurrently
                 if total_pages > 1:
@@ -662,26 +685,27 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                     )
 
                     # Process the additional articles
-                    processed_articles, current_count, should_continue = (
-                        await self._process_articles(
-                            additional_articles,
-                            seen_ids,
-                            deduplicate,
-                            max_articles,
-                            current_count,
-                        )
-                    )
-
-                    # Add articles from additional pages
-                    all_articles.extend(processed_articles)
-
-                    # Stop processing chunks if we've reached the limit
-                    if not should_continue:
-                        if show_progress:
-                            print(
-                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                    if additional_articles:
+                        processed_articles, current_count, should_continue = (
+                            await self._process_articles(
+                                additional_articles,
+                                seen_ids,
+                                deduplicate,
+                                max_articles,
+                                current_count,
                             )
-                        break
+                        )
+
+                        # Add articles from additional pages
+                        all_articles.extend(processed_articles)
+
+                        # Stop processing chunks if we've reached the limit
+                        if not should_continue:
+                            if show_progress:
+                                print(
+                                    f"\nReached maximum article limit ({max_articles}). Stopping."
+                                )
+                            break
 
             except Exception as e:
                 print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
@@ -760,29 +784,33 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                     when=when_param, page=1, **request_params
                 )
 
-                # Process first page of results
-                processed_articles, current_count, should_continue = (
-                    await self._process_articles(
-                        first_page_response.articles,
-                        seen_ids,
-                        deduplicate,
-                        max_articles,
-                        current_count,
-                    )
-                )
+                # Get articles safely
+                articles = safe_get_articles(first_page_response)
 
-                all_articles.extend(processed_articles)
+                # Default total_pages if we can't find articles
+                total_pages = getattr(first_page_response, "total_pages", 1)
 
-                # Stop if we've reached the limit
-                if not should_continue:
-                    if show_progress:
-                        print(
-                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                # Process articles if any were found
+                if articles:
+                    processed_articles, current_count, should_continue = (
+                        await self._process_articles(
+                            articles,  # Use the safely retrieved articles
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
                         )
-                    break
+                    )
 
-                # Calculate total pages
-                total_pages = first_page_response.total_pages
+                    all_articles.extend(processed_articles)
+
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(
+                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                            )
+                        break
 
                 # If there are more pages, fetch them concurrently
                 if total_pages > 1:
@@ -795,26 +823,27 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                     )
 
                     # Process the additional articles
-                    processed_articles, current_count, should_continue = (
-                        await self._process_articles(
-                            additional_articles,
-                            seen_ids,
-                            deduplicate,
-                            max_articles,
-                            current_count,
-                        )
-                    )
-
-                    # Add articles from additional pages
-                    all_articles.extend(processed_articles)
-
-                    # Stop processing chunks if we've reached the limit
-                    if not should_continue:
-                        if show_progress:
-                            print(
-                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                    if additional_articles:
+                        processed_articles, current_count, should_continue = (
+                            await self._process_articles(
+                                additional_articles,
+                                seen_ids,
+                                deduplicate,
+                                max_articles,
+                                current_count,
                             )
-                        break
+                        )
+
+                        # Add articles from additional pages
+                        all_articles.extend(processed_articles)
+
+                        # Stop processing chunks if we've reached the limit
+                        if not should_continue:
+                            if show_progress:
+                                print(
+                                    f"\nReached maximum article limit ({max_articles}). Stopping."
+                                )
+                            break
 
             except Exception as e:
                 print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
