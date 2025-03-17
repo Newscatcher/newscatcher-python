@@ -22,7 +22,7 @@ jobs:
           # Install additional dependencies directly for the CI process
           pip install types-tqdm python-dotenv python-dateutil tqdm types-python-dateutil
       - name: Compile
-        run: poetry run mypy .
+        run: poetry run mypy --config-file=mypy.ini .
 
   test-utils:
     runs-on: ubuntu-20.04
