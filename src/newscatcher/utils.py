@@ -198,7 +198,7 @@ def setup_progress_tracking(
         show_progress = True
 
     if not show_progress:
-        return chunks
+        return iter(chunks)
 
     total_chunks = len(chunks)
 
@@ -268,3 +268,32 @@ def calculate_when_param(
         when_param = f"{when_value}h"
 
     return when_param
+
+
+def safe_get_articles(response):
+    """
+    Safely extract articles from a response object, handling different response types.
+
+    Args:
+        response: API response which might be SearchResponseDto, ClusteredSearchResponseDto,
+                 or another type
+
+    Returns:
+        List of articles or empty list if no articles are found
+    """
+    if not response:
+        return []
+
+    if hasattr(response, "articles") and response.articles is not None:
+        return response.articles
+
+    # For ClusteredSearchResponseDto, articles might be in clusters
+    if hasattr(response, "clusters") and response.clusters is not None:
+        all_articles = []
+        for cluster in response.clusters:
+            if hasattr(cluster, "articles") and cluster.articles is not None:
+                all_articles.extend(cluster.articles)
+        return all_articles
+
+    # If no articles found, return empty list
+    return []
