@@ -1,5 +1,6 @@
 LICENSE
 .gitignore
+README.md
 
 # Ignore custom SDK code
 src/newscatcher/client.py

@@ -95,6 +95,51 @@ except ApiError as e:
     print(e.body)
 ```
 
+## Retrieving More Articles
+
+The standard News API endpoints have a limit of 10,000 articles per query. To help retrieve more articles when needed, this SDK provides methods that automatically break down your request into smaller time chunks:
+
+### Get All Articles
+
+```python
+import datetime
+from newscatcher import NewscatcherApi
+
+client = NewscatcherApi(api_key="YOUR_API_KEY")
+
+# Get articles about renewable energy from the past 10 days
+articles = client.get_all_articles(
+    q="renewable energy",
+    from_="10d",  # Last 10 days
+    time_chunk_size="1d",  # Split into 1-day chunks
+    max_articles=50000,    # Limit to 50,000 articles
+    show_progress=True     # Show progress indicator
+)
+
+print(f"Retrieved {len(articles)} articles")
+```
+
+### Get All Latest Headlines
+
+```python
+from newscatcher import NewscatcherApi
+
+client = NewscatcherApi(api_key="YOUR_API_KEY")
+
+# Get all technology headlines from the past week
+articles = client.get_all_headlines(
+    when="7d",
+    time_chunk_size="1h",  # Split into 1-hour chunks
+    show_progress=True
+)
+
+print(f"Retrieved {len(articles)} articles")
+```
+
+These methods handle pagination and deduplication automatically, providing a seamless experience for retrieving large datasets.
+
+The async versions of these methods are also available with the `AsyncNewscatcherApi` client.
+
 ## Advanced
 
 ### Retries
@@ -141,6 +186,7 @@ client.search.post(..., request_options={
 
 You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
 and transports.
+
 ```python
 import httpx
 from newscatcher import NewscatcherApi
