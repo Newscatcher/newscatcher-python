@@ -9,9 +9,10 @@ src/newscatcher/utils.py
 # Custom tests
 tests/custom
 tests/integration
+tests/__init__.py
 test-mock-mode.sh
 .env.template
 mypy.ini
 
 # CI/CD
-ci.yml
+.github/workflows/ci.yml
