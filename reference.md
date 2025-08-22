@@ -36,6 +36,8 @@ client = NewscatcherApi(
 )
 client.search.get(
     q="technology AND (Apple OR Microsoft) NOT Google",
+    search_in="title_content, title_content_translated",
+    include_translation_fields=True,
     predefined_sources="top 100 US, top 5 GB",
     from_=datetime.datetime.fromisoformat(
         "2024-07-01 00:00:00+00:00",
@@ -43,6 +45,8 @@ client.search.get(
     to=datetime.datetime.fromisoformat(
         "2024-07-01 00:00:00+00:00",
     ),
+    include_nlp_data=True,
+    has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
     iptc_tags="20000199,20000209",
@@ -85,15 +89,15 @@ For more details, see [Advanced querying](/docs/v3/documentation/guides-and-conc
 <dl>
 <dd>
 
-**search_in:** `typing.Optional[str]` 
+**search_in:** `typing.Optional[SearchIn]` 
+    
+</dd>
+</dl>
 
-The article fields to search in. To search in multiple fields, use a comma-separated string. 
+<dl>
+<dd>
 
-Example: `"title, summary"`
-
-**Note**: The `summary` option is available if NLP is enabled in your plan.
-
-Available options: `title`, `summary`, `content`.
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
     
 </dd>
 </dl>
@@ -236,7 +240,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `7 day ago`, `today`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -255,7 +259,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `1 day ago`, `now`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -519,21 +523,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**include_nlp_data:** `typing.Optional[bool]` 
-
-If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
-
-The NLP layer includes:
-- Theme: General topic of the article.
-- Summary: A concise overview of the article content.
-- Sentiment: Separate scores for title and content (range: -1 to 1).
-- Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
-- IPTC tags: Standardized news category tags.
-- IAB tags: Content categories for digital advertising.
-
-**Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
     
 </dd>
 </dl>
@@ -541,13 +531,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**has_nlp:** `typing.Optional[bool]` 
-
-If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
-
-**Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**has_nlp:** `typing.Optional[HasNlp]` 
     
 </dd>
 </dl>
@@ -591,7 +575,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 
 **org_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. 
+Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Apple, Microsoft"`
 
@@ -607,7 +591,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **per_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. 
+Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Elon Musk, Jeff Bezos"`
 
@@ -623,7 +607,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **loc_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. 
+Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"California, New York"`
 
@@ -639,7 +623,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **misc_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. 
+Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Bitcoin, Blockchain"`
 
@@ -735,7 +719,7 @@ Filters articles based on International Press Telecommunications Council (IPTC) 
 
 Example: `"20000199, 20000209"`
 
-**Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -751,7 +735,7 @@ Inverse of the `iptc_tags` parameter. Excludes articles based on International P
 
 Example: `"20000205, 20000209"`
 
-**Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -767,7 +751,7 @@ Filters articles based on Interactive Advertising Bureau (IAB) content categorie
 
 Example: `"Business, Events"`
 
-**Note**: The `iab_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
     
@@ -783,7 +767,7 @@ Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Adve
 
 Example: `"Agriculture, Metals"`
 
-**Note**: The `not_iab_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
     
@@ -814,6 +798,14 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 If true, excludes duplicate and highly similar articles from the search results. If false, returns all relevant articles, including duplicates. 
 
 To learn more, see [Articles deduplication](/docs/v3/documentation/guides-and-concepts/articles-deduplication).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
     
 </dd>
 </dl>
@@ -904,6 +896,14 @@ client.search.post(
 <dd>
 
 **search_in:** `typing.Optional[SearchIn]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
     
 </dd>
 </dl>
@@ -1327,6 +1327,14 @@ client.search.post(
 <dl>
 <dd>
 
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1374,6 +1382,9 @@ client = NewscatcherApi(
 )
 client.latestheadlines.get(
     predefined_sources="top 100 US, top 5 GB",
+    include_translation_fields=True,
+    include_nlp_data=True,
+    has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
     iptc_tags="20000199,20000209",
@@ -1687,21 +1698,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**include_nlp_data:** `typing.Optional[bool]` 
-
-If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
-
-The NLP layer includes:
-- Theme: General topic of the article.
-- Summary: A concise overview of the article content.
-- Sentiment: Separate scores for title and content (range: -1 to 1).
-- Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
-- IPTC tags: Standardized news category tags.
-- IAB tags: Content categories for digital advertising.
-
-**Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
     
 </dd>
 </dl>
@@ -1709,13 +1706,15 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**has_nlp:** `typing.Optional[bool]` 
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
+    
+</dd>
+</dl>
 
-If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
+<dl>
+<dd>
 
-**Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**has_nlp:** `typing.Optional[HasNlp]` 
     
 </dd>
 </dl>
@@ -1759,7 +1758,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 
 **org_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. 
+Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Apple, Microsoft"`
 
@@ -1775,7 +1774,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **per_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. 
+Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Elon Musk, Jeff Bezos"`
 
@@ -1791,7 +1790,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **loc_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. 
+Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"California, New York"`
 
@@ -1807,7 +1806,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **misc_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. 
+Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Bitcoin, Blockchain"`
 
@@ -1903,7 +1902,7 @@ Filters articles based on International Press Telecommunications Council (IPTC) 
 
 Example: `"20000199, 20000209"`
 
-**Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -1919,7 +1918,7 @@ Inverse of the `iptc_tags` parameter. Excludes articles based on International P
 
 Example: `"20000205, 20000209"`
 
-**Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -1935,7 +1934,7 @@ Filters articles based on Interactive Advertising Bureau (IAB) content categorie
 
 Example: `"Business, Events"`
 
-**Note**: The `iab_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
     
@@ -1951,7 +1950,7 @@ Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Adve
 
 Example: `"Agriculture, Metals"`
 
-**Note**: The `not_iab_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
     
@@ -1970,6 +1969,14 @@ Filters articles based on provided taxonomy that is tailored to your specific ne
 Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
 
 To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
     
 </dd>
 </dl>
@@ -2234,6 +2241,14 @@ client.latestheadlines.post(
 <dl>
 <dd>
 
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **include_nlp_data:** `typing.Optional[IncludeNlpData]` 
     
 </dd>
@@ -2370,6 +2385,586 @@ client.latestheadlines.post(
 <dl>
 <dd>
 
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Breaking News
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_get</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves breaking news articles and sorts them based on specified criteria.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher import NewscatcherApi
+
+client = NewscatcherApi(
+    api_key="YOUR_API_KEY",
+)
+client.breaking_news.breaking_news_get(
+    top_n_articles=5,
+    include_translation_fields=True,
+    include_nlp_data=True,
+    has_nlp=True,
+    theme="Business,Finance",
+    not_theme="Crime",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**sort_by:** `typing.Optional[BreakingNewsGetRequestSortBy]` 
+
+The sorting order of the results. Possible values are:
+- `relevancy`: The most relevant results first.
+- `date`: The most recently published results first.
+- `rank`: The results from the highest-ranked sources first.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` 
+
+The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
+
+For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — The number of articles to return per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**top_n_articles:** `typing.Optional[TopNArticles]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**has_nlp:** `typing.Optional[HasNlp]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**theme:** `typing.Optional[str]` 
+
+Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
+
+Example: `"Finance, Tech"`
+
+**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+
+Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_theme:** `typing.Optional[str]` 
+
+Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
+
+Example: `"Crime, Tech"`
+
+**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**org_entity_name:** `typing.Optional[str]` 
+
+Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
+
+Example: `"Apple, Microsoft"`
+
+**Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**per_entity_name:** `typing.Optional[str]` 
+
+Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
+
+Example: `"Elon Musk, Jeff Bezos"`
+
+**Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**loc_entity_name:** `typing.Optional[str]` 
+
+Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
+
+Example: `"California, New York"`
+
+**Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**misc_entity_name:** `typing.Optional[str]` 
+
+Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
+
+Example: `"Bitcoin, Blockchain"`
+
+**Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**title_sentiment_min:** `typing.Optional[float]` 
+
+Filters articles based on the minimum sentiment score of their titles.
+
+Range is `-1.0` to `1.0`, where:
+- Negative values indicate negative sentiment.
+- Positive values indicate positive sentiment.
+- Values close to 0 indicate neutral sentiment.
+
+**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**title_sentiment_max:** `typing.Optional[float]` 
+
+Filters articles based on the maximum sentiment score of their titles.
+
+Range is `-1.0` to `1.0`, where:
+- Negative values indicate negative sentiment.
+- Positive values indicate positive sentiment.
+- Values close to 0 indicate neutral sentiment.
+
+**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**content_sentiment_min:** `typing.Optional[float]` 
+
+Filters articles based on the minimum sentiment score of their content.
+
+Range is `-1.0` to `1.0`, where:
+- Negative values indicate negative sentiment.
+- Positive values indicate positive sentiment.
+- Values close to 0 indicate neutral sentiment.
+
+**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**content_sentiment_max:** `typing.Optional[float]` 
+
+Filters articles based on the maximum sentiment score of their content.
+
+Range is `-1.0` to `1.0`, where:
+- Negative values indicate negative sentiment.
+- Positive values indicate positive sentiment.
+- Values close to 0 indicate neutral sentiment.
+
+**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
+
+To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_post</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves breaking news articles and sorts them based on specified criteria.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher import NewscatcherApi
+
+client = NewscatcherApi(
+    api_key="YOUR_API_KEY",
+)
+client.breaking_news.breaking_news_post(
+    sort_by="relevancy",
+    page=1,
+    page_size=100,
+    include_nlp_data=True,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**sort_by:** `typing.Optional[SortBy]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ranked_only:** `typing.Optional[RankedOnly]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from_rank:** `typing.Optional[FromRank]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to_rank:** `typing.Optional[ToRank]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[Page]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[PageSize]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**top_n_articles:** `typing.Optional[TopNArticles]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**has_nlp:** `typing.Optional[HasNlp]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**theme:** `typing.Optional[Theme]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_theme:** `typing.Optional[NotTheme]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**org_entity_name:** `typing.Optional[OrgEntityName]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**per_entity_name:** `typing.Optional[PerEntityName]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**loc_entity_name:** `typing.Optional[LocEntityName]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**misc_entity_name:** `typing.Optional[MiscEntityName]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**content_sentient_max:** `typing.Optional[ContentSentimentMax]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -2426,6 +3021,9 @@ client.authors.get(
     to=datetime.datetime.fromisoformat(
         "2024-07-01 00:00:00+00:00",
     ),
+    include_translation_fields=True,
+    include_nlp_data=True,
+    has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
     ner_name="Tesla",
@@ -2579,7 +3177,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `7 day ago`, `today`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -2598,7 +3196,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `1 day ago`, `now`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -2766,21 +3364,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**include_nlp_data:** `typing.Optional[bool]` 
-
-If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
-
-The NLP layer includes:
-- Theme: General topic of the article.
-- Summary: A concise overview of the article content.
-- Sentiment: Separate scores for title and content (range: -1 to 1).
-- Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
-- IPTC tags: Standardized news category tags.
-- IAB tags: Content categories for digital advertising.
-
-**Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
     
 </dd>
 </dl>
@@ -2788,13 +3372,15 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**has_nlp:** `typing.Optional[bool]` 
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
+    
+</dd>
+</dl>
 
-If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
+<dl>
+<dd>
 
-**Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**has_nlp:** `typing.Optional[HasNlp]` 
     
 </dd>
 </dl>
@@ -2930,7 +3516,7 @@ Filters articles based on International Press Telecommunications Council (IPTC) 
 
 Example: `"20000199, 20000209"`
 
-**Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -2946,7 +3532,7 @@ Inverse of the `iptc_tags` parameter. Excludes articles based on International P
 
 Example: `"20000205, 20000209"`
 
-**Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -2962,7 +3548,7 @@ Filters articles based on Interactive Advertising Bureau (IAB) content categorie
 
 Example: `"Business, Events"`
 
-**Note**: The `iab_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
     
@@ -2978,7 +3564,7 @@ Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Adve
 
 Example: `"Agriculture, Metals"`
 
-**Note**: The `not_iab_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
     
@@ -2997,6 +3583,14 @@ Filters articles based on provided taxonomy that is tailored to your specific ne
 Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
 
 To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
     
 </dd>
 </dl>
@@ -3292,6 +3886,14 @@ client.authors.post(
 <dl>
 <dd>
 
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **include_nlp_data:** `typing.Optional[IncludeNlpData]` 
     
 </dd>
@@ -3397,6 +3999,14 @@ client.authors.post(
 <dd>
 
 **custom_tags:** `typing.Optional[CustomTags]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -3538,6 +4148,14 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -3649,7 +4267,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `1 day ago`, `now`
     
 </dd>
 </dl>
@@ -3666,6 +4284,14 @@ Formats with examples:
 <dd>
 
 **page_size:** `typing.Optional[PageSize]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -3722,6 +4348,8 @@ client = NewscatcherApi(
 )
 client.searchsimilar.get(
     q="technology AND (Apple OR Microsoft) NOT Google",
+    search_in="title_content, title_content_translated",
+    include_translation_fields=True,
     similar_documents_fields="title,summary",
     predefined_sources="top 100 US, top 5 GB",
     from_=datetime.datetime.fromisoformat(
@@ -3730,6 +4358,8 @@ client.searchsimilar.get(
     to=datetime.datetime.fromisoformat(
         "2024-07-01 00:00:00+00:00",
     ),
+    include_nlp_data=True,
+    has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
     ner_name="Tesla",
@@ -3771,15 +4401,15 @@ For more details, see [Advanced querying](/docs/v3/documentation/guides-and-conc
 <dl>
 <dd>
 
-**search_in:** `typing.Optional[str]` 
+**search_in:** `typing.Optional[SearchIn]` 
+    
+</dd>
+</dl>
 
-The article fields to search in. To search in multiple fields, use a comma-separated string. 
+<dl>
+<dd>
 
-Example: `"title, summary"`
-
-**Note**: The `summary` option is available if NLP is enabled in your plan.
-
-Available options: `title`, `summary`, `content`.
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
     
 </dd>
 </dl>
@@ -3920,7 +4550,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `7 day ago`, `today`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -3939,7 +4569,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `1 day ago`, `now`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -4107,21 +4737,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**include_nlp_data:** `typing.Optional[bool]` 
-
-If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
-
-The NLP layer includes:
-- Theme: General topic of the article.
-- Summary: A concise overview of the article content.
-- Sentiment: Separate scores for title and content (range: -1 to 1).
-- Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
-- IPTC tags: Standardized news category tags.
-- IAB tags: Content categories for digital advertising.
-
-**Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
     
 </dd>
 </dl>
@@ -4129,13 +4745,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**has_nlp:** `typing.Optional[bool]` 
-
-If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
-
-**Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**has_nlp:** `typing.Optional[HasNlp]` 
     
 </dd>
 </dl>
@@ -4271,7 +4881,7 @@ Filters articles based on International Press Telecommunications Council (IPTC) 
 
 Example: `"20000199, 20000209"`
 
-**Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -4287,7 +4897,7 @@ Inverse of the `iptc_tags` parameter. Excludes articles based on International P
 
 Example: `"20000205, 20000209"`
 
-**Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -4306,6 +4916,14 @@ Filters articles based on provided taxonomy that is tailored to your specific ne
 Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
 
 To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
     
 </dd>
 </dl>
@@ -4386,6 +5004,14 @@ client.searchsimilar.post(
 <dd>
 
 **search_in:** `typing.Optional[SearchIn]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
     
 </dd>
 </dl>
@@ -4706,6 +5332,14 @@ client.searchsimilar.post(
 <dd>
 
 **custom_tags:** `typing.Optional[CustomTags]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -5122,6 +5756,7 @@ client = NewscatcherApi(
 )
 client.aggregation.get(
     q="technology AND (Apple OR Microsoft) NOT Google",
+    search_in="title_content, title_content_translated",
     predefined_sources="top 100 US, top 5 GB",
     from_=datetime.datetime.fromisoformat(
         "2024-07-01 00:00:00+00:00",
@@ -5129,6 +5764,8 @@ client.aggregation.get(
     to=datetime.datetime.fromisoformat(
         "2024-07-01 00:00:00+00:00",
     ),
+    include_nlp_data=True,
+    has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
     iptc_tags="20000199,20000209",
@@ -5168,15 +5805,15 @@ For more details, see [Advanced querying](/docs/v3/documentation/guides-and-conc
 <dl>
 <dd>
 
-**search_in:** `typing.Optional[str]` 
+**aggregation_by:** `typing.Optional[AggregationBy]` 
+    
+</dd>
+</dl>
 
-The article fields to search in. To search in multiple fields, use a comma-separated string. 
+<dl>
+<dd>
 
-Example: `"title, summary"`
-
-**Note**: The `summary` option is available if NLP is enabled in your plan.
-
-Available options: `title`, `summary`, `content`.
+**search_in:** `typing.Optional[SearchIn]` 
     
 </dd>
 </dl>
@@ -5305,7 +5942,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `7 day ago`, `today`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -5324,7 +5961,7 @@ Formats with examples:
 - YYYY-MM-dd: `2024-07-01`
 - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
 - YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
+- English phrases: `1 day ago`, `now`
 
 **Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
     
@@ -5492,21 +6129,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**include_nlp_data:** `typing.Optional[bool]` 
-
-If true, includes an NLP layer with each article in the response. This layer provides enhanced information such as theme classification, article summary, sentiment analysis, tags, and named entity recognition.
-
-The NLP layer includes:
-- Theme: General topic of the article.
-- Summary: A concise overview of the article content.
-- Sentiment: Separate scores for title and content (range: -1 to 1).
-- Named entities: Identified persons (PER), organizations (ORG), locations (LOC), and miscellaneous entities (MISC).
-- IPTC tags: Standardized news category tags.
-- IAB tags: Content categories for digital advertising.
-
-**Note**: The `include_nlp_data` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
     
 </dd>
 </dl>
@@ -5514,13 +6137,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**has_nlp:** `typing.Optional[bool]` 
-
-If true, filters the results to include only articles with an NLP layer. This allows you to focus on articles that have been processed with advanced NLP techniques.
-
-**Note**: The `has_nlp` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**has_nlp:** `typing.Optional[HasNlp]` 
     
 </dd>
 </dl>
@@ -5564,7 +6181,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 
 **org_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. 
+Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Apple, Microsoft"`
 
@@ -5580,7 +6197,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **per_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. 
+Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Elon Musk, Jeff Bezos"`
 
@@ -5596,7 +6213,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **loc_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. 
+Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"California, New York"`
 
@@ -5612,7 +6229,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 
 **misc_entity_name:** `typing.Optional[str]` 
 
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. 
+Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
 
 Example: `"Bitcoin, Blockchain"`
 
@@ -5708,7 +6325,7 @@ Filters articles based on International Press Telecommunications Council (IPTC) 
 
 Example: `"20000199, 20000209"`
 
-**Note**: The `iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -5724,7 +6341,7 @@ Inverse of the `iptc_tags` parameter. Excludes articles based on International P
 
 Example: `"20000205, 20000209"`
 
-**Note**: The `not_iptc_tags` parameter is only available if tags are included in your subscription plan.
+**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
 To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
     
@@ -5734,11 +6351,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 <dl>
 <dd>
 
-**aggregation_by:** `typing.Optional[AggregationGetRequestAggregationBy]` 
-
-The aggregation interval for the results. Possible values are:
-- `day`: Aggregates results by day.
-- `hour`: Aggregates results by hour.
+**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
     
 </dd>
 </dl>
@@ -5794,6 +6407,7 @@ client = NewscatcherApi(
 )
 client.aggregation.post(
     q="renewable energy",
+    aggregation_by="day",
     predefined_sources="top 50 US",
     from_=datetime.datetime.fromisoformat(
         "2024-01-01 00:00:00+00:00",
@@ -5801,7 +6415,6 @@ client.aggregation.post(
     to=datetime.datetime.fromisoformat(
         "2024-06-30 00:00:00+00:00",
     ),
-    aggregation_by="day",
 )
 
 ```
@@ -5819,6 +6432,14 @@ client.aggregation.post(
 <dd>
 
 **q:** `Q` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**aggregation_by:** `typing.Optional[AggregationBy]` 
     
 </dd>
 </dl>
@@ -6154,7 +6775,7 @@ client.aggregation.post(
 <dl>
 <dd>
 
-**aggregation_by:** `typing.Optional[AggregationBy]` 
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
