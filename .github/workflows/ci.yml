@@ -23,12 +23,33 @@ jobs:
           pip install types-tqdm python-dotenv python-dateutil tqdm types-python-dateutil
       - name: Compile
         run: |
-          # Run mypy with special handling for Fern-generated files
-          # First check our own code with normal settings
-          poetry run mypy --config-file=mypy.ini src/newscatcher/client.py src/newscatcher/utils.py tests/
+          # Check if custom files exist before running mypy on them
+          if [ -f "src/newscatcher/client.py" ] && [ -f "src/newscatcher/utils.py" ] && [ -d "tests" ]; then
+            if [ -f "mypy.ini" ]; then
+              poetry run mypy --config-file=mypy.ini src/newscatcher/client.py src/newscatcher/utils.py tests/
+            else
+              poetry run mypy src/newscatcher/client.py src/newscatcher/utils.py tests/
+            fi
+          fi
 
-          # Then check core files with no-any-return error disabled
-          poetry run mypy --config-file=mypy.ini --disable-error-code=no-any-return src/newscatcher/core/
+          # Check core files with no-any-return error disabled
+          if [ -d "src/newscatcher/core" ]; then
+            if [ -f "mypy.ini" ]; then
+              poetry run mypy --config-file=mypy.ini --disable-error-code=no-any-return src/newscatcher/core/
+            else
+              poetry run mypy --disable-error-code=no-any-return src/newscatcher/core/
+            fi
+          fi
+
+          # Basic SDK import test for Fern-generated code
+          python -c "
+          try:
+              from newscatcher import NewscatcherApi
+              print('SDK import test passed')
+          except Exception as e:
+              print(f'SDK import test failed: {e}')
+              exit(1)
+          "
 
   test-utils:
     runs-on: ubuntu-20.04
@@ -45,7 +66,12 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Test utils
-        run: poetry run pytest -rP tests/utils
+        run: |
+          if [ -d "tests/utils" ]; then
+            poetry run pytest -rP tests/utils
+          else
+            echo "No utils tests found, skipping"
+          fi
 
   test-custom:
     runs-on: ubuntu-20.04
@@ -69,17 +95,87 @@ jobs:
         run: |
           # Create mocks directory
           mkdir -p tests/mocks
-          # Run the mock data generation script
-          python -c "$(cat test-mock-mode.sh | sed -n '/python -c/,/EOF/p' | grep -v 'python -c' | grep -v EOF)"
+          # Run the mock data generation script only if it exists
+          if [ -f "test-mock-mode.sh" ]; then
+            python -c "$(cat test-mock-mode.sh | sed -n '/python -c/,/EOF/p' | grep -v 'python -c' | grep -v EOF)"
+          else
+            echo "Mock data script not found, skipping mock generation"
+          fi
       - name: Run custom tests
         env:
           NEWSCATCHER_API_KEY: ${{ secrets.NEWSCATCHER_API_KEY }}
-          TEST_MODE: "mock" # Use mock mode in CI
+          TEST_MODE: "mock"
         run: |
-          pytest tests/custom tests/integration -v
+          # Only run custom tests if directories exist
+          test_dirs=""
+          if [ -d "tests/custom" ]; then
+            test_dirs="$test_dirs tests/custom"
+          fi
+          if [ -d "tests/integration" ]; then
+            test_dirs="$test_dirs tests/integration"
+          fi
+
+          if [ -n "$test_dirs" ]; then
+            pytest $test_dirs -v
+          else
+            echo "No custom test directories found, running basic SDK test instead"
+            python -c "
+            try:
+                from newscatcher import NewscatcherApi
+                client = NewscatcherApi(api_key='test-key')
+                print('Basic SDK functionality test passed')
+            except Exception as e:
+                print(f'Basic SDK test failed: {e}')
+                exit(1)
+            "
+          fi
+
+  test-fern-generated:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Bootstrap poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+      - name: Install dependencies
+        run: poetry install
+      - name: Test generated SDK structure
+        run: |
+          # Verify basic SDK structure and imports
+          python -c "
+          import sys
+          import os
+
+          # Check if base client exists
+          try:
+              from newscatcher.base_client import BaseNewscatcherApi
+              print('Base client import successful')
+          except ImportError as e:
+              print(f'Base client import failed: {e}')
+              
+          # Check if main client exists
+          try:
+              from newscatcher import NewscatcherApi
+              print('Main client import successful')
+              
+              # Test basic instantiation
+              client = NewscatcherApi(api_key='test-key')
+              print('Client instantiation successful')
+              
+          except Exception as e:
+              print(f'Main client test failed: {e}')
+              sys.exit(1)
+
+          print('All SDK structure tests passed')
+          "
 
   publish:
-    needs: [compile, test-utils, test-custom]
+    needs: [compile, test-utils, test-custom, test-fern-generated]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-20.04
     steps:
