@@ -48,6 +48,8 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install
+          # Install the package in development mode
+          pip install -e .
           # Install additional test dependencies for custom tests
           pip install pytest pytest-asyncio python-dateutil tqdm python-dotenv || echo "Optional test dependencies not installed"
       - name: Generate mock data
