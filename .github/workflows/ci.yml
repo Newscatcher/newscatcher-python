@@ -48,10 +48,12 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install
+          # Ensure all required dependencies are installed
+          poetry install --with dev || echo "Dev dependencies not available"
           # Install the package in development mode
           pip install -e .
           # Install additional test dependencies for custom tests
-          pip install pytest pytest-asyncio python-dateutil tqdm python-dotenv || echo "Optional test dependencies not installed"
+          pip install pytest pytest-asyncio python-dateutil tqdm python-dotenv httpx || echo "Optional test dependencies not installed"
       - name: Generate mock data
         run: |
           # Only run if mock script exists
@@ -81,6 +83,8 @@ jobs:
           fi
       - name: SDK validation test
         run: |
+          # Install package in development mode for validation
+          pip install -e .
           # Always run basic SDK validation
           python -c "
           try:
