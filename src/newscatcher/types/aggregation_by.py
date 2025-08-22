@@ -2,4 +2,4 @@
 
 import typing
 
-AggregationBy = typing.Union[typing.Literal["day", "hour"], typing.Any]
+AggregationBy = typing.Union[typing.Literal["day", "hour", "month"], typing.Any]
