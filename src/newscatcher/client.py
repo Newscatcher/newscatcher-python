@@ -98,7 +98,11 @@ class QueryValidator:
         if query == "*":
             return True, ""
 
-        matches = re.search(r"^[\*]*$|[\s]\*|^\*[^\s]", query)
+        # Check for patterns that are invalid:
+        # ^[\*]*$ - query that is only asterisks (but not single *)
+        # [\s]\* - space followed by asterisk
+        # ^\*[^\s] - asterisk at start followed by non-space
+        matches = re.search(r"^[\*]{2,}$|[\s]\*|^\*[^\s]", query)
         if matches:
             return (
                 False,
@@ -109,6 +113,7 @@ class QueryValidator:
 
     def _check_start_end(self, query: str) -> Tuple[bool, str]:
         """Check for invalid operators at query boundaries."""
+        # Operators that cannot appear at the end
         end_operators = [
             "OR ",
             "%7C%7C",
@@ -154,41 +159,26 @@ class QueryValidator:
             "|| )",
         ]
 
+        # Operators that cannot appear at the start
         start_operators = [
-            " OR",
+            "OR ",
+            "OR",
             "%7C%7C",
-            " %7C%7C",
-            " AND",
+            "AND ",
+            "AND",
             "%26%26",
-            " %26%26",
             "&&",
-            " &&",
-            " ||",
             "||",
-            "( OR",
-            "(%7C%7C",
-            "( %7C%7C",
-            "( AND",
-            "(%26%26",
-            "( %26%26",
-            "(&&",
-            "( &&",
-            "( ||",
-            "(||",
-            ")OR",
-            ") OR",
-            ")%7C%7C",
-            ") %7C%7C",
-            ")AND",
-            ") AND",
-            ")%26%26",
-            ") %26%26",
-            ")&&",
-            ") &&",
-            " )||",
-            ") ||",
+            "NOT ",
+            "NOT",
+            "!",
+            "%21",
+            "-",
+            "+",
+            "%2B",
         ]
 
+        # Check end operators
         for op in end_operators:
             if query.endswith(op):
                 return (
@@ -197,6 +187,7 @@ class QueryValidator:
                     f"Please remove an unused operator.",
                 )
 
+        # Check start operators
         for op in start_operators:
             if query.startswith(op):
                 return (
@@ -292,45 +283,6 @@ class NewscatcherMixin:
     # Constants
     DEFAULT_MAX_ARTICLES = 100000
 
-    def __init__(self, *args, **kwargs):
-        """Initialize mixin with query validator."""
-        super().__init__(*args, **kwargs)
-        self._query_validator = QueryValidator()
-
-    def validate_query(self, query: str) -> Tuple[bool, str]:
-        """
-        Validate search query syntax locally before making API calls.
-
-        This method implements the same validation logic as the server-side API
-        to catch syntax errors early and reduce unnecessary API calls that would
-        fail due to malformed queries.
-
-        Args:
-            query: The search query string to validate
-
-        Returns:
-            Tuple of (is_valid: bool, error_message: str)
-            - If valid: (True, "")
-            - If invalid: (False, "detailed error message")
-
-        Examples:
-            Basic validation:
-            >>> is_valid, error = client.validate_query("python programming")
-            >>> if not is_valid:
-            ...     print(f"Query error: {error}")
-
-            Complex boolean query:
-            >>> is_valid, error = client.validate_query('("machine learning" OR AI) AND python')
-
-            Bulk validation:
-            >>> queries = ["valid query", "invalid [query]", "another AND valid"]
-            >>> for q in queries:
-            ...     is_valid, error = client.validate_query(q)
-            ...     if not is_valid:
-            ...         print(f"Invalid query '{q}': {error}")
-        """
-        return self._query_validator.validate_query(query)
-
     def prepare_time_chunks(self, endpoint_type, **kwargs):
         """
         Prepare time chunks for API requests.
@@ -399,6 +351,43 @@ class NewscatcherMixin:
         """
         if show_progress:
             print(f"Retrieved {article_count} articles")
+
+    def validate_query(self, query: str) -> Tuple[bool, str]:
+        """
+        Validate search query syntax locally before making API calls.
+
+        This method implements the same validation logic as the server-side API
+        to catch syntax errors early and reduce unnecessary API calls that would
+        fail due to malformed queries.
+
+        Args:
+            query: The search query string to validate
+
+        Returns:
+            Tuple of (is_valid: bool, error_message: str)
+            - If valid: (True, "")
+            - If invalid: (False, "detailed error message")
+
+        Examples:
+            Basic validation:
+            >>> is_valid, error = client.validate_query("python programming")
+            >>> if not is_valid:
+            ...     print(f"Query error: {error}")
+
+            Complex boolean query:
+            >>> is_valid, error = client.validate_query('("machine learning" OR AI) AND python')
+
+            Bulk validation:
+            >>> queries = ["valid query", "invalid [query]", "another AND valid"]
+            >>> for q in queries:
+            ...     is_valid, error = client.validate_query(q)
+            ...     if not is_valid:
+            ...         print(f"Invalid query '{q}': {error}")
+        """
+        # Initialize validator if not already done
+        if not hasattr(self, "_query_validator"):
+            self._query_validator = QueryValidator()
+        return self._query_validator.validate_query(query)
 
 
 # Synchronous implementation
@@ -552,7 +541,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                     from_=chunk_from,
                     to=chunk_to,
                     page=1,
-                    page_size=100,  # Use 100 page size for efficiency
+                    page_size=100,  # Use maximum page size for efficiency
                     **request_params,
                 )
 
