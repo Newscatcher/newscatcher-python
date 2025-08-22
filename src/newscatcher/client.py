@@ -9,6 +9,7 @@ import sys
 import os
 import datetime
 import asyncio
+import re
 from typing import Dict, List, Optional, Union, Any, Set, Tuple, Callable
 
 from .base_client import BaseNewscatcherApi, AsyncBaseNewscatcherApi
@@ -23,6 +24,265 @@ from .utils import (
 )
 
 
+class QueryValidator:
+    """
+    Query validation utility implementing server-side validation logic.
+
+    This class encapsulates all query validation rules to ensure consistency
+    with the API's validation behavior and provide early error detection.
+    """
+
+    def __init__(self):
+        """Initialize validator with validation rules."""
+        self.not_allowed_characters = [
+            "[",
+            "]",
+            "/",
+            "\\",
+            "%5B",
+            "%5D",
+            "%2F",
+            "%5C",
+            ":",
+            "%3A",
+            "^",
+            "%5E",
+        ]
+        self.open_char = ["(", "%28"]
+        self.close_char = [")", "%29"]
+
+    def validate_query(self, query: str) -> Tuple[bool, str]:
+        """
+        Validate search query syntax according to API rules.
+
+        Args:
+            query: Search query string to validate
+
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        if not isinstance(query, str):
+            return False, "Query must be a string"
+
+        if not query.strip():
+            return False, "Query cannot be empty"
+
+        validation_checks = [
+            self._check_allowed_characters,
+            self._check_asterisk,
+            self._check_start_end,
+            self._check_middle,
+            self._check_quotes,
+        ]
+
+        for check in validation_checks:
+            is_valid, error_message = check(query)
+            if not is_valid:
+                return False, error_message
+
+        return True, ""
+
+    def _check_allowed_characters(self, query: str) -> Tuple[bool, str]:
+        """Check for forbidden characters."""
+        for char in self.not_allowed_characters:
+            if char in query:
+                return (
+                    False,
+                    f"Query parameter must not include following characters "
+                    f"{str(self.not_allowed_characters)}. Please remove them from query parameter",
+                )
+        return True, ""
+
+    def _check_asterisk(self, query: str) -> Tuple[bool, str]:
+        """Check wildcard (*) usage rules."""
+        if query == "*":
+            return True, ""
+
+        matches = re.search(r"^[\*]*$|[\s]\*|^\*[^\s]", query)
+        if matches:
+            return (
+                False,
+                "The wildcard (*) character in query parameter must be preceded "
+                "by at least one alphabet or number. Please modify the query.",
+            )
+        return True, ""
+
+    def _check_start_end(self, query: str) -> Tuple[bool, str]:
+        """Check for invalid operators at query boundaries."""
+        end_operators = [
+            "OR ",
+            "%7C%7C",
+            "%7C%7C ",
+            "AND ",
+            "%26%26",
+            "%26%26 ",
+            "&&",
+            "&& ",
+            "||",
+            "|| ",
+            "NOT",
+            "NOT ",
+            "%21",
+            "%21 ",
+            "!",
+            "! ",
+            "%2B",
+            "%2B ",
+            "-",
+            "- ",
+            "OR(",
+            "OR (",
+            "%7C%7C(",
+            "%7C%7C (",
+            "AND(",
+            "AND( ",
+            "%26%26(",
+            "%26%26 (",
+            "&&(",
+            "&& (",
+            "||(",
+            "|| (",
+            "OR )",
+            "%7C%7C)",
+            "%7C%7C )",
+            "AND )",
+            "%26%26)",
+            "%26%26 )",
+            "&&)",
+            "&& )",
+            "||)",
+            "|| )",
+        ]
+
+        start_operators = [
+            " OR",
+            "%7C%7C",
+            " %7C%7C",
+            " AND",
+            "%26%26",
+            " %26%26",
+            "&&",
+            " &&",
+            " ||",
+            "||",
+            "( OR",
+            "(%7C%7C",
+            "( %7C%7C",
+            "( AND",
+            "(%26%26",
+            "( %26%26",
+            "(&&",
+            "( &&",
+            "( ||",
+            "(||",
+            ")OR",
+            ") OR",
+            ")%7C%7C",
+            ") %7C%7C",
+            ")AND",
+            ") AND",
+            ")%26%26",
+            ") %26%26",
+            ")&&",
+            ") &&",
+            " )||",
+            ") ||",
+        ]
+
+        for op in end_operators:
+            if query.endswith(op):
+                return (
+                    False,
+                    f"Query parameter ends with an operator {str(op)}. "
+                    f"Please remove an unused operator.",
+                )
+
+        for op in start_operators:
+            if query.startswith(op):
+                return (
+                    False,
+                    f"Query parameter starts with an operator {str(op)}. "
+                    f"The query must not start with such operator. Please remove it.",
+                )
+
+        return True, ""
+
+    def _check_middle(self, query: str) -> Tuple[bool, str]:
+        """Check for invalid operator combinations."""
+        invalid_combinations = [
+            " OR OR ",
+            "%7C%7C %7C%7C",
+            "|| ||",
+            "|| (||",
+            "||) ||",
+            " AND AND ",
+            "%26%26 %26%26",
+            "&& &&",
+            "&& (&&",
+            "&&) &&",
+            " NOT NOT ",
+            "! !",
+            "%21 %21",
+            "- -",
+            "--",
+            " OR AND ",
+            " AND OR ",
+            "%7C%7C %26%26",
+            "%26%26 %7C%7C",
+            " OR (AND ",
+            " AND (OR ",
+            "%7C%7C (%26%26",
+            "%26%26 (%7C%7C",
+            " OR) AND ",
+            " AND) OR ",
+            "%7C%7C) %26%26",
+            "%26%26) %7C%7C",
+            "()",
+        ]
+
+        for combo in invalid_combinations:
+            if combo in query:
+                return (
+                    False,
+                    f'Query parameter contains operator " {str(combo)} " used without '
+                    f"keywords. Please add keywords or remove one of the operators",
+                )
+
+        return True, ""
+
+    def _check_quotes(self, query: str) -> Tuple[bool, str]:
+        """Check for balanced quotes and parentheses."""
+        # Check parentheses balance
+        all_open = []
+        all_closed = []
+
+        for i in self.open_char:
+            all_open.extend(re.findall(re.escape(i), query))
+        for j in self.close_char:
+            all_closed.extend(re.findall(re.escape(j), query))
+
+        if len(all_open) != len(all_closed):
+            return (
+                False,
+                'Query parameter contains an unclosed round bracket "(" or ")". '
+                "Please close the bracket before proceeding.",
+            )
+
+        # Check quotes
+        all_quotes = []
+        for o in ['"', "%22"]:
+            all_quotes.extend(re.findall(re.escape(o), query))
+
+        if len(all_quotes) % 2 != 0:
+            return (
+                False,
+                'Query parameter contains an unclosed quote ("). '
+                "Please close the quote before proceeding.",
+            )
+
+        return True, ""
+
+
 # Mixin class with shared functionality
 class NewscatcherMixin:
     """
@@ -31,6 +291,45 @@ class NewscatcherMixin:
 
     # Constants
     DEFAULT_MAX_ARTICLES = 100000
+
+    def __init__(self, *args, **kwargs):
+        """Initialize mixin with query validator."""
+        super().__init__(*args, **kwargs)
+        self._query_validator = QueryValidator()
+
+    def validate_query(self, query: str) -> Tuple[bool, str]:
+        """
+        Validate search query syntax locally before making API calls.
+
+        This method implements the same validation logic as the server-side API
+        to catch syntax errors early and reduce unnecessary API calls that would
+        fail due to malformed queries.
+
+        Args:
+            query: The search query string to validate
+
+        Returns:
+            Tuple of (is_valid: bool, error_message: str)
+            - If valid: (True, "")
+            - If invalid: (False, "detailed error message")
+
+        Examples:
+            Basic validation:
+            >>> is_valid, error = client.validate_query("python programming")
+            >>> if not is_valid:
+            ...     print(f"Query error: {error}")
+
+            Complex boolean query:
+            >>> is_valid, error = client.validate_query('("machine learning" OR AI) AND python')
+
+            Bulk validation:
+            >>> queries = ["valid query", "invalid [query]", "another AND valid"]
+            >>> for q in queries:
+            ...     is_valid, error = client.validate_query(q)
+            ...     if not is_valid:
+            ...         print(f"Invalid query '{q}': {error}")
+        """
+        return self._query_validator.validate_query(query)
 
     def prepare_time_chunks(self, endpoint_type, **kwargs):
         """
@@ -105,10 +404,12 @@ class NewscatcherMixin:
 # Synchronous implementation
 class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
     """
-    Extended Newscatcher API client with methods for comprehensive article retrieval.
+    Extended Newscatcher API client with methods for comprehensive article retrieval
+    and query validation.
 
     This class extends the base client by adding methods that automatically
-    chunk requests by time to overcome API limitations.
+    chunk requests by time to overcome API limitations, and provides local
+    query validation to catch syntax errors before making API calls.
     """
 
     def _process_articles(
@@ -164,6 +465,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
         max_articles: Optional[int] = None,  # None uses DEFAULT_MAX_ARTICLES
         show_progress: bool = False,
         deduplicate: bool = True,
+        validate_query: bool = True,  # New parameter for query validation
         **kwargs,
     ) -> Articles:
         """
@@ -183,11 +485,15 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
             max_articles: Maximum number of articles to return (defaults to DEFAULT_MAX_ARTICLES)
             show_progress: Whether to show a progress indicator
             deduplicate: Whether to remove duplicate articles (based on article ID)
+            validate_query: Whether to validate query syntax before making API calls
             **kwargs: Additional parameters to pass to the search.post method
                     (Any valid parameters for the search endpoint)
 
         Returns:
             List of Article objects
+
+        Raises:
+            ValueError: If validate_query=True and the query has invalid syntax
 
         Examples:
             ```python
@@ -198,8 +504,20 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                 time_chunk_size="1h",  # Split into 1-hour chunks
                 max_articles=50000     # Limit to 50,000 articles
             )
+
+            # Disable query validation if needed
+            articles = client.get_all_articles(
+                q="complex [query] with special chars",
+                validate_query=False  # Skip validation
+            )
             ```
         """
+        # Validate query syntax if enabled
+        if validate_query:
+            is_valid, error_message = self.validate_query(q)
+            if not is_valid:
+                raise ValueError(f"Invalid query syntax: {error_message}")
+
         # Apply default max_articles if not specified
         if max_articles is None:
             max_articles = self.DEFAULT_MAX_ARTICLES
@@ -230,28 +548,67 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
             try:
                 # Fetch first page to get total hits and pagination info
                 first_page_response = self.search.post(
-                    q=q, from_=chunk_from, to=chunk_to, page=1, **request_params
+                    q=q,
+                    from_=chunk_from,
+                    to=chunk_to,
+                    page=1,
+                    page_size=100,  # Use 100 page size for efficiency
+                    **request_params,
                 )
 
-                # Get articles safely
-                articles = safe_get_articles(first_page_response)
+                # Get the data from response
+                if hasattr(first_page_response, "articles"):
+                    articles_data = first_page_response.articles
+                else:
+                    # Handle different response structures
+                    articles_data = getattr(first_page_response, "data", [])
 
-                # Default total_pages if we can't find articles
+                # Process articles from first page
+                processed, current_count, should_continue = self._process_articles(
+                    articles_data, seen_ids, deduplicate, max_articles, current_count
+                )
+                all_articles.extend(processed)
+
+                # If we've hit the limit, stop processing
+                if not should_continue:
+                    if show_progress:
+                        print(
+                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                        )
+                    break
+
+                # Check if there are more pages
                 total_pages = getattr(first_page_response, "total_pages", 1)
 
-                # Process articles if any were found
-                if articles:
-                    processed_articles, current_count, should_continue = (
-                        self._process_articles(
-                            articles,  # Use the safely retrieved articles
-                            seen_ids,
-                            deduplicate,
-                            max_articles,
-                            current_count,
-                        )
+                # Fetch remaining pages if available
+                for page in range(2, total_pages + 1):
+                    if not should_continue:
+                        break
+
+                    page_response = self.search.post(
+                        q=q,
+                        from_=chunk_from,
+                        to=chunk_to,
+                        page=page,
+                        page_size=100,
+                        **request_params,
                     )
 
-                    all_articles.extend(processed_articles)
+                    # Get articles from this page
+                    if hasattr(page_response, "articles"):
+                        page_articles = page_response.articles
+                    else:
+                        page_articles = getattr(page_response, "data", [])
+
+                    # Process articles from this page
+                    processed, current_count, should_continue = self._process_articles(
+                        page_articles,
+                        seen_ids,
+                        deduplicate,
+                        max_articles,
+                        current_count,
+                    )
+                    all_articles.extend(processed)
 
                     # Stop if we've reached the limit
                     if not should_continue:
@@ -261,61 +618,23 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                             )
                         break
 
-                # If there are more pages, fetch them
-                if total_pages > 1:
-                    for page in range(2, total_pages + 1):
-                        try:
-                            page_response = self.search.post(
-                                q=q,
-                                from_=chunk_from,
-                                to=chunk_to,
-                                page=page,
-                                **request_params,
-                            )
-
-                            # Get articles safely from page response
-                            page_articles = safe_get_articles(page_response)
-
-                            # Process articles if any were found
-                            if page_articles:
-                                processed_articles, current_count, should_continue = (
-                                    self._process_articles(
-                                        page_articles,  # Use the safely retrieved articles
-                                        seen_ids,
-                                        deduplicate,
-                                        max_articles,
-                                        current_count,
-                                    )
-                                )
-
-                                all_articles.extend(processed_articles)
-
-                                # Stop if we've reached the limit
-                                if not should_continue:
-                                    if show_progress:
-                                        print(
-                                            f"\nReached maximum article limit ({max_articles}). Stopping."
-                                        )
-                                    break
-
-                        except Exception as e:
-                            print(f"Error fetching page {page}: {str(e)}")
-                            # Continue with partial results
-
-                    # Stop processing chunks if we've reached the limit
-                    if not should_continue:
-                        break
-
             except Exception as e:
-                print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
-                # Continue with next chunk
+                # Log the error but continue with other chunks
+                if show_progress:
+                    print(
+                        f"Error processing chunk {chunk_from} to {chunk_to}: {str(e)}"
+                    )
+                continue
 
-        self.log_completion(show_progress, len(all_articles))
+            # Update progress
+            if show_progress:
+                self.log_completion(show_progress, current_count)
+
         return all_articles
 
     def get_all_headlines(
         self,
-        when: Optional[Union[datetime.datetime, str]] = None,
+        when: str = "7d",
         time_chunk_size: str = "1h",  # Default to 1 hour chunks
         max_articles: Optional[int] = None,  # None uses DEFAULT_MAX_ARTICLES
         show_progress: bool = False,
@@ -323,30 +642,32 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
         **kwargs,
     ) -> Articles:
         """
-        Fetch all latest headlines by splitting the request into
-        multiple time-based chunks to overcome the 10,000 article limit.
+        Fetch latest headlines by splitting the request into multiple time-based chunks
+        to overcome the 10,000 article limit.
+
+        This method works similarly to get_all_articles but specifically for the
+        latest headlines endpoint, dividing the time range into smaller chunks
+        and making multiple API calls.
 
         Args:
-            when: How far back to fetch headlines (ISO 8601 format, datetime object, or relative time like "7d")
+            when: Time period to search (e.g., '7d', '24h', '1d')
             time_chunk_size: Size of time chunks to divide the search (e.g., "1d", "12h")
                            Supported units: d (days), h (hours)
             max_articles: Maximum number of articles to return (defaults to DEFAULT_MAX_ARTICLES)
             show_progress: Whether to show a progress indicator
             deduplicate: Whether to remove duplicate articles (based on article ID)
-            **kwargs: Additional parameters to pass to the latest headlines method
-                    (Any valid parameters for the latestheadlines endpoint)
+            **kwargs: Additional parameters to pass to the latestheadlines.post method
 
         Returns:
             List of Article objects
 
         Examples:
             ```python
-            # Get all latest headlines about technology from the last 7 days
-            articles = client.get_all_headlines(
+            # Get all technology headlines from the past week
+            headlines = client.get_all_headlines(
                 when="7d",
-                topic="tech",
-                time_chunk_size="1h",  # Split into 1-hour chunks
-                max_articles=50000     # Limit to 50,000 articles
+                time_chunk_size="1h",
+                show_progress=True
             )
             ```
         """
@@ -369,8 +690,8 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
 
         # Process each time chunk
         for chunk_start, chunk_end in chunks_iter:
-            # Calculate the "when" parameter for this chunk
-            when_param = calculate_when_param(to_date, chunk_start)
+            # Calculate when parameter for this chunk
+            when_param = calculate_when_param(chunk_start, chunk_end)
 
             # Prepare request parameters
             request_params = self.prepare_request_params(kwargs)
@@ -381,17 +702,14 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                     when=when_param, page=1, **request_params
                 )
 
-                # Get articles safely
-                articles = safe_get_articles(first_page_response)
+                # Get articles safely from first page response
+                articles_data = safe_get_articles(first_page_response)
 
-                # Default total_pages if we can't find articles
-                total_pages = getattr(first_page_response, "total_pages", 1)
-
-                # Process articles if any were found
-                if articles:
+                # Process articles from first page if any were found
+                if articles_data:
                     processed_articles, current_count, should_continue = (
                         self._process_articles(
-                            articles,  # Use the safely retrieved articles
+                            articles_data,  # Use the safely retrieved articles
                             seen_ids,
                             deduplicate,
                             max_articles,
@@ -408,6 +726,17 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                                 f"\nReached maximum article limit ({max_articles}). Stopping."
                             )
                         break
+
+                # Check if there are more pages
+                total_pages = getattr(first_page_response, "total_pages", 1)
+
+                # Stop processing if we've reached the limit
+                if not should_continue:
+                    if show_progress:
+                        print(
+                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                        )
+                    break
 
                 # If there are more pages, fetch them
                 if total_pages > 1:
@@ -461,11 +790,12 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
 # Asynchronous implementation
 class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
     """
-    Async version of the extended Newscatcher API client with methods for
-    unlimited article retrieval.
+    Extended async Newscatcher API client with methods for comprehensive article retrieval
+    and query validation.
 
     This class extends the async base client by adding methods that automatically
-    chunk requests by time to overcome API limitations.
+    chunk requests by time to overcome API limitations, and provides local
+    query validation to catch syntax errors before making API calls.
     """
 
     async def _process_articles(
@@ -523,43 +853,41 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
         Process multiple pages of results concurrently.
 
         Args:
-            client_method: Async method to call for each page
-            params: Base parameters to pass to the method
-            total_pages: Total number of pages to request
+            client_method: The client method to call for each page
+            params: Parameters to pass to the client method
+            total_pages: Total number of pages to process
             concurrency: Maximum number of concurrent requests
 
         Returns:
-            List of Article objects from all pages
+            List of articles from all pages
         """
-        all_articles = []
+        # Create semaphore for concurrency control
+        semaphore = asyncio.Semaphore(concurrency)
 
-        # Skip page 1 as it's already been fetched
-        remaining_pages = list(range(2, total_pages + 1))
+        async def fetch_page(page_num):
+            async with semaphore:
+                page_params = {**params, "page": page_num}
+                return await client_method(**page_params)
 
-        # Process pages in batches to limit concurrency
-        for batch_start in range(0, len(remaining_pages), concurrency):
-            batch_pages = remaining_pages[batch_start : batch_start + concurrency]
+        # Create tasks for all pages (starting from page 2)
+        tasks = [fetch_page(page) for page in range(2, total_pages + 1)]
 
-            # Create tasks for this batch
-            tasks = []
-            for page in batch_pages:
-                # Create a copy of parameters with updated page number
-                page_params = {**params, "page": page}
-                tasks.append(client_method(**page_params))
+        # Execute with concurrency control
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-            # Wait for all tasks in this batch to complete
-            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Collect articles from all responses
+        all_page_articles = []
+        for response in responses:
+            if isinstance(response, Exception):
+                print(f"Error in page request: {str(response)}")
+                continue
 
-            # Process successful results
-            for result in batch_results:
-                if not isinstance(result, Exception):
-                    articles = safe_get_articles(result)
-                    if articles:
-                        all_articles.extend(articles)
-                else:
-                    print(f"Error fetching a page: {str(result)}")
+            # Get articles safely from response
+            page_articles = safe_get_articles(response)
+            if page_articles:
+                all_page_articles.extend(page_articles)
 
-        return all_articles
+        return all_page_articles
 
     async def get_all_articles(
         self,
@@ -570,11 +898,12 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
         max_articles: Optional[int] = None,  # None uses DEFAULT_MAX_ARTICLES
         show_progress: bool = False,
         deduplicate: bool = True,
-        concurrency: int = 3,  # Default concurrency for page fetching
+        validate_query: bool = True,  # New parameter for query validation
+        concurrency: int = 3,
         **kwargs,
     ) -> Articles:
         """
-        Async version: Fetch all articles matching the search criteria by splitting the request into
+        Async version: Fetch articles matching the search criteria by splitting the request into
         multiple time-based chunks to overcome the 10,000 article limit.
 
         This method divides the time range into smaller chunks and makes multiple API calls
@@ -590,12 +919,16 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
             max_articles: Maximum number of articles to return (defaults to DEFAULT_MAX_ARTICLES)
             show_progress: Whether to show a progress indicator
             deduplicate: Whether to remove duplicate articles (based on article ID)
+            validate_query: Whether to validate query syntax before making API calls
             concurrency: Maximum number of concurrent requests for pagination
             **kwargs: Additional parameters to pass to the search.post method
                     (Any valid parameters for the search endpoint)
 
         Returns:
             List of Article objects
+
+        Raises:
+            ValueError: If validate_query=True and the query has invalid syntax
 
         Examples:
             ```python
@@ -608,6 +941,12 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
             )
             ```
         """
+        # Validate query syntax if enabled
+        if validate_query:
+            is_valid, error_message = self.validate_query(q)
+            if not is_valid:
+                raise ValueError(f"Invalid query syntax: {error_message}")
+
         # Apply default max_articles if not specified
         if max_articles is None:
             max_articles = self.DEFAULT_MAX_ARTICLES
@@ -638,28 +977,70 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
             try:
                 # Fetch first page to get total hits and pagination info
                 first_page_response = await self.search.post(
-                    q=q, from_=chunk_from, to=chunk_to, page=1, **request_params
+                    q=q,
+                    from_=chunk_from,
+                    to=chunk_to,
+                    page=1,
+                    page_size=100,  # Use maximum page size for efficiency
+                    **request_params,
                 )
 
-                # Get articles safely
-                articles = safe_get_articles(first_page_response)
+                # Get the data from response
+                if hasattr(first_page_response, "articles"):
+                    articles_data = first_page_response.articles
+                else:
+                    # Handle different response structures
+                    articles_data = getattr(first_page_response, "data", [])
 
-                # Default total_pages if we can't find articles
+                # Process articles from first page
+                processed, current_count, should_continue = (
+                    await self._process_articles(
+                        articles_data,
+                        seen_ids,
+                        deduplicate,
+                        max_articles,
+                        current_count,
+                    )
+                )
+                all_articles.extend(processed)
+
+                # If we've hit the limit, stop processing
+                if not should_continue:
+                    if show_progress:
+                        print(
+                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                        )
+                    break
+
+                # Check if there are more pages
                 total_pages = getattr(first_page_response, "total_pages", 1)
 
-                # Process articles if any were found
-                if articles:
-                    processed_articles, current_count, should_continue = (
+                # Fetch remaining pages concurrently if available
+                if total_pages > 1:
+                    # Use the async page processing method
+                    additional_articles = await self._process_page_requests_async(
+                        self.search.post,
+                        {
+                            "q": q,
+                            "from_": chunk_from,
+                            "to": chunk_to,
+                            **request_params,
+                        },
+                        total_pages,
+                        concurrency,
+                    )
+
+                    # Process additional articles
+                    processed, current_count, should_continue = (
                         await self._process_articles(
-                            articles,  # Use the safely retrieved articles
+                            additional_articles,
                             seen_ids,
                             deduplicate,
                             max_articles,
                             current_count,
                         )
                     )
-
-                    all_articles.extend(processed_articles)
+                    all_articles.extend(processed)
 
                     # Stop if we've reached the limit
                     if not should_continue:
@@ -669,87 +1050,55 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                             )
                         break
 
-                # If there are more pages, fetch them concurrently
-                if total_pages > 1:
-                    # Create base parameters for page requests
-                    base_params = {
-                        "q": q,
-                        "from_": chunk_from,
-                        "to": chunk_to,
-                        **request_params,
-                    }
-
-                    # Process pages concurrently
-                    additional_articles = await self._process_page_requests_async(
-                        self.search.post, base_params, total_pages, concurrency
-                    )
-
-                    # Process the additional articles
-                    if additional_articles:
-                        processed_articles, current_count, should_continue = (
-                            await self._process_articles(
-                                additional_articles,
-                                seen_ids,
-                                deduplicate,
-                                max_articles,
-                                current_count,
-                            )
-                        )
-
-                        # Add articles from additional pages
-                        all_articles.extend(processed_articles)
-
-                        # Stop processing chunks if we've reached the limit
-                        if not should_continue:
-                            if show_progress:
-                                print(
-                                    f"\nReached maximum article limit ({max_articles}). Stopping."
-                                )
-                            break
-
             except Exception as e:
-                print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
-                # Continue with next chunk
+                # Log the error but continue with other chunks
+                if show_progress:
+                    print(
+                        f"Error processing chunk {chunk_from} to {chunk_to}: {str(e)}"
+                    )
+                continue
 
-        self.log_completion(show_progress, len(all_articles))
+            # Update progress
+            if show_progress:
+                self.log_completion(show_progress, current_count)
+
         return all_articles
 
     async def get_all_headlines(
         self,
-        when: Optional[Union[datetime.datetime, str]] = None,
+        when: str = "7d",
         time_chunk_size: str = "1h",  # Default to 1 hour chunks
         max_articles: Optional[int] = None,  # None uses DEFAULT_MAX_ARTICLES
         show_progress: bool = False,
         deduplicate: bool = True,
-        concurrency: int = 3,  # Default concurrency for page fetching
+        concurrency: int = 3,
         **kwargs,
     ) -> Articles:
         """
-        Async version: Fetch all latest headlines by splitting the request into
-        multiple time-based chunks to overcome the 10,000 article limit.
+        Async version: Fetch latest headlines by splitting the request into multiple
+        time-based chunks to overcome the 10,000 article limit.
 
         Args:
-            when: How far back to fetch headlines (ISO 8601 format, datetime object, or relative time like "7d")
+            when: Time period to search (e.g., '7d', '24h', '1d')
             time_chunk_size: Size of time chunks to divide the search (e.g., "1d", "12h")
                            Supported units: d (days), h (hours)
             max_articles: Maximum number of articles to return (defaults to DEFAULT_MAX_ARTICLES)
             show_progress: Whether to show a progress indicator
             deduplicate: Whether to remove duplicate articles (based on article ID)
             concurrency: Maximum number of concurrent requests for pagination
-            **kwargs: Additional parameters to pass to the latest headlines method
-                    (Any valid parameters for the latestheadlines endpoint)
+            **kwargs: Additional parameters to pass to the latestheadlines.post method
 
         Returns:
             List of Article objects
 
         Examples:
             ```python
-            # Get all latest headlines about technology from the last 7 days
-            articles = await client.get_all_headlines(
+            # Get all technology headlines from the past week
+            headlines = await client.get_all_headlines(
                 when="7d",
-                topic="tech",
-                time_chunk_size="1h",  # Split into 1-hour chunks
-                max_articles=50000     # Limit to 50,000 articles
+                time_chunk_size="1h",
+                concurrency=5,
+                show_progress=True
             )
             ```
         """
@@ -772,8 +1121,8 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
 
         # Process each time chunk
         for chunk_start, chunk_end in chunks_iter:
-            # Calculate the "when" parameter for this chunk
-            when_param = calculate_when_param(to_date, chunk_start)
+            # Calculate when parameter for this chunk
+            when_param = calculate_when_param(chunk_start, chunk_end)
 
             # Prepare request parameters
             request_params = self.prepare_request_params(kwargs)
@@ -784,17 +1133,14 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                     when=when_param, page=1, **request_params
                 )
 
-                # Get articles safely
-                articles = safe_get_articles(first_page_response)
+                # Get articles safely from first page response
+                articles_data = safe_get_articles(first_page_response)
 
-                # Default total_pages if we can't find articles
-                total_pages = getattr(first_page_response, "total_pages", 1)
-
-                # Process articles if any were found
-                if articles:
+                # Process articles from first page if any were found
+                if articles_data:
                     processed_articles, current_count, should_continue = (
                         await self._process_articles(
-                            articles,  # Use the safely retrieved articles
+                            articles_data,  # Use the safely retrieved articles
                             seen_ids,
                             deduplicate,
                             max_articles,
@@ -812,38 +1158,46 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                             )
                         break
 
-                # If there are more pages, fetch them concurrently
-                if total_pages > 1:
-                    # Create base parameters for page requests
-                    base_params = {"when": when_param, **request_params}
+                # Check if there are more pages
+                total_pages = getattr(first_page_response, "total_pages", 1)
 
-                    # Process pages concurrently
+                # Stop processing if we've reached the limit
+                if not should_continue:
+                    if show_progress:
+                        print(
+                            f"\nReached maximum article limit ({max_articles}). Stopping."
+                        )
+                    break
+
+                # Fetch remaining pages concurrently if available
+                if total_pages > 1:
+                    # Use the async page processing method
                     additional_articles = await self._process_page_requests_async(
-                        self.latestheadlines.post, base_params, total_pages, concurrency
+                        self.latestheadlines.post,
+                        {"when": when_param, **request_params},
+                        total_pages,
+                        concurrency,
                     )
 
-                    # Process the additional articles
-                    if additional_articles:
-                        processed_articles, current_count, should_continue = (
-                            await self._process_articles(
-                                additional_articles,
-                                seen_ids,
-                                deduplicate,
-                                max_articles,
-                                current_count,
-                            )
+                    # Process additional articles
+                    processed, current_count, should_continue = (
+                        await self._process_articles(
+                            additional_articles,
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
                         )
+                    )
+                    all_articles.extend(processed)
 
-                        # Add articles from additional pages
-                        all_articles.extend(processed_articles)
-
-                        # Stop processing chunks if we've reached the limit
-                        if not should_continue:
-                            if show_progress:
-                                print(
-                                    f"\nReached maximum article limit ({max_articles}). Stopping."
-                                )
-                            break
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(
+                                f"\nReached maximum article limit ({max_articles}). Stopping."
+                            )
+                        break
 
             except Exception as e:
                 print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
