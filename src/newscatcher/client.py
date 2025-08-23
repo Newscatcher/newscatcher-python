@@ -3,7 +3,7 @@ import os
 import datetime
 import asyncio
 import re
-from typing import Dict, List, Optional, Union, Any, Set, Tuple, Callable
+from typing import Optional, Union, List, Set, Tuple, Any
 
 from .base_client import BaseNewscatcherApi, AsyncBaseNewscatcherApi
 from .types.articles import Articles
@@ -468,14 +468,25 @@ class NewscatcherMixin:
             current_count += 1
 
         return processed_articles, current_count, True
+    
+    def log_completion(self, show_progress: bool, article_count: int):
+        """
+        Log completion message if progress tracking is enabled.
+        
+        Args:
+            show_progress: Whether progress tracking is enabled
+            article_count: Number of articles retrieved
+        """
+        if show_progress:
+            print(f"Retrieved {article_count} articles")
 
 
 class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
     """Synchronous Newscatcher API client with unlimited article retrieval."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, **kwargs):
         """Initialize the synchronous client."""
-        BaseNewscatcherApi.__init__(self, api_key=api_key)
+        BaseNewscatcherApi.__init__(self, api_key=api_key, **kwargs)
         NewscatcherMixin.__init__(self)
 
     def get_all_articles(
@@ -488,7 +499,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
         show_progress: bool = False,
         deduplicate: bool = True,
         validate_query: bool = True,
-        concurrency: int = 5,
+        concurrency: int = 3,
         **kwargs
     ) -> List[Any]:
         """Retrieve all articles matching search criteria, bypassing the 10,000 limit."""
@@ -589,14 +600,148 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
             print(f"\nCompleted: Retrieved {len(all_articles)} articles")
 
         return all_articles
+    
+    def get_all_headlines(
+        self,
+        when: Optional[Union[datetime.datetime, str]] = None,
+        time_chunk_size: str = "1h",
+        max_articles: Optional[int] = None,
+        show_progress: bool = False,
+        deduplicate: bool = True,
+        **kwargs,
+    ) -> Articles:
+        """
+        Fetch all latest headlines by splitting the request into
+        multiple time-based chunks to overcome the 10,000 article limit.
+        """
+        
+        # Set defaults
+        if max_articles is None:
+            max_articles = self.DEFAULT_MAX_ARTICLES
+
+        # Parse time parameters - this converts when="1d" to proper time ranges
+        from_date, to_date, chunk_delta = parse_time_parameters("latestheadlines", when=when, time_chunk_size=time_chunk_size)
+        
+        # Create time chunks
+        time_chunks = create_time_chunks(from_date, to_date, chunk_delta)
+
+        # Setup progress tracking
+        desc = "Fetching headlines chunks"
+        is_test = "pytest" in sys.modules or "TEST_MODE" in os.environ
+        chunks_iter = setup_progress_tracking(
+            time_chunks,
+            show_progress,
+            description=desc,
+            is_test=is_test,
+        )
+
+        all_articles = []
+        seen_ids = set()
+        current_count = 0
+
+        # Prepare request parameters
+        request_params = {**kwargs}
+        if "page" in request_params:
+            del request_params["page"]
+        if "page_size" not in request_params:
+            request_params["page_size"] = 1000
+
+        # Process each time chunk
+        for chunk_start, chunk_end in chunks_iter:
+            if current_count >= max_articles:
+                break
+
+            try:
+                # Convert chunk times to the expected format using calculate_when_param
+                when_param = calculate_when_param(chunk_end, chunk_start)  # This creates "1d", "2h", etc.
+
+                # Make the first request
+                first_response = self.latestheadlines.post(
+                    when=when_param, page=1, **request_params
+                )
+
+                # Get articles safely from first response
+                first_articles = safe_get_articles(first_response)
+
+                if first_articles:
+                    # Process first page articles
+                    processed_articles, current_count, should_continue = (
+                        self._process_articles(
+                            first_articles,
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
+                        )
+                    )
+
+                    all_articles.extend(processed_articles)
+
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(f"\nReached maximum article limit ({max_articles}). Stopping.")
+                        break
+
+                    # Get total pages for pagination
+                    total_pages = getattr(first_response, "total_pages", 1)
+                    
+                    # If there are more pages, fetch them
+                    if total_pages > 1:
+                        for page in range(2, min(total_pages + 1, 11)):
+                            if current_count >= max_articles:
+                                break
+
+                            try:
+                                page_response = self.latestheadlines.post(
+                                    when=when_param, page=page, **request_params
+                                )
+
+                                # Get articles safely from page response
+                                page_articles = safe_get_articles(page_response)
+
+                                # Process articles if any were found
+                                if page_articles:
+                                    processed_articles, current_count, should_continue = (
+                                        self._process_articles(
+                                            page_articles,
+                                            seen_ids,
+                                            deduplicate,
+                                            max_articles,
+                                            current_count,
+                                        )
+                                    )
+
+                                    all_articles.extend(processed_articles)
+
+                                    # Stop if we've reached the limit
+                                    if not should_continue:
+                                        if show_progress:
+                                            print(f"\nReached maximum article limit ({max_articles}). Stopping.")
+                                        break
+
+                            except Exception as e:
+                                print(f"Error fetching page {page}: {str(e)}")
+                                # Continue with partial results
+
+                        # Stop processing chunks if we've reached the limit
+                        if not should_continue:
+                            break
+
+            except Exception as e:
+                print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
+                # Continue with next chunk
+
+        self.log_completion(show_progress, len(all_articles))
+        return all_articles
 
 
 class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
     """Asynchronous Newscatcher API client with unlimited article retrieval."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, **kwargs):
         """Initialize the asynchronous client."""
-        AsyncBaseNewscatcherApi.__init__(self, api_key=api_key)
+        AsyncBaseNewscatcherApi.__init__(self, api_key=api_key, **kwargs)
         NewscatcherMixin.__init__(self)
 
     async def get_all_articles(
@@ -609,7 +754,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
         show_progress: bool = False,
         deduplicate: bool = True,
         validate_query: bool = True,
-        concurrency: int = 5,
+        concurrency: int = 3,
         **kwargs
     ) -> List[Any]:
         """Asynchronously retrieve all articles matching search criteria."""
@@ -725,4 +870,150 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
         if show_progress:
             print(f"\nCompleted: Retrieved {len(all_articles)} articles")
 
+        return all_articles
+    
+    async def get_all_headlines(
+        self,
+        when: Optional[Union[datetime.datetime, str]] = None,
+        time_chunk_size: str = "1h",  # Default to 1 hour chunks
+        max_articles: Optional[int] = None,  # None uses DEFAULT_MAX_ARTICLES
+        show_progress: bool = False,
+        deduplicate: bool = True,
+        concurrency: int = 3,  # Default concurrency for page fetching
+        **kwargs,
+    ) -> Articles:
+        """
+        Async version: Fetch all latest headlines by splitting the request into
+        multiple time-based chunks to overcome the 10,000 article limit.
+        """   
+        # Set defaults
+        if max_articles is None:
+            max_articles = self.DEFAULT_MAX_ARTICLES
+
+        # Parse time parameters
+        from_date, to_date, chunk_delta = parse_time_parameters("latestheadlines", when=when, time_chunk_size=time_chunk_size)
+        
+        # Create time chunks
+        time_chunks = create_time_chunks(from_date, to_date, chunk_delta)
+
+        # Setup progress tracking
+        desc = "Fetching headlines chunks"
+        is_test = "pytest" in sys.modules or "TEST_MODE" in os.environ
+        chunks_iter = setup_progress_tracking(
+            time_chunks,
+            show_progress,
+            description=desc,
+            is_test=is_test,
+        )
+
+        all_articles = []
+        seen_ids = set()
+        current_count = 0
+
+        # Prepare request parameters
+        request_params = {**kwargs}
+        if "page" in request_params:
+            del request_params["page"]
+        if "page_size" not in request_params:
+            request_params["page_size"] = 1000
+
+        # Process each time chunk
+        for chunk_start, chunk_end in chunks_iter:
+            if current_count >= max_articles:
+                break
+
+            try:
+                # Convert chunk times to the expected format using calculate_when_param  
+                when_param = calculate_when_param(chunk_end, chunk_start)
+
+                # Make the first request
+                first_response = await self.latestheadlines.post(
+                    when=when_param, page=1, **request_params
+                )
+
+                # Get articles safely from first response
+                first_articles = safe_get_articles(first_response)
+
+                if first_articles:
+                    # Process first page articles
+                    processed_articles, current_count, should_continue = (
+                        self._process_articles(
+                            first_articles,
+                            seen_ids,
+                            deduplicate,
+                            max_articles,
+                            current_count,
+                        )
+                    )
+
+                    all_articles.extend(processed_articles)
+
+                    # Stop if we've reached the limit
+                    if not should_continue:
+                        if show_progress:
+                            print(f"\nReached maximum article limit ({max_articles}). Stopping.")
+                        break
+
+                    # Get total pages for pagination
+                    total_pages = getattr(first_response, "total_pages", 1)
+                    
+                    # If there are more pages, fetch them with concurrency
+                    if total_pages > 1:
+                        page_tasks = []
+                        semaphore = asyncio.Semaphore(concurrency)
+
+                        async def fetch_page(page_num):
+                            async with semaphore:
+                                try:
+                                    return await self.latestheadlines.post(
+                                        when=when_param, page=page_num, **request_params
+                                    )
+                                except Exception as e:
+                                    print(f"Error fetching page {page_num}: {str(e)}")
+                                    return None
+
+                        # Create tasks for all pages
+                        for page in range(2, min(total_pages + 1, 11)):  # Limit to 10 pages max
+                            if current_count >= max_articles:
+                                break
+                            page_tasks.append(fetch_page(page))
+
+                        # Execute page requests with concurrency
+                        if page_tasks:
+                            page_responses = await asyncio.gather(*page_tasks, return_exceptions=True)
+
+                            for response in page_responses:
+                                if current_count >= max_articles:
+                                    break
+
+                                if response and not isinstance(response, Exception):
+                                    page_articles = safe_get_articles(response)
+                                    
+                                    if page_articles:
+                                        processed_articles, current_count, should_continue = (
+                                            self._process_articles(
+                                                page_articles,
+                                                seen_ids,
+                                                deduplicate,
+                                                max_articles,
+                                                current_count,
+                                            )
+                                        )
+
+                                        all_articles.extend(processed_articles)
+
+                                        if not should_continue:
+                                            if show_progress:
+                                                print(f"\nReached maximum article limit ({max_articles}). Stopping.")
+                                            break
+
+                        # Stop processing chunks if we've reached the limit
+                        if not should_continue:
+                            break
+
+            except Exception as e:
+                print(f"Error processing chunk {chunk_start} to {chunk_end}: {str(e)}")
+                # Continue with next chunk
+
+        self.log_completion(show_progress, len(all_articles))
         return all_articles
