@@ -246,6 +246,125 @@ class TestQueryValidatorBasic:
             is_valid, error_msg = self.validator.validate_query(query)
             assert is_valid, f"Balanced query {repr(query)} should be valid but got error: {error_msg}"
 
+class TestSameLevelOperators:
+    """Test same-level AND/OR operator validation based on API behavior."""
+
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.validator = QueryValidator()
+
+    def test_same_level_operators(self):
+        """Test the same level operator validation against known API behavior."""
+        
+        test_cases = [
+            # These should FAIL (from your API test results)
+            ("AI OR artificial intelligence", False, "same level"),
+            ("startup OR venture capital", False, "same level"),
+            ("python AND (machine learning OR data)", False, "same level"),
+            ("blockchain OR artificial intelligence", False, "same level"),
+            ("programming OR machine learning", False, "same level"),
+            
+            # These should SUCCEED (from your API test results)  
+            ("AI OR \"artificial intelligence\"", True, "escaped phrase"),
+            ("startup OR \"venture capital\"", True, "escaped phrase"),
+            ("python AND (\"machine learning\" OR data)", True, "escaped phrase"),
+            ("blockchain OR \"artificial intelligence\"", True, "escaped phrase"),
+            ("programming OR \"machine learning\"", True, "escaped phrase"),
+            
+            # Same level operators (should succeed)
+            ("AI OR ML", True, "same level OR"),
+            ("python AND machine", True, "same level AND"),
+            ("AI OR ML OR NLP", True, "all OR"),
+            ("machine AND learning AND python", True, "all AND"),
+            
+            # Properly grouped (should succeed)
+            ("(AI AND research) OR (ML AND development)", True, "properly grouped"),
+            ("(startup AND innovation) OR (venture AND capital)", True, "properly grouped"),
+        ]
+        
+        for query, should_pass, description in test_cases:
+            is_valid, error_msg = self.validator.validate_query(query)
+            
+            if should_pass:
+                assert is_valid, f"Query {repr(query)} ({description}) should be valid but got error: {error_msg}"
+            else:
+                assert not is_valid, f"Query {repr(query)} ({description}) should be invalid but was accepted"
+                assert "same level" in error_msg, f"Expected 'same level' error message for {repr(query)}, got: {error_msg}"
+
+    def test_same_level_error_message_format(self):
+        """Test that same-level operator errors match exact API format."""
+        invalid_queries = [
+            "AI OR artificial intelligence",
+            "startup OR venture capital",
+            "programming OR machine learning"
+        ]
+        
+        expected_message_parts = [
+            'in [q] "AND" and "OR" operator not allowed at same level',
+            'Please use parentheses to group terms correctly',
+            'such as `(elon AND musk) OR twitter`'
+        ]
+        
+        for query in invalid_queries:
+            is_valid, error_msg = self.validator.validate_query(query)
+            assert not is_valid, f"Query {repr(query)} should be invalid"
+            
+            for expected_part in expected_message_parts:
+                assert expected_part in error_msg, (
+                    f"Error message for {repr(query)} should contain '{expected_part}'. "
+                    f"Got: {error_msg}"
+                )
+
+    def test_quoted_phrases_prevent_same_level_violations(self):
+        """Test that properly quoted phrases prevent same-level violations."""
+        # These pairs show the difference between quoted and unquoted
+        test_pairs = [
+            ("AI OR artificial intelligence", False),          # Unquoted - should fail
+            ("AI OR \"artificial intelligence\"", True),       # Quoted - should succeed
+            
+            ("startup OR venture capital", False),             # Unquoted - should fail  
+            ("startup OR \"venture capital\"", True),          # Quoted - should succeed
+            
+            ("programming OR machine learning", False),        # Unquoted - should fail
+            ("programming OR \"machine learning\"", True),     # Quoted - should succeed
+        ]
+        
+        for query, should_pass in test_pairs:
+            is_valid, error_msg = self.validator.validate_query(query)
+            
+            if should_pass:
+                assert is_valid, f"Quoted query {repr(query)} should be valid but got error: {error_msg}"
+            else:
+                assert not is_valid, f"Unquoted query {repr(query)} should be invalid due to same-level violation"
+                assert "same level" in error_msg.lower()
+
+    def test_edge_cases_same_level(self):
+        """Test edge cases for same-level operator detection."""
+        edge_cases = [
+            # No operators - should pass
+            ("machine learning artificial intelligence", True),
+            
+            # Only AND operators - should pass  
+            ("machine AND learning AND artificial", True),
+            
+            # Only OR operators - should pass
+            ("AI OR ML OR NLP OR DL", True),
+            
+            # Complex but properly quoted - should pass
+            ("(\"machine learning\" OR \"artificial intelligence\") AND python", True),
+            
+            # Multiple violations in one query - should fail
+            ("AI OR machine learning AND data science OR neural networks", False),
+        ]
+        
+        for query, should_pass in edge_cases:
+            is_valid, error_msg = self.validator.validate_query(query)
+            
+            if should_pass:
+                assert is_valid, f"Edge case {repr(query)} should be valid but got error: {error_msg}"
+            else:
+                assert not is_valid, f"Edge case {repr(query)} should be invalid"
+
 
 class TestQueryValidatorWithAPI:
     """Test query validator against actual API behavior."""
