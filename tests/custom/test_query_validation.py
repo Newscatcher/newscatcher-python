@@ -280,6 +280,9 @@ class TestSameLevelOperators:
             # Properly grouped (should succeed)
             ("(AI AND research) OR (ML AND development)", True, "properly grouped"),
             ("(startup AND innovation) OR (venture AND capital)", True, "properly grouped"),
+            ("AI OR (artificial intelligence)", True, "properly grouped"),
+            ("(python \"machine learning\") OR data", True, "properly grouped"),
+
         ]
         
         for query, should_pass, description in test_cases:
