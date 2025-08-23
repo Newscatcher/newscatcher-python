@@ -38,7 +38,7 @@ class QueryValidator:
         if not query.strip():
             return False, "[q] parameter should not empty"
 
-        # Apply the same validation checks as elasticsearch_helper.py
+        # Apply the same validation checks as elasticsearch
         result, message = self._check_allowed_characters(query, "q")
         if not result:
             return False, message
@@ -52,6 +52,10 @@ class QueryValidator:
             return False, message
 
         result, message = self._check_middle(query, "q")
+        if not result:
+            return False, message
+        
+        result, message = self._check_same_level_operators(query, "q")
         if not result:
             return False, message
 
@@ -162,6 +166,212 @@ class QueryValidator:
                 )
 
         return True, ""
+    
+    def _check_same_level_operators(self, query: str, variable_name: str) -> Tuple[bool, str]:
+        """
+        Check for AND/OR at same level after automatic AND insertion.
+        
+        The API automatically inserts AND operators between standalone terms that aren't 
+        within quotes or connected by explicit operators. This creates same-level operator 
+        violations when OR is mixed with these implicit ANDs.
+        
+        Examples:
+        - "AI OR artificial intelligence" → "AI OR artificial AND intelligence" (INVALID)
+        - "AI OR \"artificial intelligence\"" → "AI OR \"artificial intelligence\"" (VALID)
+        """
+        
+        # Quick check: if no OR/AND operators, no same-level issue
+        if not any(op in query for op in [' OR ', ' AND ', '||', '&&', '%7C%7C', '%26%26']):
+            return True, ""
+        
+        # Tokenize the query while preserving quoted phrases and operators
+        tokens = self._tokenize_query_for_same_level_check(query)
+        
+        # Simulate automatic AND insertion
+        tokens_with_implicit_and = self._simulate_and_insertion(tokens)
+        
+        # Check for same-level AND/OR violations
+        if self._has_same_level_and_or(tokens_with_implicit_and):
+            return (
+                False,
+                f'in [{variable_name}] "AND" and "OR" operator not allowed at same level, '
+                f'Please use parentheses to group terms correctly, such as '
+                f'`(elon AND musk) OR twitter`.'
+            )
+        
+        return True, ""
+
+    def _tokenize_query_for_same_level_check(self, query: str) -> List[str]:
+        """
+        Tokenize query preserving quoted phrases, operators, and parentheses.
+        
+        Returns tokens like: ['AI', 'OR', 'artificial', 'intelligence'] 
+        or ['AI', 'OR', '"artificial intelligence"']
+        """
+        tokens = []
+        i = 0
+        current_token = ""
+        
+        while i < len(query):
+            char = query[i]
+            
+            # Handle quoted phrases (including escaped quotes)
+            if char == '"':
+                if current_token:
+                    tokens.append(current_token.strip())
+                    current_token = ""
+                
+                # Collect the entire quoted phrase
+                quoted_phrase = '"'
+                i += 1
+                while i < len(query):
+                    if query[i] == '"':
+                        quoted_phrase += '"'
+                        i += 1
+                        break
+                    elif query[i] == '\\' and i + 1 < len(query) and query[i + 1] == '"':
+                        # Handle escaped quotes
+                        quoted_phrase += query[i:i+2]
+                        i += 2
+                    else:
+                        quoted_phrase += query[i]
+                        i += 1
+                
+                tokens.append(quoted_phrase)
+                continue
+            
+            # Handle operators and parentheses
+            elif char in '()':
+                if current_token:
+                    tokens.append(current_token.strip())
+                    current_token = ""
+                tokens.append(char)
+                i += 1
+                continue
+            
+            # Handle spaces - potential token boundaries
+            elif char == ' ':
+                if current_token:
+                    token = current_token.strip()
+                    if token:
+                        tokens.append(token)
+                    current_token = ""
+                i += 1
+                continue
+            
+            else:
+                current_token += char
+                i += 1
+        
+        # Add final token
+        if current_token:
+            token = current_token.strip()
+            if token:
+                tokens.append(token)
+        
+        return tokens
+
+    def _simulate_and_insertion(self, tokens: List[str]) -> List[str]:
+        """
+        Simulate automatic AND insertion between adjacent terms.
+        
+        Rules:
+        - Insert AND between adjacent words that aren't operators
+        - Don't insert AND around parentheses or quoted phrases
+        - Don't insert AND if there's already an operator
+        """
+        if len(tokens) <= 1:
+            return tokens
+        
+        result = []
+        operators = {'AND', 'OR', 'NOT', '&&', '||', '%26%26', '%7C%7C', '!', '-'}
+        brackets = {'(', ')'}
+        
+        for i, token in enumerate(tokens):
+            result.append(token)
+            
+            # Check if we should insert AND after this token
+            if i < len(tokens) - 1:
+                current = token
+                next_token = tokens[i + 1]
+                
+                # Don't insert AND if current or next is operator/bracket
+                if (current.upper() in operators or 
+                    next_token.upper() in operators or
+                    current in brackets or 
+                    next_token in brackets or
+                    current.startswith('"') or  # Quoted phrase
+                    next_token.startswith('"')):
+                    continue
+                
+                # Insert implicit AND between standalone words
+                if (not current.upper() in operators and 
+                    not next_token.upper() in operators and
+                    current not in brackets and 
+                    next_token not in brackets):
+                    result.append('AND')
+        
+        return result
+
+    def _has_same_level_and_or(self, tokens: List[str]) -> bool:
+        """
+        Check if tokens contain AND/OR at the same precedence level.
+        
+        This is a simplified check that looks for AND and OR operators
+        not properly separated by parentheses.
+        """
+        # Simple heuristic: if we have both AND and OR operators outside of 
+        # properly grouped parentheses, it's likely a same-level violation
+        
+        has_and = any(token.upper() in ['AND', '&&', '%26%26'] for token in tokens)
+        has_or = any(token.upper() in ['OR', '||', '%7C%7C'] for token in tokens)
+        
+        # If we have both AND and OR, we need to check grouping
+        if has_and and has_or:
+            # For now, use a simple heuristic: 
+            # If there are no parentheses to group operations, assume violation
+            if '(' not in tokens and ')' not in tokens:
+                return True
+            
+            # More sophisticated parsing would check proper grouping
+            # This is a basic implementation that catches common cases
+            return self._check_operator_grouping(tokens)
+        
+        return False
+
+    def _check_operator_grouping(self, tokens: List[str]) -> bool:
+        """
+        Check if AND/OR operators are properly grouped with parentheses.
+        
+        This is a simplified implementation that catches common violations.
+        A full parser would be more accurate but more complex.
+        """
+        # Simple rule: if we see patterns like "term AND term OR term" without
+        # parentheses properly separating the different operator types, it's invalid
+        
+        operators = []
+        paren_depth = 0
+        current_level_ops = []
+        
+        for token in tokens:
+            if token == '(':
+                # Starting new group - save current level operators
+                if current_level_ops:
+                    operators.append(current_level_ops.copy())
+                current_level_ops = []
+                paren_depth += 1
+            elif token == ')':
+                paren_depth -= 1
+                # Check current level when closing group
+                if len(set(current_level_ops)) > 1:  # Mixed operators at this level
+                    return True
+                current_level_ops = []
+            elif token.upper() in ['AND', 'OR', '&&', '||', '%26%26', '%7C%7C']:
+                normalized_op = 'AND' if token.upper() in ['AND', '&&', '%26%26'] else 'OR'
+                current_level_ops.append(normalized_op)
+        
+        # Check final level
+        return len(set(current_level_ops)) > 1
 
     def _check_quotes(self, query: str, variable_name: str) -> Tuple[bool, str]:
         """Check for balanced quotes and parentheses."""
@@ -193,7 +403,6 @@ class QueryValidator:
             f"[{variable_name}] parameter contains an unclosed quote (\"). "
             f"Please close the quote before proceeding."
         )
-
 
 class NewscatcherMixin:
     """Common functionality for both synchronous and asynchronous Newscatcher API clients."""
