@@ -3,11 +3,11 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FNewscatcher%2Fnewscatcher-python)
 [![pypi](https://img.shields.io/pypi/v/newscatcher-sdk)](https://pypi.python.org/pypi/newscatcher-sdk)
 
-The Newscatcher Python library provides convenient access to the Newscatcher API from Python.
+The Newscatcher Python library gives you convenient access to the Newscatcher API from Python.
 
 ## Documentation
 
-API reference documentation is available [here](https://www.newscatcherapi.com/docs/v3/api-reference).
+View API reference documentation at [newscatcherapi.com/docs](https://www.newscatcherapi.com/docs/v3/api-reference).
 
 ## Installation
 
@@ -21,7 +21,7 @@ A full reference for this library is available [here](./reference.md).
 
 ## Usage
 
-Instantiate and use the client with the following:
+Create and use the client:
 
 ```python
 import datetime
@@ -46,9 +46,9 @@ client.search.post(
 )
 ```
 
-## Async Client
+## Async client
 
-The SDK also exports an `async` client so that you can make non-blocking calls to our API.
+Use the `AsyncNewscatcherApi` client to make non-blocking calls to the API:
 
 ```python
 import asyncio
@@ -80,10 +80,9 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Exception Handling
+## Exception handling
 
-When the API returns a non-success status code (4xx or 5xx response), a subclass of the following error
-will be thrown.
+The SDK raises an `ApiError` when the API returns a non-success status code (4xx or 5xx response):
 
 ```python
 from newscatcher.core.api_error import ApiError
@@ -95,11 +94,11 @@ except ApiError as e:
     print(e.body)
 ```
 
-## Retrieving More Articles
+## Retrieving more articles
 
-The standard News API endpoints have a limit of 10,000 articles per query. To help retrieve more articles when needed, this SDK provides methods that automatically break down your request into smaller time chunks:
+The standard News API endpoints have a limit of 10,000 articles per query. To retrieve more articles when needed, use these methods that automatically break down your request into smaller time chunks:
 
-### Get All Articles
+### Get all articles
 
 ```python
 import datetime
@@ -119,7 +118,7 @@ articles = client.get_all_articles(
 print(f"Retrieved {len(articles)} articles")
 ```
 
-### Get All Latest Headlines
+### Get all latest headlines
 
 ```python
 from newscatcher import NewscatcherApi
@@ -136,25 +135,62 @@ articles = client.get_all_headlines(
 print(f"Retrieved {len(articles)} articles")
 ```
 
-These methods handle pagination and deduplication automatically, providing a seamless experience for retrieving large datasets.
+These methods handle pagination and deduplication automatically, giving you a seamless experience for retrieving large datasets.
 
-The async versions of these methods are also available with the `AsyncNewscatcherApi` client.
+You can also use async versions of these methods with the `AsyncNewscatcherApi` client.
+
+## Query validation
+
+The SDK includes client-side query validation to help you catch syntax errors before making API calls:
+
+```python
+from newscatcher import NewscatcherApi
+
+client = NewscatcherApi(api_key="YOUR_API_KEY")
+
+# Validate query syntax
+is_valid, error_message = client.validate_query("machine learning")
+if is_valid:
+    print("Query is valid!")
+else:
+    print(f"Invalid query: {error_message}")
+```
+
+### Automatic validation
+
+Query validation is enabled by default in methods like `get_all_articles()` and will raise a `ValueError` for invalid queries. You can disable validation by setting `validate_query=False`:
+
+```python
+# Enable validation (default)
+articles = client.get_all_articles(
+    q="AI OR \"artificial intelligence\"",  # Valid query
+    validate_query=True,  # Optional, True by default
+    from_="7d"
+)
+
+# Disable validation (not recommended)
+articles = client.get_all_articles(
+    q="some query",
+    validate_query=False,  # Skip client-side validation
+    from_="7d"
+)
+```
+
+For complete validation rules, bulk validation techniques, and troubleshooting, see [Validate queries with Python SDK](https://www.newscatcherapi.com/docs/v3/documentation/how-to/validate-queries-python-sdk).
 
 ## Advanced
 
 ### Retries
 
-The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
-as the request is deemed retriable and the number of retry attempts has not grown larger than the configured
-retry limit (default: 2).
+The SDK includes automatic retries with exponential backoff. The SDK retries a request when the request is retriable and the number of retry attempts is less than the configured retry limit (default: 2).
 
-A request is deemed retriable when any of the following HTTP status codes is returned:
+The SDK retries requests when the API returns these HTTP status codes:
 
 - [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
 - [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
 - [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
 
-Use the `max_retries` request option to configure this behavior.
+Use the `max_retries` request option to configure this behavior:
 
 ```python
 client.search.post(..., request_options={
@@ -164,7 +200,7 @@ client.search.post(..., request_options={
 
 ### Timeouts
 
-The SDK defaults to a 60 second timeout. You can configure this with a timeout option at the client or request level.
+The SDK uses a 60-second timeout by default. Configure timeouts at the client or request level:
 
 ```python
 
@@ -182,10 +218,9 @@ client.search.post(..., request_options={
 })
 ```
 
-### Custom Client
+### Custom client
 
-You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
-and transports.
+Override the `httpx` client to customize it for your use case. Common use cases include proxies and transports:
 
 ```python
 import httpx
@@ -202,10 +237,6 @@ client = NewscatcherApi(
 
 ## Contributing
 
-While we value open-source contributions to this SDK, this library is generated programmatically.
-Additions made directly to this library would have to be moved over to our generation code,
-otherwise they would be overwritten upon the next generated release. Feel free to open a PR as
-a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
-an issue first to discuss with us!
+We value open-source contributions to this SDK. This library is generated programmatically, but we can implement custom methods and use `.fernignore` to preserve certain files. However, implementing custom solutions in the SDK involves a complex process. Please open an issue first to discuss your ideas before submitting a PR.
 
 On the other hand, contributions to the README are always very welcome!
