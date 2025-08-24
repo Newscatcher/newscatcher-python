@@ -3,7 +3,7 @@ name = "newscatcher-sdk"
 
 [tool.poetry]
 name = "newscatcher-sdk"
-version = "1.3.0"
+version = "1.4.0"
 description = ""
 readme = "README.md"
 authors = []
