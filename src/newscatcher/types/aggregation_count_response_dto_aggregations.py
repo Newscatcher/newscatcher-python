@@ -4,4 +4,4 @@ import typing
 
 from .aggregation_item import AggregationItem
 
-Aggregations = typing.Union[AggregationItem, typing.List[AggregationItem]]
+AggregationCountResponseDtoAggregations = typing.Union[AggregationItem, typing.List[AggregationItem]]

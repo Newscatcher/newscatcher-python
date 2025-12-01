@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
-from .aggregations import Aggregations
+from .aggregation_count_response_dto_aggregations import AggregationCountResponseDtoAggregations
 from .base_search_response_dto import BaseSearchResponseDto
 from .user_input_dto import UserInputDto
 
@@ -16,7 +16,7 @@ class AggregationCountResponseDto(BaseSearchResponseDto):
     - Optional fields may be `null` or `undefined` if the data point is not presented or couldn't be extracted during processing.
     """
 
-    aggregations: typing.Optional[Aggregations] = pydantic.Field(default=None)
+    aggregations: typing.Optional[AggregationCountResponseDtoAggregations] = pydantic.Field(default=None)
     """
     The aggregation results. Can be either a dictionary or a list of dictionaries.
     """

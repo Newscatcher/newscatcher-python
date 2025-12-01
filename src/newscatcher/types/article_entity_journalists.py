@@ -2,4 +2,4 @@
 
 import typing
 
-UserInputDto = typing.Dict[str, typing.Any]
+ArticleEntityJournalists = typing.Union[typing.List[str], str]

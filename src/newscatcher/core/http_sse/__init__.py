@@ -6,17 +6,15 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import (
-        AggregationGetRequestPublishedDatePrecision,
-        AggregationGetRequestSortBy,
-        AggregationGetResponse,
-        AggregationPostResponse,
-    )
+    from ._api import EventSource, aconnect_sse, connect_sse
+    from ._exceptions import SSEError
+    from ._models import ServerSentEvent
 _dynamic_imports: typing.Dict[str, str] = {
-    "AggregationGetRequestPublishedDatePrecision": ".types",
-    "AggregationGetRequestSortBy": ".types",
-    "AggregationGetResponse": ".types",
-    "AggregationPostResponse": ".types",
+    "EventSource": "._api",
+    "SSEError": "._exceptions",
+    "ServerSentEvent": "._models",
+    "aconnect_sse": "._api",
+    "connect_sse": "._api",
 }
 
 
@@ -41,9 +39,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = [
-    "AggregationGetRequestPublishedDatePrecision",
-    "AggregationGetRequestSortBy",
-    "AggregationGetResponse",
-    "AggregationPostResponse",
-]
+__all__ = ["EventSource", "SSEError", "ServerSentEvent", "aconnect_sse", "connect_sse"]

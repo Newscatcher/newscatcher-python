@@ -4,4 +4,4 @@ import typing
 
 from .article_entity import ArticleEntity
 
-Articles = typing.List[ArticleEntity]
+ArticlesDto = typing.List[ArticleEntity]
