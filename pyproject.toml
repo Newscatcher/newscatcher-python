@@ -3,7 +3,7 @@ name = "newscatcher-sdk"
 
 [tool.poetry]
 name = "newscatcher-sdk"
-version = "1.4.0"
+version = "1.4.1"
 description = ""
 readme = "README.md"
 authors = []
@@ -31,7 +31,7 @@ packages = [
     { include = "newscatcher", from = "src"}
 ]
 
-[project.urls]
+[tool.poetry.urls]
 Repository = 'https://github.com/Newscatcher/newscatcher-python'
 
 [tool.poetry.dependencies]

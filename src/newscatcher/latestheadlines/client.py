@@ -436,12 +436,27 @@ class LatestheadlinesClient:
             api_key="YOUR_API_KEY",
         )
         client.latestheadlines.get(
+            when="7d",
+            lang="en",
+            not_lang="fr",
+            countries="US",
+            not_countries="UK",
             predefined_sources="top 100 US, top 5 GB",
+            sources="nytimes.com",
+            not_sources="cnn.com",
+            not_author_name="John Doe",
+            parent_url="https://www.washingtonpost.com/politics",
+            all_links="https://aiindex.stanford.edu/report",
+            all_domain_links="nvidia.com",
             include_translation_fields=True,
             include_nlp_data=True,
             has_nlp=True,
             theme="Business,Finance",
             not_theme="Crime",
+            org_entity_name="Apple",
+            per_entity_name="Elon Musk",
+            loc_entity_name="California",
+            misc_entity_name="Bitcoin",
             iptc_tags="20000199,20000209",
             not_iptc_tags="20000205,20000209",
             iab_tags="Business,Events",
@@ -652,10 +667,8 @@ class LatestheadlinesClient:
             api_key="YOUR_API_KEY",
         )
         client.latestheadlines.post(
-            lang="en",
-            predefined_sources=["top 50 US", "top 20 GB"],
-            is_opinion=False,
-            page_size=10,
+            when="7d",
+            page_size=1,
         )
         """
         _response = self._raw_client.post(
@@ -1092,12 +1105,27 @@ class AsyncLatestheadlinesClient:
 
         async def main() -> None:
             await client.latestheadlines.get(
+                when="7d",
+                lang="en",
+                not_lang="fr",
+                countries="US",
+                not_countries="UK",
                 predefined_sources="top 100 US, top 5 GB",
+                sources="nytimes.com",
+                not_sources="cnn.com",
+                not_author_name="John Doe",
+                parent_url="https://www.washingtonpost.com/politics",
+                all_links="https://aiindex.stanford.edu/report",
+                all_domain_links="nvidia.com",
                 include_translation_fields=True,
                 include_nlp_data=True,
                 has_nlp=True,
                 theme="Business,Finance",
                 not_theme="Crime",
+                org_entity_name="Apple",
+                per_entity_name="Elon Musk",
+                loc_entity_name="California",
+                misc_entity_name="Bitcoin",
                 iptc_tags="20000199,20000209",
                 not_iptc_tags="20000205,20000209",
                 iab_tags="Business,Events",
@@ -1316,10 +1344,8 @@ class AsyncLatestheadlinesClient:
 
         async def main() -> None:
             await client.latestheadlines.post(
-                lang="en",
-                predefined_sources=["top 50 US", "top 20 GB"],
-                is_opinion=False,
-                page_size=10,
+                when="7d",
+                page_size=1,
             )
 
 
