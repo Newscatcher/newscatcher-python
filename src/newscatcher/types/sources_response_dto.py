@@ -24,7 +24,7 @@ class SourcesResponseDto(UniversalBaseModel):
     A list of news sources that match the specified criteria.
     """
 
-    user_input: typing.Dict[str, typing.Optional[typing.Any]] = pydantic.Field()
+    user_input: typing.Dict[str, typing.Any] = pydantic.Field()
     """
     The user input parameters for the request.
     """

@@ -11,6 +11,7 @@ from ..types.page import Page
 from ..types.page_size import PageSize
 from ..types.robots_compliant import RobotsCompliant
 from ..types.search_response_dto import SearchResponseDto
+from ..types.source import Source
 from ..types.to import To
 from .raw_client import AsyncRawSearchLinkClient, RawSearchLinkClient
 
@@ -38,6 +39,7 @@ class SearchLinkClient:
         *,
         ids: typing.Optional[str] = None,
         links: typing.Optional[str] = None,
+        source: typing.Optional[Source] = None,
         from_: typing.Optional[From] = None,
         to: typing.Optional[To] = None,
         page: typing.Optional[int] = None,
@@ -63,6 +65,8 @@ class SearchLinkClient:
             Example: `"https://example.com/article1, https://example.com/article2"`
 
             **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
 
@@ -97,6 +101,9 @@ class SearchLinkClient:
             api_key="YOUR_API_KEY",
         )
         client.search_link.search_url_get(
+            ids="5f8d0d55b6e45e00179c6e7e",
+            links="https://nytimes.com/article1",
+            source="articles.id,articles.title,articles.link,articles.published_date",
             from_=datetime.datetime.fromisoformat(
                 "2024-07-01 00:00:00+00:00",
             ),
@@ -108,6 +115,7 @@ class SearchLinkClient:
         _response = self._raw_client.search_url_get(
             ids=ids,
             links=links,
+            source=source,
             from_=from_,
             to=to,
             page=page,
@@ -122,6 +130,7 @@ class SearchLinkClient:
         *,
         ids: typing.Optional[Ids] = OMIT,
         links: typing.Optional[Links] = OMIT,
+        source: typing.Optional[Source] = OMIT,
         from_: typing.Optional[From] = OMIT,
         to: typing.Optional[To] = OMIT,
         page: typing.Optional[Page] = OMIT,
@@ -137,6 +146,8 @@ class SearchLinkClient:
         ids : typing.Optional[Ids]
 
         links : typing.Optional[Links]
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
             The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
@@ -180,19 +191,14 @@ class SearchLinkClient:
             api_key="YOUR_API_KEY",
         )
         client.search_link.search_url_post(
-            ids=[
-                "8ea8a784568ffaa05cb6d1ab2d2e84dd",
-                "0146a551ef05ab1c494a55e806e3ce64",
-            ],
-            links=[
-                "https://www.nytimes.com/2024/08/30/technology/ai-chatbot-chatgpt-manipulation.html",
-                "https://www.bbc.com/news/articles/c39k379grzlo",
-            ],
+            links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
+            source="articles.id,articles.title,articles.link,articles.canonical_url",
         )
         """
         _response = self._raw_client.search_url_post(
             ids=ids,
             links=links,
+            source=source,
             from_=from_,
             to=to,
             page=page,
@@ -223,6 +229,7 @@ class AsyncSearchLinkClient:
         *,
         ids: typing.Optional[str] = None,
         links: typing.Optional[str] = None,
+        source: typing.Optional[Source] = None,
         from_: typing.Optional[From] = None,
         to: typing.Optional[To] = None,
         page: typing.Optional[int] = None,
@@ -248,6 +255,8 @@ class AsyncSearchLinkClient:
             Example: `"https://example.com/article1, https://example.com/article2"`
 
             **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
 
@@ -286,6 +295,9 @@ class AsyncSearchLinkClient:
 
         async def main() -> None:
             await client.search_link.search_url_get(
+                ids="5f8d0d55b6e45e00179c6e7e",
+                links="https://nytimes.com/article1",
+                source="articles.id,articles.title,articles.link,articles.published_date",
                 from_=datetime.datetime.fromisoformat(
                     "2024-07-01 00:00:00+00:00",
                 ),
@@ -300,6 +312,7 @@ class AsyncSearchLinkClient:
         _response = await self._raw_client.search_url_get(
             ids=ids,
             links=links,
+            source=source,
             from_=from_,
             to=to,
             page=page,
@@ -314,6 +327,7 @@ class AsyncSearchLinkClient:
         *,
         ids: typing.Optional[Ids] = OMIT,
         links: typing.Optional[Links] = OMIT,
+        source: typing.Optional[Source] = OMIT,
         from_: typing.Optional[From] = OMIT,
         to: typing.Optional[To] = OMIT,
         page: typing.Optional[Page] = OMIT,
@@ -329,6 +343,8 @@ class AsyncSearchLinkClient:
         ids : typing.Optional[Ids]
 
         links : typing.Optional[Links]
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
             The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
@@ -377,14 +393,8 @@ class AsyncSearchLinkClient:
 
         async def main() -> None:
             await client.search_link.search_url_post(
-                ids=[
-                    "8ea8a784568ffaa05cb6d1ab2d2e84dd",
-                    "0146a551ef05ab1c494a55e806e3ce64",
-                ],
-                links=[
-                    "https://www.nytimes.com/2024/08/30/technology/ai-chatbot-chatgpt-manipulation.html",
-                    "https://www.bbc.com/news/articles/c39k379grzlo",
-                ],
+                links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
+                source="articles.id,articles.title,articles.link,articles.canonical_url",
             )
 
 
@@ -393,6 +403,7 @@ class AsyncSearchLinkClient:
         _response = await self._raw_client.search_url_post(
             ids=ids,
             links=links,
+            source=source,
             from_=from_,
             to=to,
             page=page,

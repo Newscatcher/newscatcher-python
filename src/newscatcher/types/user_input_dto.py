@@ -2,4 +2,4 @@
 
 import typing
 
-UserInputDto = typing.Dict[str, typing.Optional[typing.Any]]
+UserInputDto = typing.Dict[str, typing.Any]
