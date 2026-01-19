@@ -13,7 +13,7 @@ class FailedSearchSimilarResponseDto(BaseSearchResponseDto):
     The response model for a failed `Search Similar` request.
     """
 
-    articles: typing.Optional[typing.List[typing.Dict[str, typing.Optional[typing.Any]]]] = pydantic.Field(default=None)
+    articles: typing.Optional[typing.List[typing.Dict[str, typing.Any]]] = pydantic.Field(default=None)
     """
     An empty list of articles, as no matches were found.
     """

@@ -146,8 +146,12 @@ class SourcesClient:
             api_key="YOUR_API_KEY",
         )
         client.sources.get(
+            lang="en",
+            countries="US",
             predefined_sources="top 100 US, top 5 GB",
+            source_name="sport",
             source_url="bbc.com",
+            news_type="General News Outlets",
         )
         """
         _response = self._raw_client.get(
@@ -225,11 +229,7 @@ class SourcesClient:
             api_key="YOUR_API_KEY",
         )
         client.sources.post(
-            predefined_sources=["top 50 US"],
-            include_additional_info=True,
-            is_news_domain=True,
-            news_domain_type="Original Content",
-            news_type="General News Outlets",
+            predefined_sources="top 10 US",
         )
         """
         _response = self._raw_client.post(
@@ -377,8 +377,12 @@ class AsyncSourcesClient:
 
         async def main() -> None:
             await client.sources.get(
+                lang="en",
+                countries="US",
                 predefined_sources="top 100 US, top 5 GB",
+                source_name="sport",
                 source_url="bbc.com",
+                news_type="General News Outlets",
             )
 
 
@@ -464,11 +468,7 @@ class AsyncSourcesClient:
 
         async def main() -> None:
             await client.sources.post(
-                predefined_sources=["top 50 US"],
-                include_additional_info=True,
-                is_news_domain=True,
-                news_domain_type="Original Content",
-                news_type="General News Outlets",
+                predefined_sources="top 10 US",
             )
 
 

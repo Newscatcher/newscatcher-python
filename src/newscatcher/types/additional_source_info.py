@@ -15,7 +15,7 @@ class AdditionalSourceInfo(UniversalBaseModel):
 
     nb_articles_for_7_d: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="nb_articles_for_7d")
-    ] = pydantic.Field(default=None)
+    ] = pydantic.Field(alias="nb_articles_for_7d", default=None)
     """
     The number of articles published by the source in the last seven days.
     """

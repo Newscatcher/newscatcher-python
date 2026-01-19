@@ -39,28 +39,28 @@ class NlpDataEntity(UniversalBaseModel):
     """
 
     ner_per: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_PER")] = (
-        pydantic.Field(default=None)
+        pydantic.Field(alias="ner_PER", default=None)
     )
     """
     Named Entity Recognition for person entities (individuals' names).
     """
 
     ner_org: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_ORG")] = (
-        pydantic.Field(default=None)
+        pydantic.Field(alias="ner_ORG", default=None)
     )
     """
     Named Entity Recognition for organization entities (company names, institutions).
     """
 
     ner_misc: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_MISC")] = (
-        pydantic.Field(default=None)
+        pydantic.Field(alias="ner_MISC", default=None)
     )
     """
     Named Entity Recognition for miscellaneous entities (events, nationalities, products).
     """
 
     ner_loc: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_LOC")] = (
-        pydantic.Field(default=None)
+        pydantic.Field(alias="ner_LOC", default=None)
     )
     """
     Named Entity Recognition for location entities (cities, countries, geographic features).
@@ -68,28 +68,28 @@ class NlpDataEntity(UniversalBaseModel):
 
     translation_ner_per: typing_extensions.Annotated[
         typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_PER")
-    ] = pydantic.Field(default=None)
+    ] = pydantic.Field(alias="translation_ner_PER", default=None)
     """
     Named Entity Recognition for person entities (individuals' names) extracted from the English translation of the article.
     """
 
     translation_ner_org: typing_extensions.Annotated[
         typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_ORG")
-    ] = pydantic.Field(default=None)
+    ] = pydantic.Field(alias="translation_ner_ORG", default=None)
     """
     Named Entity Recognition for organization entities (company names, institutions) extracted from the English translation of the article.
     """
 
     translation_ner_misc: typing_extensions.Annotated[
         typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_MISC")
-    ] = pydantic.Field(default=None)
+    ] = pydantic.Field(alias="translation_ner_MISC", default=None)
     """
     Named Entity Recognition for miscellaneous entities (events, nationalities, products) extracted from the English translation of the article.
     """
 
     translation_ner_loc: typing_extensions.Annotated[
         typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_LOC")
-    ] = pydantic.Field(default=None)
+    ] = pydantic.Field(alias="translation_ner_LOC", default=None)
     """
     Named Entity Recognition for location entities (cities, countries, geographic features) extracted from the English translation of the article.
     """

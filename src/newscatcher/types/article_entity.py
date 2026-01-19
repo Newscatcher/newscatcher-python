@@ -7,8 +7,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .additional_domain_info_entity import AdditionalDomainInfoEntity
 from .article_entity_all_domain_links import ArticleEntityAllDomainLinks
 from .article_entity_all_links import ArticleEntityAllLinks
-from .authors import Authors
-from .journalists import Journalists
+from .article_entity_authors import ArticleEntityAuthors
+from .article_entity_journalists import ArticleEntityJournalists
 from .nlp_data_entity import NlpDataEntity
 
 
@@ -17,7 +17,7 @@ class ArticleEntity(UniversalBaseModel):
     The data model representing a single article in the search results.
     """
 
-    title: str = pydantic.Field()
+    title: typing.Optional[str] = pydantic.Field(default=None)
     """
     The title of the article.
     """
@@ -27,12 +27,12 @@ class ArticleEntity(UniversalBaseModel):
     The primary author of the article.
     """
 
-    authors: typing.Optional[Authors] = pydantic.Field(default=None)
+    authors: typing.Optional[ArticleEntityAuthors] = pydantic.Field(default=None)
     """
     A list of authors of the article.
     """
 
-    journalists: typing.Optional[Journalists] = pydantic.Field(default=None)
+    journalists: typing.Optional[ArticleEntityJournalists] = pydantic.Field(default=None)
     """
     A list of journalists associated with the article.
     """
@@ -62,17 +62,22 @@ class ArticleEntity(UniversalBaseModel):
     The date the article was parsed.
     """
 
-    link: str = pydantic.Field()
+    link: typing.Optional[str] = pydantic.Field(default=None)
     """
     The URL link to the article.
     """
 
-    domain_url: str = pydantic.Field()
+    canonical_url: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Indicates whether the article URL is canonical.
+    """
+
+    domain_url: typing.Optional[str] = pydantic.Field(default=None)
     """
     The domain URL of the article.
     """
 
-    full_domain_url: str = pydantic.Field()
+    full_domain_url: typing.Optional[str] = pydantic.Field(default=None)
     """
     The full domain URL of the article.
     """
@@ -92,7 +97,7 @@ class ArticleEntity(UniversalBaseModel):
     Indicates if the article is paid content.
     """
 
-    parent_url: str = pydantic.Field()
+    parent_url: typing.Optional[str] = pydantic.Field(default=None)
     """
     The categorical URL of the article.
     """
@@ -107,7 +112,7 @@ class ArticleEntity(UniversalBaseModel):
     The rights information for the article.
     """
 
-    rank: int = pydantic.Field()
+    rank: typing.Optional[int] = pydantic.Field(default=None)
     """
     The rank of the article's source.
     """
@@ -127,7 +132,7 @@ class ArticleEntity(UniversalBaseModel):
     A brief description of the article.
     """
 
-    content: str = pydantic.Field()
+    content: typing.Optional[str] = pydantic.Field(default=None)
     """
     The content of the article.
     """
@@ -168,12 +173,12 @@ class ArticleEntity(UniversalBaseModel):
     """
 
     nlp: typing.Optional[NlpDataEntity] = None
-    id: str = pydantic.Field()
+    id: typing.Optional[str] = pydantic.Field(default=None)
     """
     The unique identifier for the article.
     """
 
-    score: float = pydantic.Field()
+    score: typing.Optional[float] = pydantic.Field(default=None)
     """
     The relevance score of the article.
     """
