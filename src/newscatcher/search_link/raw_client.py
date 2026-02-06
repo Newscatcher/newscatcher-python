@@ -24,6 +24,7 @@ from ..types.page import Page
 from ..types.page_size import PageSize
 from ..types.robots_compliant import RobotsCompliant
 from ..types.search_response_dto import SearchResponseDto
+from ..types.source import Source
 from ..types.to import To
 
 # this is used as the default value for optional parameters
@@ -39,6 +40,7 @@ class RawSearchLinkClient:
         *,
         ids: typing.Optional[str] = None,
         links: typing.Optional[str] = None,
+        source: typing.Optional[Source] = None,
         from_: typing.Optional[From] = None,
         to: typing.Optional[To] = None,
         page: typing.Optional[int] = None,
@@ -64,6 +66,8 @@ class RawSearchLinkClient:
             Example: `"https://example.com/article1, https://example.com/article2"`
 
             **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
 
@@ -94,6 +98,7 @@ class RawSearchLinkClient:
             params={
                 "ids": ids,
                 "links": links,
+                "_source": source,
                 "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
                 "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
@@ -199,6 +204,7 @@ class RawSearchLinkClient:
         *,
         ids: typing.Optional[Ids] = OMIT,
         links: typing.Optional[Links] = OMIT,
+        source: typing.Optional[Source] = OMIT,
         from_: typing.Optional[From] = OMIT,
         to: typing.Optional[To] = OMIT,
         page: typing.Optional[Page] = OMIT,
@@ -214,6 +220,8 @@ class RawSearchLinkClient:
         ids : typing.Optional[Ids]
 
         links : typing.Optional[Links]
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
             The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
@@ -255,6 +263,7 @@ class RawSearchLinkClient:
             json={
                 "ids": convert_and_respect_annotation_metadata(object_=ids, annotation=Ids, direction="write"),
                 "links": convert_and_respect_annotation_metadata(object_=links, annotation=Links, direction="write"),
+                "_source": source,
                 "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
                 "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
@@ -369,6 +378,7 @@ class AsyncRawSearchLinkClient:
         *,
         ids: typing.Optional[str] = None,
         links: typing.Optional[str] = None,
+        source: typing.Optional[Source] = None,
         from_: typing.Optional[From] = None,
         to: typing.Optional[To] = None,
         page: typing.Optional[int] = None,
@@ -394,6 +404,8 @@ class AsyncRawSearchLinkClient:
             Example: `"https://example.com/article1, https://example.com/article2"`
 
             **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
 
@@ -424,6 +436,7 @@ class AsyncRawSearchLinkClient:
             params={
                 "ids": ids,
                 "links": links,
+                "_source": source,
                 "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
                 "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,
@@ -529,6 +542,7 @@ class AsyncRawSearchLinkClient:
         *,
         ids: typing.Optional[Ids] = OMIT,
         links: typing.Optional[Links] = OMIT,
+        source: typing.Optional[Source] = OMIT,
         from_: typing.Optional[From] = OMIT,
         to: typing.Optional[To] = OMIT,
         page: typing.Optional[Page] = OMIT,
@@ -544,6 +558,8 @@ class AsyncRawSearchLinkClient:
         ids : typing.Optional[Ids]
 
         links : typing.Optional[Links]
+
+        source : typing.Optional[Source]
 
         from_ : typing.Optional[From]
             The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
@@ -585,6 +601,7 @@ class AsyncRawSearchLinkClient:
             json={
                 "ids": convert_and_respect_annotation_metadata(object_=ids, annotation=Ids, direction="write"),
                 "links": convert_and_respect_annotation_metadata(object_=links, annotation=Links, direction="write"),
+                "_source": source,
                 "from_": convert_and_respect_annotation_metadata(object_=from_, annotation=From, direction="write"),
                 "to_": convert_and_respect_annotation_metadata(object_=to, annotation=To, direction="write"),
                 "page": page,

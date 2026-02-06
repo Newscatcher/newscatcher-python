@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
-from .articles import Articles
+from .articles_dto import ArticlesDto
 from .base_search_response_dto import BaseSearchResponseDto
 from .user_input_dto import UserInputDto
 
@@ -18,7 +18,7 @@ class SearchResponseDto(BaseSearchResponseDto):
     - The `nlp` property within the article object `articles[n].nlp` is only available with NLP-enabled subscription plans.
     """
 
-    articles: typing.Optional[Articles] = None
+    articles: typing.Optional[ArticlesDto] = None
     user_input: typing.Optional[UserInputDto] = None
 
     if IS_PYDANTIC_V2:
