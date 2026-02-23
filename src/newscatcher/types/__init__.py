@@ -2,112 +2,270 @@
 
 # isort: skip_file
 
-from .additional_domain_info import AdditionalDomainInfo
-from .additional_domain_info_entity import AdditionalDomainInfoEntity
-from .additional_source_info import AdditionalSourceInfo
-from .aggregation_by import AggregationBy
-from .aggregation_count_response_dto import AggregationCountResponseDto
-from .aggregation_item import AggregationItem
-from .aggregations import Aggregations
-from .all_domain_links import AllDomainLinks
-from .all_links import AllLinks
-from .article_entity import ArticleEntity
-from .article_entity_all_domain_links import ArticleEntityAllDomainLinks
-from .article_entity_all_links import ArticleEntityAllLinks
-from .articles import Articles
-from .author_name import AuthorName
-from .authors import Authors
-from .base_search_response_dto import BaseSearchResponseDto
-from .breaking_news_article_entity import BreakingNewsArticleEntity
-from .breaking_news_article_entity_all_domain_links import BreakingNewsArticleEntityAllDomainLinks
-from .breaking_news_article_entity_all_links import BreakingNewsArticleEntityAllLinks
-from .breaking_news_event_entity import BreakingNewsEventEntity
-from .breaking_news_response_dto import BreakingNewsResponseDto
-from .by_parse_date import ByParseDate
-from .cluster_entity import ClusterEntity
-from .clustered_articles_dto import ClusteredArticlesDto
-from .clustered_search_response_dto import ClusteredSearchResponseDto
-from .clustering_enabled import ClusteringEnabled
-from .clustering_threshold import ClusteringThreshold
-from .clustering_variable import ClusteringVariable
-from .content_sentiment_max import ContentSentimentMax
-from .content_sentiment_min import ContentSentimentMin
-from .countries import Countries
-from .custom_tags import CustomTags
-from .error import Error
-from .exclude_duplicates import ExcludeDuplicates
-from .failed_aggregation_count_response_dto import FailedAggregationCountResponseDto
-from .failed_authors_response_dto import FailedAuthorsResponseDto
-from .failed_search_similar_response_dto import FailedSearchSimilarResponseDto
-from .from_ import From
-from .from_rank import FromRank
-from .has_nlp import HasNlp
-from .iab_tags import IabTags
-from .ids import Ids
-from .include_additional_info import IncludeAdditionalInfo
-from .include_nlp_data import IncludeNlpData
-from .include_similar_documents import IncludeSimilarDocuments
-from .include_translation_fields import IncludeTranslationFields
-from .iptc_tags import IptcTags
-from .is_headline import IsHeadline
-from .is_news_domain import IsNewsDomain
-from .is_opinion import IsOpinion
-from .is_paid_content import IsPaidContent
-from .journalists import Journalists
-from .lang import Lang
-from .links import Links
-from .loc_entity_name import LocEntityName
-from .misc_entity_name import MiscEntityName
-from .named_entity_list import NamedEntityList
-from .named_entity_list_item import NamedEntityListItem
-from .ner_name import NerName
-from .news_domain_type import NewsDomainType
-from .news_type import NewsType
-from .nlp_data_entity import NlpDataEntity
-from .not_author_name import NotAuthorName
-from .not_countries import NotCountries
-from .not_iab_tags import NotIabTags
-from .not_iptc_tags import NotIptcTags
-from .not_lang import NotLang
-from .not_sources import NotSources
-from .not_theme import NotTheme
-from .org_entity_name import OrgEntityName
-from .page import Page
-from .page_size import PageSize
-from .parent_url import ParentUrl
-from .per_entity_name import PerEntityName
-from .predefined_sources import PredefinedSources
-from .published_date_precision import PublishedDatePrecision
-from .q import Q
-from .ranked_only import RankedOnly
-from .robots_compliant import RobotsCompliant
-from .search_in import SearchIn
-from .search_response_dto import SearchResponseDto
-from .search_similar_response_dto import SearchSimilarResponseDto
-from .sentiment_scores import SentimentScores
-from .similar_article_entity import SimilarArticleEntity
-from .similar_document import SimilarDocument
-from .similar_documents_fields import SimilarDocumentsFields
-from .similar_documents_number import SimilarDocumentsNumber
-from .sort_by import SortBy
-from .source_info import SourceInfo
-from .source_name import SourceName
-from .source_url import SourceUrl
-from .sources import Sources
-from .sources_response_dto import SourcesResponseDto
-from .sources_response_dto_sources_item import SourcesResponseDtoSourcesItem
-from .subscription_response_dto import SubscriptionResponseDto
-from .theme import Theme
-from .time_frame_count import TimeFrameCount
-from .title_sentiment_max import TitleSentimentMax
-from .title_sentiment_min import TitleSentimentMin
-from .to import To
-from .to_rank import ToRank
-from .top_n_articles import TopNArticles
-from .user_input_dto import UserInputDto
-from .when import When
-from .word_count_max import WordCountMax
-from .word_count_min import WordCountMin
+import typing
+from importlib import import_module
+
+if typing.TYPE_CHECKING:
+    from .additional_domain_info import AdditionalDomainInfo
+    from .additional_domain_info_entity import AdditionalDomainInfoEntity
+    from .additional_source_info import AdditionalSourceInfo
+    from .aggregation_by import AggregationBy
+    from .aggregation_count_response_dto import AggregationCountResponseDto
+    from .aggregation_count_response_dto_aggregations import AggregationCountResponseDtoAggregations
+    from .aggregation_get_request_from import AggregationGetRequestFrom
+    from .aggregation_get_request_to import AggregationGetRequestTo
+    from .aggregation_item import AggregationItem
+    from .all_domain_links import AllDomainLinks
+    from .all_links import AllLinks
+    from .article_entity import ArticleEntity
+    from .article_entity_all_domain_links import ArticleEntityAllDomainLinks
+    from .article_entity_all_links import ArticleEntityAllLinks
+    from .article_entity_authors import ArticleEntityAuthors
+    from .article_entity_journalists import ArticleEntityJournalists
+    from .articles_dto import ArticlesDto
+    from .author_name import AuthorName
+    from .authors_get_request_from import AuthorsGetRequestFrom
+    from .authors_get_request_to import AuthorsGetRequestTo
+    from .base_search_response_dto import BaseSearchResponseDto
+    from .breaking_news_article_entity import BreakingNewsArticleEntity
+    from .breaking_news_article_entity_all_domain_links import BreakingNewsArticleEntityAllDomainLinks
+    from .breaking_news_article_entity_all_links import BreakingNewsArticleEntityAllLinks
+    from .breaking_news_article_entity_authors import BreakingNewsArticleEntityAuthors
+    from .breaking_news_article_entity_journalists import BreakingNewsArticleEntityJournalists
+    from .breaking_news_event_entity import BreakingNewsEventEntity
+    from .breaking_news_response_dto import BreakingNewsResponseDto
+    from .by_parse_date import ByParseDate
+    from .canonical_url import CanonicalUrl
+    from .cluster_entity import ClusterEntity
+    from .clustered_articles_dto import ClusteredArticlesDto
+    from .clustered_search_response_dto import ClusteredSearchResponseDto
+    from .clustering_enabled import ClusteringEnabled
+    from .clustering_threshold import ClusteringThreshold
+    from .clustering_variable import ClusteringVariable
+    from .content_sentiment_max import ContentSentimentMax
+    from .content_sentiment_min import ContentSentimentMin
+    from .countries import Countries
+    from .custom_tags import CustomTags
+    from .error import Error
+    from .exclude_duplicates import ExcludeDuplicates
+    from .failed_aggregation_count_response_dto import FailedAggregationCountResponseDto
+    from .failed_authors_response_dto import FailedAuthorsResponseDto
+    from .failed_search_similar_response_dto import FailedSearchSimilarResponseDto
+    from .from_ import From
+    from .from_rank import FromRank
+    from .has_nlp import HasNlp
+    from .iab_tags import IabTags
+    from .ids import Ids
+    from .include_additional_info import IncludeAdditionalInfo
+    from .include_nlp_data import IncludeNlpData
+    from .include_similar_documents import IncludeSimilarDocuments
+    from .include_translation_fields import IncludeTranslationFields
+    from .iptc_tags import IptcTags
+    from .is_headline import IsHeadline
+    from .is_news_domain import IsNewsDomain
+    from .is_opinion import IsOpinion
+    from .is_paid_content import IsPaidContent
+    from .lang import Lang
+    from .links import Links
+    from .loc_entity_name import LocEntityName
+    from .misc_entity_name import MiscEntityName
+    from .named_entity_list import NamedEntityList
+    from .named_entity_list_item import NamedEntityListItem
+    from .ner_name import NerName
+    from .news_domain_type import NewsDomainType
+    from .news_type import NewsType
+    from .nlp_data_entity import NlpDataEntity
+    from .not_author_name import NotAuthorName
+    from .not_countries import NotCountries
+    from .not_iab_tags import NotIabTags
+    from .not_iptc_tags import NotIptcTags
+    from .not_lang import NotLang
+    from .not_sources import NotSources
+    from .not_theme import NotTheme
+    from .org_entity_name import OrgEntityName
+    from .page import Page
+    from .page_size import PageSize
+    from .parent_url import ParentUrl
+    from .per_entity_name import PerEntityName
+    from .predefined_sources import PredefinedSources
+    from .published_date_precision import PublishedDatePrecision
+    from .q import Q
+    from .ranked_only import RankedOnly
+    from .robots_compliant import RobotsCompliant
+    from .search_get_request_from import SearchGetRequestFrom
+    from .search_get_request_to import SearchGetRequestTo
+    from .search_in import SearchIn
+    from .search_response_dto import SearchResponseDto
+    from .search_similar_get_request_from import SearchSimilarGetRequestFrom
+    from .search_similar_get_request_to import SearchSimilarGetRequestTo
+    from .search_similar_response_dto import SearchSimilarResponseDto
+    from .sentiment_scores import SentimentScores
+    from .similar_article_entity import SimilarArticleEntity
+    from .similar_document import SimilarDocument
+    from .similar_documents_fields import SimilarDocumentsFields
+    from .similar_documents_number import SimilarDocumentsNumber
+    from .sort_by import SortBy
+    from .source import Source
+    from .source_info import SourceInfo
+    from .source_name import SourceName
+    from .source_url import SourceUrl
+    from .sources import Sources
+    from .sources_response_dto import SourcesResponseDto
+    from .sources_response_dto_sources_item import SourcesResponseDtoSourcesItem
+    from .subscription_response_dto import SubscriptionResponseDto
+    from .theme import Theme
+    from .time_frame_count import TimeFrameCount
+    from .title_sentiment_max import TitleSentimentMax
+    from .title_sentiment_min import TitleSentimentMin
+    from .to import To
+    from .to_rank import ToRank
+    from .top_n_articles import TopNArticles
+    from .user_input_dto import UserInputDto
+    from .when import When
+    from .word_count_max import WordCountMax
+    from .word_count_min import WordCountMin
+_dynamic_imports: typing.Dict[str, str] = {
+    "AdditionalDomainInfo": ".additional_domain_info",
+    "AdditionalDomainInfoEntity": ".additional_domain_info_entity",
+    "AdditionalSourceInfo": ".additional_source_info",
+    "AggregationBy": ".aggregation_by",
+    "AggregationCountResponseDto": ".aggregation_count_response_dto",
+    "AggregationCountResponseDtoAggregations": ".aggregation_count_response_dto_aggregations",
+    "AggregationGetRequestFrom": ".aggregation_get_request_from",
+    "AggregationGetRequestTo": ".aggregation_get_request_to",
+    "AggregationItem": ".aggregation_item",
+    "AllDomainLinks": ".all_domain_links",
+    "AllLinks": ".all_links",
+    "ArticleEntity": ".article_entity",
+    "ArticleEntityAllDomainLinks": ".article_entity_all_domain_links",
+    "ArticleEntityAllLinks": ".article_entity_all_links",
+    "ArticleEntityAuthors": ".article_entity_authors",
+    "ArticleEntityJournalists": ".article_entity_journalists",
+    "ArticlesDto": ".articles_dto",
+    "AuthorName": ".author_name",
+    "AuthorsGetRequestFrom": ".authors_get_request_from",
+    "AuthorsGetRequestTo": ".authors_get_request_to",
+    "BaseSearchResponseDto": ".base_search_response_dto",
+    "BreakingNewsArticleEntity": ".breaking_news_article_entity",
+    "BreakingNewsArticleEntityAllDomainLinks": ".breaking_news_article_entity_all_domain_links",
+    "BreakingNewsArticleEntityAllLinks": ".breaking_news_article_entity_all_links",
+    "BreakingNewsArticleEntityAuthors": ".breaking_news_article_entity_authors",
+    "BreakingNewsArticleEntityJournalists": ".breaking_news_article_entity_journalists",
+    "BreakingNewsEventEntity": ".breaking_news_event_entity",
+    "BreakingNewsResponseDto": ".breaking_news_response_dto",
+    "ByParseDate": ".by_parse_date",
+    "CanonicalUrl": ".canonical_url",
+    "ClusterEntity": ".cluster_entity",
+    "ClusteredArticlesDto": ".clustered_articles_dto",
+    "ClusteredSearchResponseDto": ".clustered_search_response_dto",
+    "ClusteringEnabled": ".clustering_enabled",
+    "ClusteringThreshold": ".clustering_threshold",
+    "ClusteringVariable": ".clustering_variable",
+    "ContentSentimentMax": ".content_sentiment_max",
+    "ContentSentimentMin": ".content_sentiment_min",
+    "Countries": ".countries",
+    "CustomTags": ".custom_tags",
+    "Error": ".error",
+    "ExcludeDuplicates": ".exclude_duplicates",
+    "FailedAggregationCountResponseDto": ".failed_aggregation_count_response_dto",
+    "FailedAuthorsResponseDto": ".failed_authors_response_dto",
+    "FailedSearchSimilarResponseDto": ".failed_search_similar_response_dto",
+    "From": ".from_",
+    "FromRank": ".from_rank",
+    "HasNlp": ".has_nlp",
+    "IabTags": ".iab_tags",
+    "Ids": ".ids",
+    "IncludeAdditionalInfo": ".include_additional_info",
+    "IncludeNlpData": ".include_nlp_data",
+    "IncludeSimilarDocuments": ".include_similar_documents",
+    "IncludeTranslationFields": ".include_translation_fields",
+    "IptcTags": ".iptc_tags",
+    "IsHeadline": ".is_headline",
+    "IsNewsDomain": ".is_news_domain",
+    "IsOpinion": ".is_opinion",
+    "IsPaidContent": ".is_paid_content",
+    "Lang": ".lang",
+    "Links": ".links",
+    "LocEntityName": ".loc_entity_name",
+    "MiscEntityName": ".misc_entity_name",
+    "NamedEntityList": ".named_entity_list",
+    "NamedEntityListItem": ".named_entity_list_item",
+    "NerName": ".ner_name",
+    "NewsDomainType": ".news_domain_type",
+    "NewsType": ".news_type",
+    "NlpDataEntity": ".nlp_data_entity",
+    "NotAuthorName": ".not_author_name",
+    "NotCountries": ".not_countries",
+    "NotIabTags": ".not_iab_tags",
+    "NotIptcTags": ".not_iptc_tags",
+    "NotLang": ".not_lang",
+    "NotSources": ".not_sources",
+    "NotTheme": ".not_theme",
+    "OrgEntityName": ".org_entity_name",
+    "Page": ".page",
+    "PageSize": ".page_size",
+    "ParentUrl": ".parent_url",
+    "PerEntityName": ".per_entity_name",
+    "PredefinedSources": ".predefined_sources",
+    "PublishedDatePrecision": ".published_date_precision",
+    "Q": ".q",
+    "RankedOnly": ".ranked_only",
+    "RobotsCompliant": ".robots_compliant",
+    "SearchGetRequestFrom": ".search_get_request_from",
+    "SearchGetRequestTo": ".search_get_request_to",
+    "SearchIn": ".search_in",
+    "SearchResponseDto": ".search_response_dto",
+    "SearchSimilarGetRequestFrom": ".search_similar_get_request_from",
+    "SearchSimilarGetRequestTo": ".search_similar_get_request_to",
+    "SearchSimilarResponseDto": ".search_similar_response_dto",
+    "SentimentScores": ".sentiment_scores",
+    "SimilarArticleEntity": ".similar_article_entity",
+    "SimilarDocument": ".similar_document",
+    "SimilarDocumentsFields": ".similar_documents_fields",
+    "SimilarDocumentsNumber": ".similar_documents_number",
+    "SortBy": ".sort_by",
+    "Source": ".source",
+    "SourceInfo": ".source_info",
+    "SourceName": ".source_name",
+    "SourceUrl": ".source_url",
+    "Sources": ".sources",
+    "SourcesResponseDto": ".sources_response_dto",
+    "SourcesResponseDtoSourcesItem": ".sources_response_dto_sources_item",
+    "SubscriptionResponseDto": ".subscription_response_dto",
+    "Theme": ".theme",
+    "TimeFrameCount": ".time_frame_count",
+    "TitleSentimentMax": ".title_sentiment_max",
+    "TitleSentimentMin": ".title_sentiment_min",
+    "To": ".to",
+    "ToRank": ".to_rank",
+    "TopNArticles": ".top_n_articles",
+    "UserInputDto": ".user_input_dto",
+    "When": ".when",
+    "WordCountMax": ".word_count_max",
+    "WordCountMin": ".word_count_min",
+}
+
+
+def __getattr__(attr_name: str) -> typing.Any:
+    module_name = _dynamic_imports.get(attr_name)
+    if module_name is None:
+        raise AttributeError(f"No {attr_name} found in _dynamic_imports for module name -> {__name__}")
+    try:
+        module = import_module(module_name, __package__)
+        if module_name == f".{attr_name}":
+            return module
+        else:
+            return getattr(module, attr_name)
+    except ImportError as e:
+        raise ImportError(f"Failed to import {attr_name} from {module_name}: {e}") from e
+    except AttributeError as e:
+        raise AttributeError(f"Failed to get {attr_name} from {module_name}: {e}") from e
+
+
+def __dir__():
+    lazy_attrs = list(_dynamic_imports.keys())
+    return sorted(lazy_attrs)
+
 
 __all__ = [
     "AdditionalDomainInfo",
@@ -115,23 +273,31 @@ __all__ = [
     "AdditionalSourceInfo",
     "AggregationBy",
     "AggregationCountResponseDto",
+    "AggregationCountResponseDtoAggregations",
+    "AggregationGetRequestFrom",
+    "AggregationGetRequestTo",
     "AggregationItem",
-    "Aggregations",
     "AllDomainLinks",
     "AllLinks",
     "ArticleEntity",
     "ArticleEntityAllDomainLinks",
     "ArticleEntityAllLinks",
-    "Articles",
+    "ArticleEntityAuthors",
+    "ArticleEntityJournalists",
+    "ArticlesDto",
     "AuthorName",
-    "Authors",
+    "AuthorsGetRequestFrom",
+    "AuthorsGetRequestTo",
     "BaseSearchResponseDto",
     "BreakingNewsArticleEntity",
     "BreakingNewsArticleEntityAllDomainLinks",
     "BreakingNewsArticleEntityAllLinks",
+    "BreakingNewsArticleEntityAuthors",
+    "BreakingNewsArticleEntityJournalists",
     "BreakingNewsEventEntity",
     "BreakingNewsResponseDto",
     "ByParseDate",
+    "CanonicalUrl",
     "ClusterEntity",
     "ClusteredArticlesDto",
     "ClusteredSearchResponseDto",
@@ -161,7 +327,6 @@ __all__ = [
     "IsNewsDomain",
     "IsOpinion",
     "IsPaidContent",
-    "Journalists",
     "Lang",
     "Links",
     "LocEntityName",
@@ -189,8 +354,12 @@ __all__ = [
     "Q",
     "RankedOnly",
     "RobotsCompliant",
+    "SearchGetRequestFrom",
+    "SearchGetRequestTo",
     "SearchIn",
     "SearchResponseDto",
+    "SearchSimilarGetRequestFrom",
+    "SearchSimilarGetRequestTo",
     "SearchSimilarResponseDto",
     "SentimentScores",
     "SimilarArticleEntity",
@@ -198,6 +367,7 @@ __all__ = [
     "SimilarDocumentsFields",
     "SimilarDocumentsNumber",
     "SortBy",
+    "Source",
     "SourceInfo",
     "SourceName",
     "SourceUrl",

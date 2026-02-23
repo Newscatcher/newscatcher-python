@@ -11,27 +11,27 @@ class BaseSearchResponseDto(UniversalBaseModel):
     The base response model containing common fields for search operations.
     """
 
-    status: str = pydantic.Field()
+    status: typing.Optional[str] = pydantic.Field(default=None)
     """
     The status of the response.
     """
 
-    total_hits: int = pydantic.Field()
+    total_hits: typing.Optional[int] = pydantic.Field(default=None)
     """
     The total number of articles matching the search criteria.
     """
 
-    page: int = pydantic.Field()
+    page: typing.Optional[int] = pydantic.Field(default=None)
     """
     The current page number of the results.
     """
 
-    total_pages: int = pydantic.Field()
+    total_pages: typing.Optional[int] = pydantic.Field(default=None)
     """
     The total number of pages available for the given search criteria.
     """
 
-    page_size: int = pydantic.Field()
+    page_size: typing.Optional[int] = pydantic.Field(default=None)
     """
     The number of articles per page.
     """
