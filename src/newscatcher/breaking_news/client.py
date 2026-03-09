@@ -239,6 +239,10 @@ class BreakingNewsClient:
             has_nlp=True,
             theme="Business,Finance",
             not_theme="Crime",
+            org_entity_name="Apple",
+            per_entity_name="Elon Musk",
+            loc_entity_name="California",
+            misc_entity_name="Bitcoin",
         )
         """
         _response = self._raw_client.breaking_news_get(
@@ -357,9 +361,8 @@ class BreakingNewsClient:
         )
         client.breaking_news.breaking_news_post(
             sort_by="relevancy",
-            page=1,
-            page_size=100,
-            include_nlp_data=True,
+            ranked_only=True,
+            top_n_articles=1,
         )
         """
         _response = self._raw_client.breaking_news_post(
@@ -600,6 +603,10 @@ class AsyncBreakingNewsClient:
                 has_nlp=True,
                 theme="Business,Finance",
                 not_theme="Crime",
+                org_entity_name="Apple",
+                per_entity_name="Elon Musk",
+                loc_entity_name="California",
+                misc_entity_name="Bitcoin",
             )
 
 
@@ -726,9 +733,8 @@ class AsyncBreakingNewsClient:
         async def main() -> None:
             await client.breaking_news.breaking_news_post(
                 sort_by="relevancy",
-                page=1,
-                page_size=100,
-                include_nlp_data=True,
+                ranked_only=True,
+                top_n_articles=1,
             )
 
 

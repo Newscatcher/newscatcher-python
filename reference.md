@@ -1,6 +1,6 @@
 # Reference
 ## Search
-<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">get</a>(...) -> SearchGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -27,28 +27,42 @@ Searches for articles based on specified criteria such as keyword, language, cou
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.search.get(
-    q="technology AND (Apple OR Microsoft) NOT Google",
+    q="\"supply chain\" AND Amazon NOT China",
     search_in="title_content, title_content_translated",
     include_translation_fields=True,
     predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
+    source_name="sport",
+    sources="nytimes.com",
+    not_sources="cnn.com",
+    lang="en",
+    not_lang="fr",
+    countries="US",
+    not_countries="UK",
+    not_author_name="John Doe",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    parent_url="https://www.washingtonpost.com/politics",
+    all_links="https://aiindex.stanford.edu/report",
+    all_domain_links="nvidia.com",
+    news_type="General News Outlets",
     include_nlp_data=True,
     has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
+    org_entity_name="Apple",
+    per_entity_name="Elon Musk",
+    loc_entity_name="California",
+    misc_entity_name="Bitcoin",
     iptc_tags="20000199,20000209",
     not_iptc_tags="20000205,20000209",
     iab_tags="Business,Events",
@@ -70,18 +84,7 @@ client.search.get(
 <dl>
 <dd>
 
-**q:** `str` 
-
-The keyword(s) to search for in articles. Query syntax supports logical operators (`AND`, `OR`, `NOT`) and wildcards:
-
-- For an exact match, use double quotes. For example, `"technology news"`.
-- Use `*` to search for any keyword.
-- Use `+` to include and `-` to exclude specific words or phrases. 
-  For example, `+Apple`, `-Google`.
-- Use `AND`, `OR`, and `NOT` to refine search results. 
-  For example, `technology AND (Apple OR Microsoft) NOT Google`.
-
-For more details, see [Advanced querying](/docs/v3/documentation/guides-and-concepts/advanced-querying).
+**q:** `Q` 
     
 </dd>
 </dl>
@@ -231,7 +234,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**from_:** `typing.Optional[dt.datetime]` 
+**from:** `typing.Optional[SearchGetRequestFrom]` 
 
 The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -250,7 +253,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**to:** `typing.Optional[dt.datetime]` 
+**to:** `typing.Optional[SearchGetRequestTo]` 
 
 The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -825,7 +828,7 @@ To learn more, see [Articles deduplication](/docs/v3/documentation/guides-and-co
 </dl>
 </details>
 
-<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">post</a>(...) -> SearchPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -852,25 +855,17 @@ Searches for articles based on specified criteria such as keyword, language, cou
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.search.post(
-    q="renewable energy",
-    predefined_sources=["top 50 US"],
-    lang=["en"],
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
-    additional_domain_info=True,
-    is_news_domain=True,
+    q="\"supply chain\" AND Amazon NOT China",
+    page_size=1,
 )
 
 ```
@@ -983,7 +978,7 @@ client.search.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -1348,7 +1343,7 @@ client.search.post(
 </details>
 
 ## LatestHeadlines
-<details><summary><code>client.latestheadlines.<a href="src/newscatcher/latestheadlines/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.latestheadlines.<a href="src/newscatcher/latestheadlines/client.py">get</a>(...) -> LatestHeadlinesGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -1376,17 +1371,35 @@ Retrieves the latest headlines for the specified time period. You can filter res
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.latestheadlines.get(
+    when="7d",
+    lang="en",
+    not_lang="fr",
+    countries="US",
+    not_countries="UK",
     predefined_sources="top 100 US, top 5 GB",
+    sources="nytimes.com",
+    not_sources="cnn.com",
+    not_author_name="John Doe",
+    parent_url="https://www.washingtonpost.com/politics",
+    all_links="https://aiindex.stanford.edu/report",
+    all_domain_links="nvidia.com",
     include_translation_fields=True,
     include_nlp_data=True,
     has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
+    org_entity_name="Apple",
+    per_entity_name="Elon Musk",
+    loc_entity_name="California",
+    misc_entity_name="Bitcoin",
     iptc_tags="20000199,20000209",
     not_iptc_tags="20000205,20000209",
     iab_tags="Business,Events",
@@ -1996,7 +2009,7 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 </dl>
 </details>
 
-<details><summary><code>client.latestheadlines.<a href="src/newscatcher/latestheadlines/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.latestheadlines.<a href="src/newscatcher/latestheadlines/client.py">post</a>(...) -> LatestHeadlinesPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -2024,15 +2037,16 @@ Retrieves the latest headlines for the specified time period. You can filter res
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.latestheadlines.post(
-    lang="en",
-    predefined_sources=["top 50 US", "top 20 GB"],
-    is_opinion=False,
-    page_size=10,
+    when="7d",
+    page_size=1,
 )
 
 ```
@@ -2406,7 +2420,7 @@ client.latestheadlines.post(
 </details>
 
 ## Breaking News
-<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_get</a>(...)</code></summary>
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_get</a>(...) -> BreakingNewsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -2434,10 +2448,13 @@ Retrieves breaking news articles and sorts them based on specified criteria.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.breaking_news.breaking_news_get(
     top_n_articles=5,
     include_translation_fields=True,
@@ -2445,6 +2462,10 @@ client.breaking_news.breaking_news_get(
     has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
+    org_entity_name="Apple",
+    per_entity_name="Elon Musk",
+    loc_entity_name="California",
+    misc_entity_name="Bitcoin",
 )
 
 ```
@@ -2744,7 +2765,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 </dl>
 </details>
 
-<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_post</a>(...)</code></summary>
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_post</a>(...) -> BreakingNewsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -2772,15 +2793,17 @@ Retrieves breaking news articles and sorts them based on specified criteria.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.breaking_news.breaking_news_post(
     sort_by="relevancy",
-    page=1,
-    page_size=100,
-    include_nlp_data=True,
+    ranked_only=True,
+    top_n_articles=1,
 )
 
 ```
@@ -2978,7 +3001,7 @@ client.breaking_news.breaking_news_post(
 </details>
 
 ## Authors
-<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">get</a>(...) -> AuthorsGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -3005,22 +3028,30 @@ Searches for articles written by a specified author. You can filter results by l
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.authors.get(
     author_name="Jane Smith",
+    not_author_name="John Doe",
     predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
+    sources="nytimes.com",
+    not_sources="cnn.com",
+    lang="en",
+    not_lang="fr",
+    countries="US",
+    not_countries="UK",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    parent_url="https://www.washingtonpost.com/politics",
+    all_links="https://aiindex.stanford.edu/report",
+    all_domain_links="nvidia.com",
     include_translation_fields=True,
     include_nlp_data=True,
     has_nlp=True,
@@ -3168,7 +3199,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 <dl>
 <dd>
 
-**from_:** `typing.Optional[dt.datetime]` 
+**from:** `typing.Optional[AuthorsGetRequestFrom]` 
 
 The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -3187,7 +3218,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**to:** `typing.Optional[dt.datetime]` 
+**to:** `typing.Optional[AuthorsGetRequestTo]` 
 
 The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -3610,7 +3641,7 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 </dl>
 </details>
 
-<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">post</a>(...) -> AuthorsPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -3637,23 +3668,16 @@ Searches for articles by author. You can filter results by language, country, so
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.authors.post(
-    author_name="Joanna Stern",
-    sources=["wsj.com", "nytimes.com"],
-    lang="en",
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
+    author_name="David Muir",
 )
 
 ```
@@ -3742,7 +3766,7 @@ client.authors.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -4027,7 +4051,7 @@ client.authors.post(
 </details>
 
 ## SearchLink
-<details><summary><code>client.search_link.<a href="src/newscatcher/search_link/client.py">search_url_get</a>(...)</code></summary>
+<details><summary><code>client.search_link.<a href="src/newscatcher/search_link/client.py">search_url_get</a>(...) -> SearchResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -4054,20 +4078,21 @@ Searches for articles based on specified links or IDs. You can filter results by
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.search_link.search_url_get(
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
+    ids="5f8d0d55b6e45e00179c6e7e",
+    links="https://nytimes.com/article1",
+    source="articles.id,articles.title,articles.link,articles.published_date",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-01-01T00:00:00+00:00"),
 )
 
 ```
@@ -4112,7 +4137,15 @@ Example: `"https://example.com/article1, https://example.com/article2"`
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**source:** `typing.Optional[Source]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -4168,7 +4201,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 </dl>
 </details>
 
-<details><summary><code>client.search_link.<a href="src/newscatcher/search_link/client.py">search_url_post</a>(...)</code></summary>
+<details><summary><code>client.search_link.<a href="src/newscatcher/search_link/client.py">search_url_post</a>(...) -> SearchResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -4196,19 +4229,16 @@ Searches for articles using their ID(s) or link(s).
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.search_link.search_url_post(
-    ids=[
-        "8ea8a784568ffaa05cb6d1ab2d2e84dd",
-        "0146a551ef05ab1c494a55e806e3ce64",
-    ],
-    links=[
-        "https://www.nytimes.com/2024/08/30/technology/ai-chatbot-chatgpt-manipulation.html",
-        "https://www.bbc.com/news/articles/c39k379grzlo",
-    ],
+    links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
+    source="articles.id,articles.title,articles.link,articles.canonical_url",
 )
 
 ```
@@ -4241,7 +4271,15 @@ client.search_link.search_url_post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**source:** `typing.Optional[Source]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from:** `typing.Optional[From]` 
 
 The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC. 
 
@@ -4312,7 +4350,7 @@ Formats with examples:
 </details>
 
 ## SearchSimilar
-<details><summary><code>client.searchsimilar.<a href="src/newscatcher/searchsimilar/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.searchsimilar.<a href="src/newscatcher/searchsimilar/client.py">get</a>(...) -> SearchSimilarGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -4339,25 +4377,32 @@ Searches for articles similar to a specified query.
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.searchsimilar.get(
-    q="technology AND (Apple OR Microsoft) NOT Google",
+    q="\"supply chain\" AND Amazon NOT China",
     search_in="title_content, title_content_translated",
     include_translation_fields=True,
     similar_documents_fields="title,summary",
     predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
+    sources="nytimes.com",
+    not_sources="cnn.com",
+    lang="en",
+    not_lang="fr",
+    countries="US",
+    not_countries="UK",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    parent_url="https://www.washingtonpost.com/politics",
+    all_links="https://aiindex.stanford.edu/report",
+    all_domain_links="nvidia.com",
     include_nlp_data=True,
     has_nlp=True,
     theme="Business,Finance",
@@ -4382,18 +4427,7 @@ client.searchsimilar.get(
 <dl>
 <dd>
 
-**q:** `str` 
-
-The keyword(s) to search for in articles. Query syntax supports logical operators (`AND`, `OR`, `NOT`) and wildcards:
-
-- For an exact match, use double quotes. For example, `"technology news"`.
-- Use `*` to search for any keyword.
-- Use `+` to include and `-` to exclude specific words or phrases. 
-  For example, `+Apple`, `-Google`.
-- Use `AND`, `OR`, and `NOT` to refine search results. 
-  For example, `technology AND (Apple OR Microsoft) NOT Google`.
-
-For more details, see [Advanced querying](/docs/v3/documentation/guides-and-concepts/advanced-querying).
+**q:** `Q` 
     
 </dd>
 </dl>
@@ -4541,7 +4575,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 <dl>
 <dd>
 
-**from_:** `typing.Optional[dt.datetime]` 
+**from:** `typing.Optional[SearchSimilarGetRequestFrom]` 
 
 The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -4560,7 +4594,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**to:** `typing.Optional[dt.datetime]` 
+**to:** `typing.Optional[SearchSimilarGetRequestTo]` 
 
 The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -4943,7 +4977,7 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 </dl>
 </details>
 
-<details><summary><code>client.searchsimilar.<a href="src/newscatcher/searchsimilar/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.searchsimilar.<a href="src/newscatcher/searchsimilar/client.py">post</a>(...) -> SearchSimilarPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -4971,14 +5005,18 @@ Searches for articles similar to the specified query. You can filter results by 
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.searchsimilar.post(
-    q="artificial intelligence",
+    q="\"supply chain\" AND Amazon NOT China",
     include_similar_documents=True,
     similar_documents_number=5,
+    page_size=10,
 )
 
 ```
@@ -5099,7 +5137,7 @@ client.searchsimilar.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -5360,7 +5398,7 @@ client.searchsimilar.post(
 </details>
 
 ## Sources
-<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">get</a>(...) -> SourcesResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -5388,13 +5426,20 @@ Retrieves a list of sources based on specified criteria such as language, countr
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.sources.get(
+    lang="en",
+    countries="US",
     predefined_sources="top 100 US, top 5 GB",
+    source_name="sport",
     source_url="bbc.com",
+    news_type="General News Outlets",
 )
 
 ```
@@ -5565,7 +5610,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 </dl>
 </details>
 
-<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">post</a>(...) -> SourcesResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -5593,16 +5638,15 @@ Retrieves the list of sources available in the database. You can filter the sour
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.sources.post(
-    predefined_sources=["top 50 US"],
-    include_additional_info=True,
-    is_news_domain=True,
-    news_domain_type="Original Content",
-    news_type="General News Outlets",
+    predefined_sources="top 10 US",
 )
 
 ```
@@ -5720,7 +5764,7 @@ client.sources.post(
 </details>
 
 ## Aggregation
-<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">get</a>(...) -> AggregationGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -5747,27 +5791,39 @@ Retrieves the count of articles aggregated by day or hour based on various searc
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.aggregation.get(
-    q="technology AND (Apple OR Microsoft) NOT Google",
+    q="\"supply chain\" AND Amazon NOT China",
     search_in="title_content, title_content_translated",
     predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
+    sources="nytimes.com",
+    not_sources="cnn.com",
+    lang="en",
+    not_lang="fr",
+    countries="US",
+    not_countries="UK",
+    not_author_name="John Doe",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    parent_url="https://www.washingtonpost.com/politics",
+    all_links="https://aiindex.stanford.edu/report",
+    all_domain_links="nvidia.com",
     include_nlp_data=True,
     has_nlp=True,
     theme="Business,Finance",
     not_theme="Crime",
+    org_entity_name="Apple",
+    per_entity_name="Elon Musk",
+    loc_entity_name="California",
+    misc_entity_name="Bitcoin",
     iptc_tags="20000199,20000209",
     not_iptc_tags="20000205,20000209",
 )
@@ -5786,18 +5842,7 @@ client.aggregation.get(
 <dl>
 <dd>
 
-**q:** `str` 
-
-The keyword(s) to search for in articles. Query syntax supports logical operators (`AND`, `OR`, `NOT`) and wildcards:
-
-- For an exact match, use double quotes. For example, `"technology news"`.
-- Use `*` to search for any keyword.
-- Use `+` to include and `-` to exclude specific words or phrases. 
-  For example, `+Apple`, `-Google`.
-- Use `AND`, `OR`, and `NOT` to refine search results. 
-  For example, `technology AND (Apple OR Microsoft) NOT Google`.
-
-For more details, see [Advanced querying](/docs/v3/documentation/guides-and-concepts/advanced-querying).
+**q:** `Q` 
     
 </dd>
 </dl>
@@ -5933,7 +5978,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**from_:** `typing.Optional[dt.datetime]` 
+**from:** `typing.Optional[AggregationGetRequestFrom]` 
 
 The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -5952,7 +5997,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**to:** `typing.Optional[dt.datetime]` 
+**to:** `typing.Optional[AggregationGetRequestTo]` 
 
 The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
 
@@ -6371,7 +6416,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 </dl>
 </details>
 
-<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">post</a>(...) -> AggregationPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -6398,23 +6443,17 @@ Retrieves the count of articles aggregated by day or hour based on various searc
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.aggregation.post(
-    q="renewable energy",
+    q="\"supply chain\" AND Amazon NOT China",
     aggregation_by="day",
-    predefined_sources="top 50 US",
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
 )
 
 ```
@@ -6519,7 +6558,7 @@ client.aggregation.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -6796,7 +6835,7 @@ client.aggregation.post(
 </details>
 
 ## Subscription
-<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">get</a>()</code></summary>
+<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">get</a>() -> SubscriptionResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -6824,10 +6863,13 @@ Retrieves information about your subscription plan.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.subscription.get()
 
 ```
@@ -6856,7 +6898,7 @@ client.subscription.get()
 </dl>
 </details>
 
-<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">post</a>()</code></summary>
+<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">post</a>() -> SubscriptionResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -6884,10 +6926,13 @@ Retrieves information about your subscription plan.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.subscription.post()
 
 ```

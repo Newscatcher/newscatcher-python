@@ -4,10 +4,10 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .authors import Authors
 from .breaking_news_article_entity_all_domain_links import BreakingNewsArticleEntityAllDomainLinks
 from .breaking_news_article_entity_all_links import BreakingNewsArticleEntityAllLinks
-from .journalists import Journalists
+from .breaking_news_article_entity_authors import BreakingNewsArticleEntityAuthors
+from .breaking_news_article_entity_journalists import BreakingNewsArticleEntityJournalists
 from .nlp_data_entity import NlpDataEntity
 
 
@@ -26,12 +26,12 @@ class BreakingNewsArticleEntity(UniversalBaseModel):
     The primary author of the article.
     """
 
-    authors: typing.Optional[Authors] = pydantic.Field(default=None)
+    authors: typing.Optional[BreakingNewsArticleEntityAuthors] = pydantic.Field(default=None)
     """
     A list of authors of the article.
     """
 
-    journalists: typing.Optional[Journalists] = pydantic.Field(default=None)
+    journalists: typing.Optional[BreakingNewsArticleEntityJournalists] = pydantic.Field(default=None)
     """
     A list of journalists associated with the article.
     """
