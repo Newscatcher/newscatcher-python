@@ -769,7 +769,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                 )  # This creates "1d", "2h", etc.
 
                 # Make the first request
-                first_response = self.latest_headlines.latest_headlines_post(
+                first_response = self.latest_headlines.post(
                     when=when_param, page=1, **request_params
                 )
 
@@ -808,10 +808,8 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                                 break
 
                             try:
-                                page_response = (
-                                    self.latest_headlines.latest_headlines_post(
-                                        when=when_param, page=page, **request_params
-                                    )
+                                page_response = self.latest_headlines.post(
+                                    when=when_param, page=page, **request_params
                                 )
 
                                 # Get articles safely from page response
@@ -1050,7 +1048,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                 when_param = calculate_when_param(chunk_end, chunk_start)
 
                 # Make the first request
-                first_response = await self.latest_headlines.latest_headlines_post(
+                first_response = await self.latest_headlines.post(
                     when=when_param, page=1, **request_params
                 )
 
@@ -1090,7 +1088,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                         async def fetch_page(page_num):
                             async with semaphore:
                                 try:
-                                    return await self.latest_headlines.latest_headlines_post(
+                                    return await self.latest_headlines.post(
                                         when=when_param, page=page_num, **request_params
                                     )
                                 except Exception as e:
