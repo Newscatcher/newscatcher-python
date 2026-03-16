@@ -20,10 +20,10 @@ def parse_time_parameters(
     Parse time parameters based on the endpoint type.
 
     Args:
-        endpoint_type: Either 'search' or 'latestheadlines'
+        endpoint_type: Either 'search' or 'latest_headlines'
         **kwargs: Parameters for the specific endpoint
             - For 'search': from_, to_, time_chunk_size
-            - For 'latestheadlines': when, time_chunk_size
+            - For 'latest_headlines': when, time_chunk_size
 
     Returns:
         Tuple of (from_date, to_date, chunk_delta)
@@ -111,7 +111,7 @@ def parse_time_parameters(
         else:
             from_date = from_
 
-    elif endpoint_type == "latestheadlines":
+    elif endpoint_type == "latest_headlines":
         # Always set to_date to now for latest headlines
         to_date = now
 
@@ -144,7 +144,7 @@ def parse_time_parameters(
             from_date = when
     else:
         raise ValueError(
-            f"Unknown endpoint type: {endpoint_type}. Use 'search' or 'latestheadlines'."
+            f"Unknown endpoint type: {endpoint_type}. Use 'search' or 'latest_headlines'."
         )
 
     return from_date, to_date, chunk_delta
@@ -254,7 +254,7 @@ def calculate_when_param(
     to_date: datetime.datetime, chunk_start: datetime.datetime
 ) -> str:
     """
-    Calculate the 'when' parameter for latestheadlines based on time difference.
+    Calculate the 'when' parameter for latest_headlines based on time difference.
 
     Args:
         to_date: Current time (usually now)

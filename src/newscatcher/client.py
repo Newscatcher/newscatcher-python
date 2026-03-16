@@ -6,6 +6,7 @@ import re
 from typing import Optional, Union, List, Set, Tuple, Any
 
 from .base_client import BaseNewscatcherApi, AsyncBaseNewscatcherApi
+from .types.articles import Articles
 from .utils import (
     parse_time_parameters,
     create_time_chunks,
@@ -718,7 +719,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
         show_progress: bool = False,
         deduplicate: bool = True,
         **kwargs,
-    ) -> List[Any]:
+    ) -> Articles:
         """
         Fetch all latest headlines by splitting the request into
         multiple time-based chunks to overcome the 10,000 article limit.
@@ -769,7 +770,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                 )  # This creates "1d", "2h", etc.
 
                 # Make the first request
-                first_response = self.latestheadlines.post(
+                first_response = self.latest_headlines.latest_headlines_post(
                     when=when_param, page=1, **request_params
                 )
 
@@ -808,8 +809,10 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
                                 break
 
                             try:
-                                page_response = self.latestheadlines.post(
-                                    when=when_param, page=page, **request_params
+                                page_response = (
+                                    self.latest_headlines.latest_headlines_post(
+                                        when=when_param, page=page, **request_params
+                                    )
                                 )
 
                                 # Get articles safely from page response
@@ -1000,7 +1003,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
         deduplicate: bool = True,
         concurrency: int = 3,  # Default concurrency for page fetching
         **kwargs,
-    ) -> List[Any]:
+    ) -> Articles:
         """
         Async version: Fetch all latest headlines by splitting the request into
         multiple time-based chunks to overcome the 10,000 article limit.
@@ -1048,7 +1051,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                 when_param = calculate_when_param(chunk_end, chunk_start)
 
                 # Make the first request
-                first_response = await self.latestheadlines.post(
+                first_response = await self.latest_headlines.latest_headlines_post(
                     when=when_param, page=1, **request_params
                 )
 
@@ -1088,7 +1091,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
                         async def fetch_page(page_num):
                             async with semaphore:
                                 try:
-                                    return await self.latestheadlines.post(
+                                    return await self.latest_headlines.latest_headlines_post(
                                         when=when_param, page=page_num, **request_params
                                     )
                                 except Exception as e:
