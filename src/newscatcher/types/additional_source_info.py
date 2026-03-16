@@ -14,12 +14,13 @@ class AdditionalSourceInfo(UniversalBaseModel):
     """
 
     nb_articles_for_7_d: typing_extensions.Annotated[
-        typing.Optional[int], FieldMetadata(alias="nb_articles_for_7d")
-    ] = pydantic.Field(default=None)
-    """
-    The number of articles published by the source in the last seven days.
-    """
-
+        typing.Optional[int],
+        FieldMetadata(alias="nb_articles_for_7d"),
+        pydantic.Field(
+            alias="nb_articles_for_7d",
+            description="The number of articles published by the source in the last seven days.",
+        ),
+    ] = None
     country: typing.Optional[str] = pydantic.Field(default=None)
     """
     The country of origin of the news source.
@@ -43,6 +44,11 @@ class AdditionalSourceInfo(UniversalBaseModel):
     news_type: typing.Optional[str] = pydantic.Field(default=None)
     """
     The category of news provided by the source.
+    """
+
+    robots_compliant: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Percentage of domain articles that comply with robots.txt scraping rules (0-100%).
     """
 
     if IS_PYDANTIC_V2:

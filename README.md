@@ -3,11 +3,28 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FNewscatcher%2Fnewscatcher-python)
 [![pypi](https://img.shields.io/pypi/v/newscatcher-sdk)](https://pypi.python.org/pypi/newscatcher-sdk)
 
-The Newscatcher Python library gives you convenient access to the Newscatcher API from Python.
+The Newscatcher Python library provides convenient access to the Newscatcher APIs from Python.
+
+## Table of Contents
+
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Reference](#reference)
+- [Usage](#usage)
+- [Async Client](#async-client)
+- [Exception Handling](#exception-handling)
+- [Retrieving More Articles](#retrieving-more-articles)
+- [Query Validation](#query-validation)
+- [Advanced](#advanced)
+  - [Access Raw Response Data](#access-raw-response-data)
+  - [Retries](#retries)
+  - [Timeouts](#timeouts)
+  - [Custom Client](#custom-client)
+- [Contributing](#contributing)
 
 ## Documentation
 
-View API reference documentation at [newscatcherapi.com/docs](https://www.newscatcherapi.com/docs/v3/api-reference).
+API reference documentation is available [here](https://www.newscatcherapi.com/docs/news-api/api-reference/overview).
 
 ## Installation
 
@@ -17,72 +34,53 @@ pip install newscatcher-sdk
 
 ## Reference
 
-A full reference for this library is available [here](./reference.md).
+A full reference for this library is available [here](https://github.com/Newscatcher/newscatcher-python/blob/HEAD/./reference.md).
 
 ## Usage
 
-Create and use the client:
+Instantiate and use the client with the following:
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
 )
+
 client.search.post(
-    q="renewable energy",
-    predefined_sources=["top 50 US"],
-    lang=["en"],
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
-    additional_domain_info=True,
-    is_news_domain=True,
+    q="\"supply chain\" AND Amazon NOT China",
+    page_size=1,
 )
 ```
 
-## Async client
+## Async Client
 
-Use the `AsyncNewscatcherApi` client to make non-blocking calls to the API:
+The SDK also exports an `async` client so that you can make non-blocking calls to our API. Note that if you are constructing an Async httpx client class to pass into this client, use `httpx.AsyncClient()` instead of `httpx.Client()` (e.g. for the `httpx_client` parameter of this client).
 
 ```python
 import asyncio
-import datetime
 
 from newscatcher import AsyncNewscatcherApi
 
 client = AsyncNewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
 )
 
 
 async def main() -> None:
     await client.search.post(
-        q="renewable energy",
-        predefined_sources=["top 50 US"],
-        lang=["en"],
-        from_=datetime.datetime.fromisoformat(
-            "2024-01-01 00:00:00+00:00",
-        ),
-        to=datetime.datetime.fromisoformat(
-            "2024-06-30 00:00:00+00:00",
-        ),
-        additional_domain_info=True,
-        is_news_domain=True,
+        q="\"supply chain\" AND Amazon NOT China",
+        page_size=1,
     )
 
 
 asyncio.run(main())
 ```
 
-## Exception handling
+## Exception Handling
 
-The SDK raises an `ApiError` when the API returns a non-success status code (4xx or 5xx response):
+When the API returns a non-success status code (4xx or 5xx response), a subclass of the following error
+will be thrown.
 
 ```python
 from newscatcher.core.api_error import ApiError
@@ -180,17 +178,34 @@ For complete validation rules, bulk validation techniques, and troubleshooting, 
 
 ## Advanced
 
+### Access Raw Response Data
+
+The SDK provides access to raw response data, including headers, through the `.with_raw_response` property.
+The `.with_raw_response` property returns a "raw" client that can be used to access the `.headers` and `.data` attributes.
+
+```python
+from newscatcher import NewscatcherApi
+
+client = NewscatcherApi(...)
+response = client.search.with_raw_response.post(...)
+print(response.headers)  # access the response headers
+print(response.status_code)  # access the response status code
+print(response.data)  # access the underlying object
+```
+
 ### Retries
 
-The SDK includes automatic retries with exponential backoff. The SDK retries a request when the request is retriable and the number of retry attempts is less than the configured retry limit (default: 2).
+The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
+as the request is deemed retryable and the number of retry attempts has not grown larger than the configured
+retry limit (default: 2).
 
-The SDK retries requests when the API returns these HTTP status codes:
+A request is deemed retryable when any of the following HTTP status codes is returned:
 
 - [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
 - [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
 - [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
 
-Use the `max_retries` request option to configure this behavior:
+Use the `max_retries` request option to configure this behavior.
 
 ```python
 client.search.post(..., request_options={
@@ -200,17 +215,12 @@ client.search.post(..., request_options={
 
 ### Timeouts
 
-The SDK uses a 60-second timeout by default. Configure timeouts at the client or request level:
+The SDK defaults to a 60 second timeout. You can configure this with a timeout option at the client or request level.
 
 ```python
-
 from newscatcher import NewscatcherApi
 
-client = NewscatcherApi(
-    ...,
-    timeout=20.0,
-)
-
+client = NewscatcherApi(..., timeout=20.0)
 
 # Override timeout for a specific method
 client.search.post(..., request_options={
@@ -218,9 +228,10 @@ client.search.post(..., request_options={
 })
 ```
 
-### Custom client
+### Custom Client
 
-Override the `httpx` client to customize it for your use case. Common use cases include proxies and transports:
+You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
+and transports.
 
 ```python
 import httpx
@@ -229,7 +240,7 @@ from newscatcher import NewscatcherApi
 client = NewscatcherApi(
     ...,
     httpx_client=httpx.Client(
-        proxies="http://my.test.proxy.example.com",
+        proxy="http://my.test.proxy.example.com",
         transport=httpx.HTTPTransport(local_address="0.0.0.0"),
     ),
 )
@@ -237,6 +248,10 @@ client = NewscatcherApi(
 
 ## Contributing
 
-We value open-source contributions to this SDK. This library is generated programmatically, but we can implement custom methods and use `.fernignore` to preserve certain files. However, implementing custom solutions in the SDK involves a complex process. Please open an issue first to discuss your ideas before submitting a PR.
+While we value open-source contributions to this SDK, this library is generated programmatically.
+Additions made directly to this library would have to be moved over to our generation code,
+otherwise they would be overwritten upon the next generated release. Feel free to open a PR as
+a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
+an issue first to discuss with us!
 
 On the other hand, contributions to the README are always very welcome!
