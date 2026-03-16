@@ -1,6 +1,6 @@
 # Reference
 ## Search
-<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">get</a>(...) -> SearchGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -12,7 +12,7 @@
 <dl>
 <dd>
 
-Searches for articles based on specified criteria such as keyword, language, country, source, and more.
+Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 </dd>
 </dl>
 </dd>
@@ -27,33 +27,70 @@ Searches for articles based on specified criteria such as keyword, language, cou
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.search.get(
-    q="technology AND (Apple OR Microsoft) NOT Google",
+    q="\"supply chain\" AND Amazon NOT China",
     search_in="title_content, title_content_translated",
     include_translation_fields=True,
-    predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
+    predefined_sources="top 50 US, top 20 GB",
+    source_name="sport,tech",
+    sources="nytimes.com,finance.yahoo.com",
+    not_sources="cnn.com,wsj.com",
+    lang="en,es",
+    not_lang="fr,de",
+    countries="US,CA",
+    not_countries="UK,FR",
+    not_author_name="John Doe, Jane Doe",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-01-01T00:00:00+00:00"),
+    published_date_precision="full",
+    by_parse_date=True,
+    ranked_only=True,
+    from_rank=100,
+    to_rank=100,
+    is_headline=True,
+    is_opinion=True,
+    is_paid_content=False,
+    parent_url="wsj.com/politics,wsj.com/tech",
+    all_links="https://aiindex.stanford.edu/report,https://www.stateof.ai",
+    all_domain_links="who.int,nih.gov",
+    all_links_text="Nvidia,Tesla",
+    additional_domain_info=True,
+    is_news_domain=True,
+    news_type="General News Outlets,Tech News and Updates",
+    word_count_min=300,
+    word_count_max=1000,
+    page=2,
+    page_size=50,
+    clustering_enabled=True,
+    clustering_threshold=0.6,
     include_nlp_data=True,
     has_nlp=True,
-    theme="Business,Finance",
-    not_theme="Crime",
+    theme="Finance,Tech",
+    not_theme="Crime,Sports",
+    org_entity_name="\"Apple Inc\" OR Microsoft",
+    per_entity_name="\"Elon Musk\" OR \"Jeff Bezos\"",
+    loc_entity_name="\"San Francisco\" OR \"New York City\"",
+    misc_entity_name="AWS OR \"Microsoft Azure\"",
+    title_sentiment_min=-0.5,
+    title_sentiment_max=0.5,
+    content_sentiment_min=-0.5,
+    content_sentiment_max=0.5,
     iptc_tags="20000199,20000209",
     not_iptc_tags="20000205,20000209",
     iab_tags="Business,Events",
     not_iab_tags="Agriculture,Metals",
-    custom_tags="Tag1,Tag2,Tag3",
+    custom_tags="Tag1,Tag2",
+    exclude_duplicates=True,
+    robots_compliant=True,
 )
 
 ```
@@ -70,18 +107,7 @@ client.search.get(
 <dl>
 <dd>
 
-**q:** `str` 
-
-The keyword(s) to search for in articles. Query syntax supports logical operators (`AND`, `OR`, `NOT`) and wildcards:
-
-- For an exact match, use double quotes. For example, `"technology news"`.
-- Use `*` to search for any keyword.
-- Use `+` to include and `-` to exclude specific words or phrases. 
-  For example, `+Apple`, `-Google`.
-- Use `AND`, `OR`, and `NOT` to refine search results. 
-  For example, `technology AND (Apple OR Microsoft) NOT Google`.
-
-For more details, see [Advanced querying](/docs/v3/documentation/guides-and-concepts/advanced-querying).
+**q:** `Q` 
     
 </dd>
 </dl>
@@ -109,13 +135,9 @@ For more details, see [Advanced querying](/docs/v3/documentation/guides-and-conc
 
 Predefined top news sources per country. 
 
-Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). 
 
-Examples: 
-- `"top 100 US"`
-- `"top 33 AT"`
-- `"top 50 US, top 20 GB"`
-- `"top 33 AT, top 50 IT"`
+Multiple countries with the number of top sources can be specified as a comma-separated string.
     
 </dd>
 </dl>
@@ -127,8 +149,6 @@ Examples:
 
 Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
 
-Example: `"sport, tech"`
-
 **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
     
 </dd>
@@ -137,13 +157,7 @@ Example: `"sport, tech"`
 <dl>
 <dd>
 
-**sources:** `typing.Optional[str]` 
-
-One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
-
-Examples:
-- `"nytimes.com"`
-- `"theguardian.com, finance.yahoo.com"`
+**sources:** `typing.Optional[str]` — One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
     
 </dd>
 </dl>
@@ -151,11 +165,7 @@ Examples:
 <dl>
 <dd>
 
-**not_sources:** `typing.Optional[str]` 
-
-The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string. 
-
-Example: `"cnn.com, wsj.com"`
+**not_sources:** `typing.Optional[str]` — The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string.
     
 </dd>
 </dl>
@@ -165,11 +175,9 @@ Example: `"cnn.com, wsj.com"`
 
 **lang:** `typing.Optional[str]` 
 
-The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string. 
+The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-Example: `"en, es"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -181,9 +189,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string. 
 
-Example: `"fr, de"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -195,9 +201,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-Example: `"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -209,9 +213,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 
 The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string. 
 
-Example:`"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -219,11 +221,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 <dl>
 <dd>
 
-**not_author_name:** `typing.Optional[str]` 
-
-The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
-
-Example: `"John Doe, Jane Doe"`
+**not_author_name:** `typing.Optional[str]` — The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
     
 </dd>
 </dl>
@@ -231,18 +229,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**from_:** `typing.Optional[dt.datetime]` 
-
-The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `7 day ago`, `today`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -250,18 +237,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**to:** `typing.Optional[dt.datetime]` 
-
-The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `now`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+**to:** `typing.Optional[To]` 
     
 </dd>
 </dl>
@@ -269,12 +245,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**published_date_precision:** `typing.Optional[SearchGetRequestPublishedDatePrecision]` 
-
-The precision of the published date. There are three types:
-- `full`: The day and time of an article is correctly identified with the appropriate timezone.
-- `timezone unknown`: The day and time of an article is correctly identified without timezone.
-- `date`: Only the day is identified without an exact time.
+**published_date_precision:** `typing.Optional[PublishedDatePrecision]` 
     
 </dd>
 </dl>
@@ -282,7 +253,7 @@ The precision of the published date. There are three types:
 <dl>
 <dd>
 
-**by_parse_date:** `typing.Optional[bool]` — If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
+**by_parse_date:** `typing.Optional[ByParseDate]` 
     
 </dd>
 </dl>
@@ -290,12 +261,7 @@ The precision of the published date. There are three types:
 <dl>
 <dd>
 
-**sort_by:** `typing.Optional[SearchGetRequestSortBy]` 
-
-The sorting order of the results. Possible values are:
-- `relevancy`: The most relevant results first.
-- `date`: The most recently published results first.
-- `rank`: The results from the highest-ranked sources first.
+**sort_by:** `typing.Optional[SortBy]` 
     
 </dd>
 </dl>
@@ -303,7 +269,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
+**ranked_only:** `typing.Optional[RankedOnly]` 
     
 </dd>
 </dl>
@@ -311,7 +277,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+**from_rank:** `typing.Optional[FromRank]` 
     
 </dd>
 </dl>
@@ -319,7 +285,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+**to_rank:** `typing.Optional[ToRank]` 
     
 </dd>
 </dl>
@@ -327,7 +293,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**is_headline:** `typing.Optional[bool]` — If true, only returns articles that were posted on the home page of a given news domain.
+**is_headline:** `typing.Optional[IsHeadline]` 
     
 </dd>
 </dl>
@@ -335,7 +301,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**is_opinion:** `typing.Optional[bool]` — If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
+**is_opinion:** `typing.Optional[IsOpinion]` 
     
 </dd>
 </dl>
@@ -343,7 +309,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**is_paid_content:** `typing.Optional[bool]` — If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
+**is_paid_content:** `typing.Optional[IsPaidContent]` 
     
 </dd>
 </dl>
@@ -351,11 +317,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**parent_url:** `typing.Optional[str]` 
-
-The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
-
-Example: `"wsj.com/politics, wsj.com/tech"`
+**parent_url:** `typing.Optional[str]` — The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
     
 </dd>
 </dl>
@@ -367,9 +329,7 @@ Example: `"wsj.com/politics, wsj.com/tech"`
 
 The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
 
-Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -381,9 +341,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 
 The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
 
-Example: `"who.int, nih.gov"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -391,12 +349,13 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**additional_domain_info:** `typing.Optional[bool]` 
+**all_links_text:** `typing.Optional[str]` 
 
-If true, includes additional domain information in the response for each article:
-- `is_news_domain`: Boolean indicating if the source is a news domain.
-- `news_domain_type`: Type of news domain (e.g., `"Original Content"`).
-- `news_type`: Category of news (e.g., `"News and Blogs"`).
+The text content of links mentioned in the article. Searches for links where the anchor text contains the specified terms. For multiple terms, use a comma-separated string.
+
+**Note**: When this parameter is used, the response includes the `all_links_data` field with detailed link information.
+
+To learn more, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -404,7 +363,7 @@ If true, includes additional domain information in the response for each article
 <dl>
 <dd>
 
-**is_news_domain:** `typing.Optional[bool]` — If true, filters results to include only news domains.
+**additional_domain_info:** `typing.Optional[AdditionalDomainInfo]` 
     
 </dd>
 </dl>
@@ -412,14 +371,15 @@ If true, includes additional domain information in the response for each article
 <dl>
 <dd>
 
-**news_domain_type:** `typing.Optional[SearchGetRequestNewsDomainType]` 
+**is_news_domain:** `typing.Optional[IsNewsDomain]` 
+    
+</dd>
+</dl>
 
-Filters results based on the news domain type. Possible values are:
-- `Original Content`: Sources that produce their own content.
-- `Aggregator`: Sources that collect content from various other sources.
-- `Press Releases`: Sources primarily publishing press releases.
-- `Republisher`: Sources that republish content from other sources.
-- `Other`: Sources that don't fit into main categories.
+<dl>
+<dd>
+
+**news_domain_type:** `typing.Optional[NewsDomainType]` 
     
 </dd>
 </dl>
@@ -431,9 +391,7 @@ Filters results based on the news domain type. Possible values are:
 
 Filters results based on the news type. Multiple types can be specified using a comma-separated string.
 
-Example: `"General News Outlets,Tech News and Updates"`
-
-For a complete list of available news types, see [Enumerated parameters > News type](/docs/v3/api-reference/overview/enumerated-parameters#news-type-news-type).
+For a complete list of available news types, see [Enumerated parameters > News type](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#news-type-news-type).
     
 </dd>
 </dl>
@@ -441,7 +399,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 <dl>
 <dd>
 
-**word_count_min:** `typing.Optional[int]` — The minimum number of words an article must contain. To be used for avoiding articles with small content.
+**word_count_min:** `typing.Optional[WordCountMin]` 
     
 </dd>
 </dl>
@@ -449,7 +407,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 <dl>
 <dd>
 
-**word_count_max:** `typing.Optional[int]` — The maximum number of words an article can contain. To be used for avoiding articles with large content.
+**word_count_max:** `typing.Optional[WordCountMax]` 
     
 </dd>
 </dl>
@@ -457,11 +415,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
+**page:** `typing.Optional[Page]` 
     
 </dd>
 </dl>
@@ -469,7 +423,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
+**page_size:** `typing.Optional[PageSize]` 
     
 </dd>
 </dl>
@@ -477,11 +431,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**clustering_enabled:** `typing.Optional[bool]` 
-
-Determines whether to group similar articles into clusters. If true, the API returns clustered results.
-
-To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-concepts/clustering-news-articles).
+**clustering_enabled:** `typing.Optional[ClusteringEnabled]` 
     
 </dd>
 </dl>
@@ -489,16 +439,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**clustering_variable:** `typing.Optional[SearchGetRequestClusteringVariable]` 
-
-Specifies which part of the article to use for determining similarity when clustering.
-
-Possible values are:
-- `content`: Uses the full article content (default).
-- `title`: Uses only the article title.
-- `summary`: Uses the article summary.
-
-To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-concepts/clustering-news-articles).
+**clustering_variable:** `typing.Optional[ClusteringVariable]` 
     
 </dd>
 </dl>
@@ -506,16 +447,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**clustering_threshold:** `typing.Optional[float]` 
-
-Sets the similarity threshold for grouping articles into clusters. A lower value creates more inclusive clusters, while a higher value requires greater similarity between articles.
-
-Examples:
-- `0.3`: Results in larger, more diverse clusters.
-- `0.6`: Balances cluster size and article similarity (default).
-- `0.9`: Creates smaller, tightly related clusters.
-
-To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-concepts/clustering-news-articles).
+**clustering_threshold:** `typing.Optional[ClusteringThreshold]` 
     
 </dd>
 </dl>
@@ -539,17 +471,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**theme:** `typing.Optional[str]` 
-
-Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
-
-Example: `"Finance, Tech"`
-
-**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+**theme:** `typing.Optional[Theme]` 
     
 </dd>
 </dl>
@@ -557,15 +479,7 @@ Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`
 <dl>
 <dd>
 
-**not_theme:** `typing.Optional[str]` 
-
-Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
-
-Example: `"Crime, Tech"`
-
-**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**not_theme:** `typing.Optional[NotTheme]` 
     
 </dd>
 </dl>
@@ -573,15 +487,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**org_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Apple, Microsoft"`
-
-**Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**org_entity_name:** `typing.Optional[OrgEntityName]` 
     
 </dd>
 </dl>
@@ -589,15 +495,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**per_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Elon Musk, Jeff Bezos"`
-
-**Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**per_entity_name:** `typing.Optional[PerEntityName]` 
     
 </dd>
 </dl>
@@ -605,15 +503,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**loc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"California, New York"`
-
-**Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**loc_entity_name:** `typing.Optional[LocEntityName]` 
     
 </dd>
 </dl>
@@ -621,15 +511,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**misc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Bitcoin, Blockchain"`
-
-**Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**misc_entity_name:** `typing.Optional[MiscEntityName]` 
     
 </dd>
 </dl>
@@ -637,18 +519,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**title_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
     
 </dd>
 </dl>
@@ -656,18 +527,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**title_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
     
 </dd>
 </dl>
@@ -675,18 +535,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
     
 </dd>
 </dl>
@@ -694,18 +543,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>
@@ -716,8 +554,6 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 **iptc_tags:** `typing.Optional[str]` 
 
 Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs. 
-
-Example: `"20000199, 20000209"`
 
 **Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -731,9 +567,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 
 **not_iptc_tags:** `typing.Optional[str]` 
 
-Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs. 
-
-Example: `"20000205, 20000209"`
+Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs.
 
 **Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -747,9 +581,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 
 **iab_tags:** `typing.Optional[str]` 
 
-Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string. 
-
-Example: `"Business, Events"`
+Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string.
 
 **Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -763,9 +595,7 @@ To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/c
 
 **not_iab_tags:** `typing.Optional[str]` 
 
-Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string. 
-
-Example: `"Agriculture, Metals"`
+Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string.
 
 **Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -781,11 +611,11 @@ To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/c
 
 Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern: 
 
-- `custom_tags.taxonomy=Tag1,Tag2,Tag3`, where `taxonomy` is the taxonomy name and `Tag1,Tag2,Tag3` is a comma-separated list of tags.
+- `custom_tags.taxonomy=Tag1,Tag2`, where `taxonomy` is the taxonomy name and `Tag1,Tag2` is a comma-separated list of tag names.
 
-Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
+Example: `custom_tags.industry="Manufacturing,Logistics"`
 
-To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
+To learn more, see the [Custom tags](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/custom-tags).
     
 </dd>
 </dl>
@@ -793,11 +623,7 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 <dl>
 <dd>
 
-**exclude_duplicates:** `typing.Optional[bool]` 
-
-If true, excludes duplicate and highly similar articles from the search results. If false, returns all relevant articles, including duplicates. 
-
-To learn more, see [Articles deduplication](/docs/v3/documentation/guides-and-concepts/articles-deduplication).
+**exclude_duplicates:** `typing.Optional[ExcludeDuplicates]` 
     
 </dd>
 </dl>
@@ -805,7 +631,7 @@ To learn more, see [Articles deduplication](/docs/v3/documentation/guides-and-co
 <dl>
 <dd>
 
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -825,7 +651,7 @@ To learn more, see [Articles deduplication](/docs/v3/documentation/guides-and-co
 </dl>
 </details>
 
-<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">post</a>(...) -> SearchPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -837,7 +663,7 @@ To learn more, see [Articles deduplication](/docs/v3/documentation/guides-and-co
 <dl>
 <dd>
 
-Searches for articles based on specified criteria such as keyword, language, country, source, and more.
+Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 </dd>
 </dl>
 </dd>
@@ -852,25 +678,17 @@ Searches for articles based on specified criteria such as keyword, language, cou
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.search.post(
-    q="renewable energy",
-    predefined_sources=["top 50 US"],
-    lang=["en"],
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
-    additional_domain_info=True,
-    is_news_domain=True,
+    q="\"supply chain\" AND Amazon NOT China",
+    page_size=1,
 )
 
 ```
@@ -983,7 +801,7 @@ client.search.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -1088,6 +906,14 @@ client.search.post(
 <dd>
 
 **all_domain_links:** `typing.Optional[AllDomainLinks]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_links_text:** `typing.Optional[AllLinksText]` 
     
 </dd>
 </dl>
@@ -1348,7 +1174,7 @@ client.search.post(
 </details>
 
 ## LatestHeadlines
-<details><summary><code>client.latestheadlines.<a href="src/newscatcher/latestheadlines/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.latest_headlines.<a href="src/newscatcher/latest_headlines/client.py">latest_headlines_get</a>(...) -> LatestHeadlinesGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -1376,22 +1202,57 @@ Retrieves the latest headlines for the specified time period. You can filter res
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.latestheadlines.get(
-    predefined_sources="top 100 US, top 5 GB",
+
+client.latest_headlines.latest_headlines_get(
+    when="7d",
+    by_parse_date=True,
+    lang="en,es",
+    not_lang="fr,de",
+    countries="US,CA",
+    not_countries="UK,FR",
+    predefined_sources="top 50 US, top 20 GB",
+    sources="nytimes.com,finance.yahoo.com",
+    not_sources="cnn.com,wsj.com",
+    not_author_name="John Doe, Jane Doe",
+    ranked_only=True,
+    is_headline=True,
+    is_opinion=True,
+    is_paid_content=False,
+    parent_url="wsj.com/politics,wsj.com/tech",
+    all_links="https://aiindex.stanford.edu/report,https://www.stateof.ai",
+    all_domain_links="who.int,nih.gov",
+    all_links_text="Nvidia,Tesla",
+    word_count_min=300,
+    word_count_max=1000,
+    page=2,
+    page_size=50,
+    clustering_enabled=True,
+    clustering_threshold=0.6,
     include_translation_fields=True,
     include_nlp_data=True,
     has_nlp=True,
-    theme="Business,Finance",
-    not_theme="Crime",
+    theme="Finance,Tech",
+    not_theme="Crime,Sports",
+    org_entity_name="\"Apple Inc\" OR Microsoft",
+    per_entity_name="\"Elon Musk\" OR \"Jeff Bezos\"",
+    loc_entity_name="\"San Francisco\" OR \"New York City\"",
+    misc_entity_name="AWS OR \"Microsoft Azure\"",
+    title_sentiment_min=-0.5,
+    title_sentiment_max=0.5,
+    content_sentiment_min=-0.5,
+    content_sentiment_max=0.5,
     iptc_tags="20000199,20000209",
     not_iptc_tags="20000205,20000209",
     iab_tags="Business,Events",
     not_iab_tags="Agriculture,Metals",
-    custom_tags="Tag1,Tag2,Tag3",
+    custom_tags="Tag1,Tag2",
+    robots_compliant=True,
 )
 
 ```
@@ -1408,15 +1269,7 @@ client.latestheadlines.get(
 <dl>
 <dd>
 
-**when:** `typing.Optional[str]` 
-
-The time period for which you want to get the latest headlines.
-
-Format examples:
-- `7d`: Last seven days
-- `30d`: Last 30 days
-- `1h`: Last hour
-- `24h`: Last 24 hours
+**when:** `typing.Optional[When]` 
     
 </dd>
 </dl>
@@ -1424,7 +1277,15 @@ Format examples:
 <dl>
 <dd>
 
-**by_parse_date:** `typing.Optional[bool]` — If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
+**by_parse_date:** `typing.Optional[ByParseDate]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort_by:** `typing.Optional[SortBy]` 
     
 </dd>
 </dl>
@@ -1434,11 +1295,9 @@ Format examples:
 
 **lang:** `typing.Optional[str]` 
 
-The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string. 
+The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-Example: `"en, es"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -1450,9 +1309,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string. 
 
-Example: `"fr, de"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -1464,9 +1321,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-Example: `"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -1478,9 +1333,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 
 The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string. 
 
-Example:`"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -1492,13 +1345,9 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 
 Predefined top news sources per country. 
 
-Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). 
 
-Examples: 
-- `"top 100 US"`
-- `"top 33 AT"`
-- `"top 50 US, top 20 GB"`
-- `"top 33 AT, top 50 IT"`
+Multiple countries with the number of top sources can be specified as a comma-separated string.
     
 </dd>
 </dl>
@@ -1506,13 +1355,7 @@ Examples:
 <dl>
 <dd>
 
-**sources:** `typing.Optional[str]` 
-
-One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
-
-Examples:
-- `"nytimes.com"`
-- `"theguardian.com, finance.yahoo.com"`
+**sources:** `typing.Optional[str]` — One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
     
 </dd>
 </dl>
@@ -1520,11 +1363,7 @@ Examples:
 <dl>
 <dd>
 
-**not_sources:** `typing.Optional[str]` 
-
-The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string. 
-
-Example: `"cnn.com, wsj.com"`
+**not_sources:** `typing.Optional[str]` — The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string.
     
 </dd>
 </dl>
@@ -1532,11 +1371,7 @@ Example: `"cnn.com, wsj.com"`
 <dl>
 <dd>
 
-**not_author_name:** `typing.Optional[str]` 
-
-The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
-
-Example: `"John Doe, Jane Doe"`
+**not_author_name:** `typing.Optional[str]` — The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
     
 </dd>
 </dl>
@@ -1544,7 +1379,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
+**ranked_only:** `typing.Optional[RankedOnly]` 
     
 </dd>
 </dl>
@@ -1552,7 +1387,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**is_headline:** `typing.Optional[bool]` — If true, only returns articles that were posted on the home page of a given news domain.
+**is_headline:** `typing.Optional[IsHeadline]` 
     
 </dd>
 </dl>
@@ -1560,7 +1395,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**is_opinion:** `typing.Optional[bool]` — If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
+**is_opinion:** `typing.Optional[IsOpinion]` 
     
 </dd>
 </dl>
@@ -1568,7 +1403,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**is_paid_content:** `typing.Optional[bool]` — If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
+**is_paid_content:** `typing.Optional[IsPaidContent]` 
     
 </dd>
 </dl>
@@ -1576,11 +1411,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**parent_url:** `typing.Optional[str]` 
-
-The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
-
-Example: `"wsj.com/politics, wsj.com/tech"`
+**parent_url:** `typing.Optional[str]` — The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
     
 </dd>
 </dl>
@@ -1592,9 +1423,7 @@ Example: `"wsj.com/politics, wsj.com/tech"`
 
 The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
 
-Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -1606,9 +1435,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 
 The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
 
-Example: `"who.int, nih.gov"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -1616,7 +1443,13 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**word_count_min:** `typing.Optional[int]` — The minimum number of words an article must contain. To be used for avoiding articles with small content.
+**all_links_text:** `typing.Optional[str]` 
+
+The text content of links mentioned in the article. Searches for links where the anchor text contains the specified terms. For multiple terms, use a comma-separated string.
+
+**Note**: When this parameter is used, the response includes the `all_links_data` field with detailed link information.
+
+To learn more, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -1624,7 +1457,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**word_count_max:** `typing.Optional[int]` — The maximum number of words an article can contain. To be used for avoiding articles with large content.
+**word_count_min:** `typing.Optional[WordCountMin]` 
     
 </dd>
 </dl>
@@ -1632,11 +1465,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
+**word_count_max:** `typing.Optional[WordCountMax]` 
     
 </dd>
 </dl>
@@ -1644,7 +1473,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
+**page:** `typing.Optional[Page]` 
     
 </dd>
 </dl>
@@ -1652,11 +1481,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**clustering_enabled:** `typing.Optional[bool]` 
-
-Determines whether to group similar articles into clusters. If true, the API returns clustered results.
-
-To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-concepts/clustering-news-articles).
+**page_size:** `typing.Optional[PageSize]` 
     
 </dd>
 </dl>
@@ -1664,16 +1489,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**clustering_variable:** `typing.Optional[LatestHeadlinesGetRequestClusteringVariable]` 
-
-Specifies which part of the article to use for determining similarity when clustering.
-
-Possible values are:
-- `content`: Uses the full article content (default).
-- `title`: Uses only the article title.
-- `summary`: Uses the article summary.
-
-To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-concepts/clustering-news-articles).
+**clustering_enabled:** `typing.Optional[ClusteringEnabled]` 
     
 </dd>
 </dl>
@@ -1681,16 +1497,15 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**clustering_threshold:** `typing.Optional[float]` 
+**clustering_variable:** `typing.Optional[ClusteringVariable]` 
+    
+</dd>
+</dl>
 
-Sets the similarity threshold for grouping articles into clusters. A lower value creates more inclusive clusters, while a higher value requires greater similarity between articles.
+<dl>
+<dd>
 
-Examples:
-- `0.3`: Results in larger, more diverse clusters.
-- `0.6`: Balances cluster size and article similarity (default).
-- `0.9`: Creates smaller, tightly related clusters.
-
-To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-concepts/clustering-news-articles).
+**clustering_threshold:** `typing.Optional[ClusteringThreshold]` 
     
 </dd>
 </dl>
@@ -1722,17 +1537,7 @@ To learn more, see [Clustering news articles](/docs/v3/documentation/guides-and-
 <dl>
 <dd>
 
-**theme:** `typing.Optional[str]` 
-
-Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
-
-Example: `"Finance, Tech"`
-
-**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+**theme:** `typing.Optional[Theme]` 
     
 </dd>
 </dl>
@@ -1740,15 +1545,7 @@ Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`
 <dl>
 <dd>
 
-**not_theme:** `typing.Optional[str]` 
-
-Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
-
-Example: `"Crime, Tech"`
-
-**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**not_theme:** `typing.Optional[NotTheme]` 
     
 </dd>
 </dl>
@@ -1756,15 +1553,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**org_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Apple, Microsoft"`
-
-**Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**org_entity_name:** `typing.Optional[OrgEntityName]` 
     
 </dd>
 </dl>
@@ -1772,15 +1561,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**per_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Elon Musk, Jeff Bezos"`
-
-**Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**per_entity_name:** `typing.Optional[PerEntityName]` 
     
 </dd>
 </dl>
@@ -1788,15 +1569,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**loc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"California, New York"`
-
-**Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**loc_entity_name:** `typing.Optional[LocEntityName]` 
     
 </dd>
 </dl>
@@ -1804,15 +1577,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**misc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Bitcoin, Blockchain"`
-
-**Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**misc_entity_name:** `typing.Optional[MiscEntityName]` 
     
 </dd>
 </dl>
@@ -1820,18 +1585,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**title_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
     
 </dd>
 </dl>
@@ -1839,18 +1593,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**title_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
     
 </dd>
 </dl>
@@ -1858,18 +1601,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
     
 </dd>
 </dl>
@@ -1877,18 +1609,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>
@@ -1899,8 +1620,6 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 **iptc_tags:** `typing.Optional[str]` 
 
 Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs. 
-
-Example: `"20000199, 20000209"`
 
 **Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -1914,9 +1633,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 
 **not_iptc_tags:** `typing.Optional[str]` 
 
-Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs. 
-
-Example: `"20000205, 20000209"`
+Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs.
 
 **Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -1930,9 +1647,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 
 **iab_tags:** `typing.Optional[str]` 
 
-Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string. 
-
-Example: `"Business, Events"`
+Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string.
 
 **Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -1946,9 +1661,7 @@ To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/c
 
 **not_iab_tags:** `typing.Optional[str]` 
 
-Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string. 
-
-Example: `"Agriculture, Metals"`
+Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string.
 
 **Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -1964,11 +1677,11 @@ To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/c
 
 Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern: 
 
-- `custom_tags.taxonomy=Tag1,Tag2,Tag3`, where `taxonomy` is the taxonomy name and `Tag1,Tag2,Tag3` is a comma-separated list of tags.
+- `custom_tags.taxonomy=Tag1,Tag2`, where `taxonomy` is the taxonomy name and `Tag1,Tag2` is a comma-separated list of tag names.
 
-Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
+Example: `custom_tags.industry="Manufacturing,Logistics"`
 
-To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
+To learn more, see the [Custom tags](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/custom-tags).
     
 </dd>
 </dl>
@@ -1976,7 +1689,7 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 <dl>
 <dd>
 
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -1996,7 +1709,7 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 </dl>
 </details>
 
-<details><summary><code>client.latestheadlines.<a href="src/newscatcher/latestheadlines/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.latest_headlines.<a href="src/newscatcher/latest_headlines/client.py">latest_headlines_post</a>(...) -> LatestHeadlinesPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -2024,15 +1737,16 @@ Retrieves the latest headlines for the specified time period. You can filter res
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.latestheadlines.post(
-    lang="en",
-    predefined_sources=["top 50 US", "top 20 GB"],
-    is_opinion=False,
-    page_size=10,
+
+client.latest_headlines.latest_headlines_post(
+    when="7d",
+    page_size=1,
 )
 
 ```
@@ -2178,6 +1892,14 @@ client.latestheadlines.post(
 <dd>
 
 **all_domain_links:** `typing.Optional[AllDomainLinks]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_links_text:** `typing.Optional[AllLinksText]` 
     
 </dd>
 </dl>
@@ -2405,8 +2127,8 @@ client.latestheadlines.post(
 </dl>
 </details>
 
-## Breaking News
-<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_get</a>(...)</code></summary>
+## BreakingNews
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_get</a>(...) -> BreakingNewsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -2434,353 +2156,33 @@ Retrieves breaking news articles and sorts them based on specified criteria.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.breaking_news.breaking_news_get(
+    ranked_only=True,
+    from_rank=100,
+    to_rank=100,
+    page=2,
+    page_size=50,
     top_n_articles=5,
     include_translation_fields=True,
     include_nlp_data=True,
     has_nlp=True,
-    theme="Business,Finance",
-    not_theme="Crime",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**sort_by:** `typing.Optional[BreakingNewsGetRequestSortBy]` 
-
-The sorting order of the results. Possible values are:
-- `relevancy`: The most relevant results first.
-- `date`: The most recently published results first.
-- `rank`: The results from the highest-ranked sources first.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**top_n_articles:** `typing.Optional[TopNArticles]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**has_nlp:** `typing.Optional[HasNlp]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**theme:** `typing.Optional[str]` 
-
-Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
-
-Example: `"Finance, Tech"`
-
-**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_theme:** `typing.Optional[str]` 
-
-Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
-
-Example: `"Crime, Tech"`
-
-**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**org_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Apple, Microsoft"`
-
-**Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**per_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Elon Musk, Jeff Bezos"`
-
-**Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**loc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"California, New York"`
-
-**Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**misc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Bitcoin, Blockchain"`
-
-**Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**title_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**title_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**content_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**content_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_post</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Retrieves breaking news articles and sorts them based on specified criteria.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from newscatcher import NewscatcherApi
-
-client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
-)
-client.breaking_news.breaking_news_post(
-    sort_by="relevancy",
-    page=1,
-    page_size=100,
-    include_nlp_data=True,
+    theme="Finance,Tech",
+    not_theme="Crime,Sports",
+    org_entity_name="\"Apple Inc\" OR Microsoft",
+    per_entity_name="\"Elon Musk\" OR \"Jeff Bezos\"",
+    loc_entity_name="\"San Francisco\" OR \"New York City\"",
+    misc_entity_name="AWS OR \"Microsoft Azure\"",
+    title_sentiment_min=-0.5,
+    title_sentiment_max=0.5,
+    content_sentiment_min=-0.5,
+    content_sentiment_max=0.5,
 )
 
 ```
@@ -2949,15 +2351,7 @@ client.breaking_news.breaking_news_post(
 <dl>
 <dd>
 
-**content_sentient_max:** `typing.Optional[ContentSentimentMax]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**robots_compliant:** `typing.Optional[RobotsCompliant]` 
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>
@@ -2977,8 +2371,7 @@ client.breaking_news.breaking_news_post(
 </dl>
 </details>
 
-## Authors
-<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_post</a>(...) -> BreakingNewsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -2990,7 +2383,7 @@ client.breaking_news.breaking_news_post(
 <dl>
 <dd>
 
-Searches for articles written by a specified author. You can filter results by language, country, source, and more.
+Retrieves breaking news articles and sorts them based on specified criteria.
 </dd>
 </dl>
 </dd>
@@ -3005,33 +2398,18 @@ Searches for articles written by a specified author. You can filter results by l
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.authors.get(
-    author_name="Jane Smith",
-    predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    include_translation_fields=True,
-    include_nlp_data=True,
-    has_nlp=True,
-    theme="Business,Finance",
-    not_theme="Crime",
-    ner_name="Tesla",
-    iptc_tags="20000199,20000209",
-    not_iptc_tags="20000205,20000209",
-    iab_tags="Business,Events",
-    not_iab_tags="Agriculture,Metals",
-    custom_tags="Tag1,Tag2,Tag3",
+
+client.breaking_news.breaking_news_post(
+    sort_by="relevancy",
+    ranked_only=True,
+    top_n_articles=1,
 )
 
 ```
@@ -3048,7 +2426,7 @@ client.authors.get(
 <dl>
 <dd>
 
-**author_name:** `str` — The name of the author to search for. This parameter returns exact matches only.
+**sort_by:** `typing.Optional[SortBy]` 
     
 </dd>
 </dl>
@@ -3056,11 +2434,7 @@ client.authors.get(
 <dl>
 <dd>
 
-**not_author_name:** `typing.Optional[str]` 
-
-The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
-
-Example: `"John Doe, Jane Doe"`
+**ranked_only:** `typing.Optional[RankedOnly]` 
     
 </dd>
 </dl>
@@ -3068,17 +2442,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**predefined_sources:** `typing.Optional[str]` 
-
-Predefined top news sources per country. 
-
-Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
-
-Examples: 
-- `"top 100 US"`
-- `"top 33 AT"`
-- `"top 50 US, top 20 GB"`
-- `"top 33 AT, top 50 IT"`
+**from_rank:** `typing.Optional[FromRank]` 
     
 </dd>
 </dl>
@@ -3086,13 +2450,7 @@ Examples:
 <dl>
 <dd>
 
-**sources:** `typing.Optional[str]` 
-
-One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
-
-Examples:
-- `"nytimes.com"`
-- `"theguardian.com, finance.yahoo.com"`
+**to_rank:** `typing.Optional[ToRank]` 
     
 </dd>
 </dl>
@@ -3100,11 +2458,7 @@ Examples:
 <dl>
 <dd>
 
-**not_sources:** `typing.Optional[str]` 
-
-The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string. 
-
-Example: `"cnn.com, wsj.com"`
+**page:** `typing.Optional[Page]` 
     
 </dd>
 </dl>
@@ -3112,13 +2466,7 @@ Example: `"cnn.com, wsj.com"`
 <dl>
 <dd>
 
-**lang:** `typing.Optional[str]` 
-
-The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string. 
-
-Example: `"en, es"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+**page_size:** `typing.Optional[PageSize]` 
     
 </dd>
 </dl>
@@ -3126,237 +2474,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 <dl>
 <dd>
 
-**not_lang:** `typing.Optional[str]` 
-
-The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string. 
-
-Example: `"fr, de"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**countries:** `typing.Optional[str]` 
-
-The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
-
-Example: `"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_countries:** `typing.Optional[str]` 
-
-The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string. 
-
-Example:`"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_:** `typing.Optional[dt.datetime]` 
-
-The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `7 day ago`, `today`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to:** `typing.Optional[dt.datetime]` 
-
-The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `now`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**published_date_precision:** `typing.Optional[AuthorsGetRequestPublishedDatePrecision]` 
-
-The precision of the published date. There are three types:
-- `full`: The day and time of an article is correctly identified with the appropriate timezone.
-- `timezone unknown`: The day and time of an article is correctly identified without timezone.
-- `date`: Only the day is identified without an exact time.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**by_parse_date:** `typing.Optional[bool]` — If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sort_by:** `typing.Optional[AuthorsGetRequestSortBy]` 
-
-The sorting order of the results. Possible values are:
-- `relevancy`: The most relevant results first.
-- `date`: The most recently published results first.
-- `rank`: The results from the highest-ranked sources first.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_headline:** `typing.Optional[bool]` — If true, only returns articles that were posted on the home page of a given news domain.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_opinion:** `typing.Optional[bool]` — If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_paid_content:** `typing.Optional[bool]` — If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**parent_url:** `typing.Optional[str]` 
-
-The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
-
-Example: `"wsj.com/politics, wsj.com/tech"`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**all_links:** `typing.Optional[str]` 
-
-The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
-
-Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**all_domain_links:** `typing.Optional[str]` 
-
-The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
-
-Example: `"who.int, nih.gov"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**word_count_min:** `typing.Optional[int]` — The minimum number of words an article must contain. To be used for avoiding articles with small content.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**word_count_max:** `typing.Optional[int]` — The maximum number of words an article can contain. To be used for avoiding articles with large content.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
+**top_n_articles:** `typing.Optional[TopNArticles]` 
     
 </dd>
 </dl>
@@ -3388,17 +2506,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**theme:** `typing.Optional[str]` 
-
-Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
-
-Example: `"Finance, Tech"`
-
-**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+**theme:** `typing.Optional[Theme]` 
     
 </dd>
 </dl>
@@ -3406,15 +2514,7 @@ Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`
 <dl>
 <dd>
 
-**not_theme:** `typing.Optional[str]` 
-
-Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
-
-Example: `"Crime, Tech"`
-
-**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**not_theme:** `typing.Optional[NotTheme]` 
     
 </dd>
 </dl>
@@ -3422,11 +2522,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**ner_name:** `typing.Optional[str]` 
-
-The name of person, organization, location, product or other named entity to search for. To specify multiple names use a comma-separated string. 
-
-Example: `"Tesla, Amazon"`
+**org_entity_name:** `typing.Optional[OrgEntityName]` 
     
 </dd>
 </dl>
@@ -3434,18 +2530,7 @@ Example: `"Tesla, Amazon"`
 <dl>
 <dd>
 
-**title_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**per_entity_name:** `typing.Optional[PerEntityName]` 
     
 </dd>
 </dl>
@@ -3453,18 +2538,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**title_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**loc_entity_name:** `typing.Optional[LocEntityName]` 
     
 </dd>
 </dl>
@@ -3472,18 +2546,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**misc_entity_name:** `typing.Optional[MiscEntityName]` 
     
 </dd>
 </dl>
@@ -3491,18 +2554,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
     
 </dd>
 </dl>
@@ -3510,15 +2562,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**iptc_tags:** `typing.Optional[str]` 
-
-Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs. 
-
-Example: `"20000199, 20000209"`
-
-**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
-
-To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
     
 </dd>
 </dl>
@@ -3526,15 +2570,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 <dl>
 <dd>
 
-**not_iptc_tags:** `typing.Optional[str]` 
-
-Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs. 
-
-Example: `"20000205, 20000209"`
-
-**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
-
-To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
     
 </dd>
 </dl>
@@ -3542,55 +2578,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 <dl>
 <dd>
 
-**iab_tags:** `typing.Optional[str]` 
-
-Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string. 
-
-Example: `"Business, Events"`
-
-**Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
-
-To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_iab_tags:** `typing.Optional[str]` 
-
-Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string. 
-
-Example: `"Agriculture, Metals"`
-
-**Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
-
-To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**custom_tags:** `typing.Optional[str]` 
-
-Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern: 
-
-- `custom_tags.taxonomy=Tag1,Tag2,Tag3`, where `taxonomy` is the taxonomy name and `Tag1,Tag2,Tag3` is a comma-separated list of tags.
-
-Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
-
-To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>
@@ -3610,7 +2598,536 @@ To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/
 </dl>
 </details>
 
-<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">post</a>(...)</code></summary>
+## Authors
+<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">get</a>(...) -> AuthorsGetResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Searches for articles written by a specified author. You can filter results by language, country, source, and more.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
+import datetime
+
+client = NewscatcherApi(
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
+)
+
+client.authors.get(
+    author_name="Jane Smith",
+    not_author_name="John Doe, Jane Doe",
+    predefined_sources="top 50 US, top 20 GB",
+    sources="nytimes.com,finance.yahoo.com",
+    not_sources="cnn.com,wsj.com",
+    lang="en,es",
+    not_lang="fr,de",
+    countries="US,CA",
+    not_countries="UK,FR",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-01-01T00:00:00+00:00"),
+    published_date_precision="full",
+    by_parse_date=True,
+    ranked_only=True,
+    from_rank=100,
+    to_rank=100,
+    is_headline=True,
+    is_opinion=True,
+    is_paid_content=False,
+    parent_url="wsj.com/politics,wsj.com/tech",
+    all_links="https://aiindex.stanford.edu/report,https://www.stateof.ai",
+    all_domain_links="who.int,nih.gov",
+    all_links_text="Nvidia,Tesla",
+    word_count_min=300,
+    word_count_max=1000,
+    page=2,
+    page_size=50,
+    include_translation_fields=True,
+    include_nlp_data=True,
+    has_nlp=True,
+    theme="Finance,Tech",
+    not_theme="Crime,Sports",
+    ner_name="Tesla,Amazon",
+    title_sentiment_min=-0.5,
+    title_sentiment_max=0.5,
+    content_sentiment_min=-0.5,
+    content_sentiment_max=0.5,
+    iptc_tags="20000199,20000209",
+    not_iptc_tags="20000205,20000209",
+    iab_tags="Business,Events",
+    not_iab_tags="Agriculture,Metals",
+    custom_tags="Tag1,Tag2",
+    robots_compliant=True,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**author_name:** `AuthorName` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_author_name:** `typing.Optional[str]` — The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**predefined_sources:** `typing.Optional[str]` 
+
+Predefined top news sources per country. 
+
+Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). 
+
+Multiple countries with the number of top sources can be specified as a comma-separated string.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sources:** `typing.Optional[str]` — One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_sources:** `typing.Optional[str]` — The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**lang:** `typing.Optional[str]` 
+
+The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
+
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_lang:** `typing.Optional[str]` 
+
+The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string. 
+
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**countries:** `typing.Optional[str]` 
+
+The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
+
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_countries:** `typing.Optional[str]` 
+
+The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string. 
+
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from:** `typing.Optional[From]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to:** `typing.Optional[To]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**published_date_precision:** `typing.Optional[PublishedDatePrecision]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**by_parse_date:** `typing.Optional[ByParseDate]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort_by:** `typing.Optional[SortBy]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ranked_only:** `typing.Optional[RankedOnly]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from_rank:** `typing.Optional[FromRank]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to_rank:** `typing.Optional[ToRank]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**is_headline:** `typing.Optional[IsHeadline]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**is_opinion:** `typing.Optional[IsOpinion]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**is_paid_content:** `typing.Optional[IsPaidContent]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_url:** `typing.Optional[str]` — The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_links:** `typing.Optional[str]` 
+
+The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
+
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_domain_links:** `typing.Optional[str]` 
+
+The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
+
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_links_text:** `typing.Optional[str]` 
+
+The text content of links mentioned in the article. Searches for links where the anchor text contains the specified terms. For multiple terms, use a comma-separated string.
+
+**Note**: When this parameter is used, the response includes the `all_links_data` field with detailed link information.
+
+To learn more, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**word_count_min:** `typing.Optional[WordCountMin]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**word_count_max:** `typing.Optional[WordCountMax]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[Page]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[PageSize]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**has_nlp:** `typing.Optional[HasNlp]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**theme:** `typing.Optional[Theme]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_theme:** `typing.Optional[NotTheme]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ner_name:** `typing.Optional[NerName]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**iptc_tags:** `typing.Optional[str]` 
+
+Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs. 
+
+**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
+
+To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_iptc_tags:** `typing.Optional[str]` 
+
+Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs.
+
+**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
+
+To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**iab_tags:** `typing.Optional[str]` 
+
+Filters articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories, use a comma-separated string.
+
+**Note**: The `iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
+
+To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**not_iab_tags:** `typing.Optional[str]` 
+
+Inverse of the `iab_tags` parameter. Excludes articles based on Interactive Advertising Bureau (IAB) content categories. These tags provide a standardized taxonomy for digital advertising content categorization. To specify multiple IAB categories to exclude, use a comma-separated string.
+
+**Note**: The `not_iab_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
+
+To learn more, see the [IAB Content taxonomy](https://iabtechlab.com/standards/content-taxonomy/).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**custom_tags:** `typing.Optional[str]` 
+
+Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern: 
+
+- `custom_tags.taxonomy=Tag1,Tag2`, where `taxonomy` is the taxonomy name and `Tag1,Tag2` is a comma-separated list of tag names.
+
+Example: `custom_tags.industry="Manufacturing,Logistics"`
+
+To learn more, see the [Custom tags](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/custom-tags).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">post</a>(...) -> AuthorsPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -3637,23 +3154,16 @@ Searches for articles by author. You can filter results by language, country, so
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.authors.post(
-    author_name="Joanna Stern",
-    sources=["wsj.com", "nytimes.com"],
-    lang="en",
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
+    author_name="David Muir",
 )
 
 ```
@@ -3742,7 +3252,7 @@ client.authors.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -3847,6 +3357,14 @@ client.authors.post(
 <dd>
 
 **all_domain_links:** `typing.Optional[AllDomainLinks]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_links_text:** `typing.Optional[AllLinksText]` 
     
 </dd>
 </dl>
@@ -4026,8 +3544,8 @@ client.authors.post(
 </dl>
 </details>
 
-## SearchLink
-<details><summary><code>client.search_link.<a href="src/newscatcher/search_link/client.py">search_url_get</a>(...)</code></summary>
+## SearchByLink
+<details><summary><code>client.search_by_link.<a href="src/newscatcher/search_by_link/client.py">search_by_link_get</a>(...) -> SearchResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -4054,20 +3572,23 @@ Searches for articles based on specified links or IDs. You can filter results by
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.search_link.search_url_get(
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
+
+client.search_by_link.search_by_link_get(
+    ids="5f8d0d55b6e45e00179c6e7e",
+    links="https://nytimes.com/article1,https://bbc.com/article2",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-01-01T00:00:00+00:00"),
+    page=2,
+    page_size=50,
+    robots_compliant=True,
 )
 
 ```
@@ -4088,8 +3609,6 @@ client.search_link.search_url_get(
 
 The Newscatcher article ID (corresponds to the `_id` field in API response) or a list of article IDs to search for. To specify multiple IDs, use a comma-separated string. 
 
-Example: `"1234567890abcdef, abcdef1234567890"`
-
 **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
     
 </dd>
@@ -4100,9 +3619,7 @@ Example: `"1234567890abcdef, abcdef1234567890"`
 
 **links:** `typing.Optional[str]` 
 
-The article link or list of article links to search for. To specify multiple links, use a comma-separated string. 
-
-Example: `"https://example.com/article1, https://example.com/article2"`
+The article link or list of article links to search for. To specify multiple links, use a comma-separated string.
 
 **Caution**: You can use either the `links` or the `ids` parameter, but not both at the same time.
     
@@ -4112,7 +3629,7 @@ Example: `"https://example.com/article1, https://example.com/article2"`
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -4128,11 +3645,7 @@ Example: `"https://example.com/article1, https://example.com/article2"`
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
+**page:** `typing.Optional[Page]` 
     
 </dd>
 </dl>
@@ -4140,7 +3653,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
+**page_size:** `typing.Optional[PageSize]` 
     
 </dd>
 </dl>
@@ -4148,7 +3661,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -4168,7 +3681,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 </dl>
 </details>
 
-<details><summary><code>client.search_link.<a href="src/newscatcher/search_link/client.py">search_url_post</a>(...)</code></summary>
+<details><summary><code>client.search_by_link.<a href="src/newscatcher/search_by_link/client.py">search_by_link_post</a>(...) -> SearchResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -4196,19 +3709,15 @@ Searches for articles using their ID(s) or link(s).
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.search_link.search_url_post(
-    ids=[
-        "8ea8a784568ffaa05cb6d1ab2d2e84dd",
-        "0146a551ef05ab1c494a55e806e3ce64",
-    ],
-    links=[
-        "https://www.nytimes.com/2024/08/30/technology/ai-chatbot-chatgpt-manipulation.html",
-        "https://www.bbc.com/news/articles/c39k379grzlo",
-    ],
+
+client.search_by_link.search_by_link_post(
+    links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
 )
 
 ```
@@ -4241,7 +3750,7 @@ client.search_link.search_url_post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
 
 The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC. 
 
@@ -4311,1056 +3820,8 @@ Formats with examples:
 </dl>
 </details>
 
-## SearchSimilar
-<details><summary><code>client.searchsimilar.<a href="src/newscatcher/searchsimilar/client.py">get</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Searches for articles similar to a specified query.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-import datetime
-
-from newscatcher import NewscatcherApi
-
-client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
-)
-client.searchsimilar.get(
-    q="technology AND (Apple OR Microsoft) NOT Google",
-    search_in="title_content, title_content_translated",
-    include_translation_fields=True,
-    similar_documents_fields="title,summary",
-    predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    include_nlp_data=True,
-    has_nlp=True,
-    theme="Business,Finance",
-    not_theme="Crime",
-    ner_name="Tesla",
-    iptc_tags="20000199,20000209",
-    not_iptc_tags="20000205,20000209",
-    custom_tags="Tag1,Tag2,Tag3",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**q:** `str` 
-
-The keyword(s) to search for in articles. Query syntax supports logical operators (`AND`, `OR`, `NOT`) and wildcards:
-
-- For an exact match, use double quotes. For example, `"technology news"`.
-- Use `*` to search for any keyword.
-- Use `+` to include and `-` to exclude specific words or phrases. 
-  For example, `+Apple`, `-Google`.
-- Use `AND`, `OR`, and `NOT` to refine search results. 
-  For example, `technology AND (Apple OR Microsoft) NOT Google`.
-
-For more details, see [Advanced querying](/docs/v3/documentation/guides-and-concepts/advanced-querying).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**search_in:** `typing.Optional[SearchIn]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_similar_documents:** `typing.Optional[bool]` — If true, includes similar documents in the response.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**similar_documents_number:** `typing.Optional[int]` — The number of similar documents to return.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**similar_documents_fields:** `typing.Optional[str]` — The fields to consider for finding similar documents.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**predefined_sources:** `typing.Optional[str]` 
-
-Predefined top news sources per country. 
-
-Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
-
-Examples: 
-- `"top 100 US"`
-- `"top 33 AT"`
-- `"top 50 US, top 20 GB"`
-- `"top 33 AT, top 50 IT"`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sources:** `typing.Optional[str]` 
-
-One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
-
-Examples:
-- `"nytimes.com"`
-- `"theguardian.com, finance.yahoo.com"`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_sources:** `typing.Optional[str]` 
-
-The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string. 
-
-Example: `"cnn.com, wsj.com"`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**lang:** `typing.Optional[str]` 
-
-The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string. 
-
-Example: `"en, es"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_lang:** `typing.Optional[str]` 
-
-The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string. 
-
-Example: `"fr, de"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**countries:** `typing.Optional[str]` 
-
-The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
-
-Example: `"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_countries:** `typing.Optional[str]` 
-
-The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string. 
-
-Example:`"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_:** `typing.Optional[dt.datetime]` 
-
-The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `7 day ago`, `today`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to:** `typing.Optional[dt.datetime]` 
-
-The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `now`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**by_parse_date:** `typing.Optional[bool]` — If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**published_date_precision:** `typing.Optional[SearchSimilarGetRequestPublishedDatePrecision]` 
-
-The precision of the published date. There are three types:
-- `full`: The day and time of an article is correctly identified with the appropriate timezone.
-- `timezone unknown`: The day and time of an article is correctly identified without timezone.
-- `date`: Only the day is identified without an exact time.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sort_by:** `typing.Optional[SearchSimilarGetRequestSortBy]` 
-
-The sorting order of the results. Possible values are:
-- `relevancy`: The most relevant results first.
-- `date`: The most recently published results first.
-- `rank`: The results from the highest-ranked sources first.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_headline:** `typing.Optional[bool]` — If true, only returns articles that were posted on the home page of a given news domain.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_opinion:** `typing.Optional[bool]` — If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_paid_content:** `typing.Optional[bool]` — If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**parent_url:** `typing.Optional[str]` 
-
-The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
-
-Example: `"wsj.com/politics, wsj.com/tech"`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**all_links:** `typing.Optional[str]` 
-
-The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
-
-Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**all_domain_links:** `typing.Optional[str]` 
-
-The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
-
-Example: `"who.int, nih.gov"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**word_count_min:** `typing.Optional[int]` — The minimum number of words an article must contain. To be used for avoiding articles with small content.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**word_count_max:** `typing.Optional[int]` — The maximum number of words an article can contain. To be used for avoiding articles with large content.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**has_nlp:** `typing.Optional[HasNlp]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**theme:** `typing.Optional[str]` 
-
-Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
-
-Example: `"Finance, Tech"`
-
-**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_theme:** `typing.Optional[str]` 
-
-Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
-
-Example: `"Crime, Tech"`
-
-**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ner_name:** `typing.Optional[str]` 
-
-The name of person, organization, location, product or other named entity to search for. To specify multiple names use a comma-separated string. 
-
-Example: `"Tesla, Amazon"`
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**title_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**title_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**content_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**content_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**iptc_tags:** `typing.Optional[str]` 
-
-Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs. 
-
-Example: `"20000199, 20000209"`
-
-**Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
-
-To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_iptc_tags:** `typing.Optional[str]` 
-
-Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs. 
-
-Example: `"20000205, 20000209"`
-
-**Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
-
-To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCodes/treeview/mediatopic/mediatopic-en-GB.html).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**custom_tags:** `typing.Optional[str]` 
-
-Filters articles based on provided taxonomy that is tailored to your specific needs and is accessible only with your API key. To specify tags, use the following pattern: 
-
-- `custom_tags.taxonomy=Tag1,Tag2,Tag3`, where `taxonomy` is the taxonomy name and `Tag1,Tag2,Tag3` is a comma-separated list of tags.
-
-Example: `custom_tags.industry="Manufacturing, Supply Chain, Logistics"`
-
-To learn more, see the [Custom tags](/docs/v3/documentation/guides-and-concepts/custom-tags).
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.searchsimilar.<a href="src/newscatcher/searchsimilar/client.py">post</a>(...)</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Searches for articles similar to the specified query. You can filter results by language, country, source, and more.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from newscatcher import NewscatcherApi
-
-client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
-)
-client.searchsimilar.post(
-    q="artificial intelligence",
-    include_similar_documents=True,
-    similar_documents_number=5,
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**q:** `Q` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**search_in:** `typing.Optional[SearchIn]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_translation_fields:** `typing.Optional[IncludeTranslationFields]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_similar_documents:** `typing.Optional[IncludeSimilarDocuments]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**similar_documents_number:** `typing.Optional[SimilarDocumentsNumber]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**similar_documents_fields:** `typing.Optional[SimilarDocumentsFields]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**predefined_sources:** `typing.Optional[PredefinedSources]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sources:** `typing.Optional[Sources]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_sources:** `typing.Optional[NotSources]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**lang:** `typing.Optional[Lang]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_lang:** `typing.Optional[NotLang]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**countries:** `typing.Optional[Countries]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_countries:** `typing.Optional[NotCountries]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_:** `typing.Optional[From]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to:** `typing.Optional[To]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**by_parse_date:** `typing.Optional[ByParseDate]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**published_date_precision:** `typing.Optional[PublishedDatePrecision]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sort_by:** `typing.Optional[SortBy]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ranked_only:** `typing.Optional[RankedOnly]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**from_rank:** `typing.Optional[FromRank]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**to_rank:** `typing.Optional[ToRank]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_headline:** `typing.Optional[IsHeadline]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_opinion:** `typing.Optional[IsOpinion]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**is_paid_content:** `typing.Optional[IsPaidContent]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**parent_url:** `typing.Optional[ParentUrl]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**all_links:** `typing.Optional[AllLinks]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**all_domain_links:** `typing.Optional[AllDomainLinks]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**word_count_min:** `typing.Optional[WordCountMin]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**word_count_max:** `typing.Optional[WordCountMax]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page:** `typing.Optional[Page]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[PageSize]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_nlp_data:** `typing.Optional[IncludeNlpData]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**has_nlp:** `typing.Optional[HasNlp]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**theme:** `typing.Optional[Theme]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_theme:** `typing.Optional[NotTheme]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ner_name:** `typing.Optional[NerName]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**iptc_tags:** `typing.Optional[IptcTags]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**not_iptc_tags:** `typing.Optional[NotIptcTags]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**custom_tags:** `typing.Optional[CustomTags]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**robots_compliant:** `typing.Optional[RobotsCompliant]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 ## Sources
-<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">get</a>(...) -> SourcesResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -5388,13 +3849,24 @@ Retrieves a list of sources based on specified criteria such as language, countr
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.sources.get(
-    predefined_sources="top 100 US, top 5 GB",
+    lang="en,es",
+    countries="US,CA",
+    predefined_sources="top 50 US, top 20 GB",
+    source_name="sport,tech",
     source_url="bbc.com",
+    include_additional_info=True,
+    is_news_domain=True,
+    news_type="General News Outlets,Tech News and Updates",
+    from_rank=100,
+    to_rank=100,
 )
 
 ```
@@ -5413,11 +3885,9 @@ client.sources.get(
 
 **lang:** `typing.Optional[str]` 
 
-The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string. 
+The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-Example: `"en, es"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -5429,9 +3899,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-Example: `"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -5443,13 +3911,9 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 
 Predefined top news sources per country. 
 
-Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). 
 
-Examples: 
-- `"top 100 US"`
-- `"top 33 AT"`
-- `"top 50 US, top 20 GB"`
-- `"top 33 AT, top 50 IT"`
+Multiple countries with the number of top sources can be specified as a comma-separated string.
     
 </dd>
 </dl>
@@ -5460,8 +3924,6 @@ Examples:
 **source_name:** `typing.Optional[str]` 
 
 Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
-
-Example: `"sport, tech"`
 
 **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
     
@@ -5484,15 +3946,7 @@ you can only use `include_additional_info` as an extra parameter.
 <dl>
 <dd>
 
-**include_additional_info:** `typing.Optional[bool]` 
-
-If true, returns the following additional datapoints about each news source:
-- `nb_articles_for_7d`: The number of articles published by the source in the last week.
-- `country`: Source country of origin.
-- `rank`: SEO rank.
-- `is_news_domain`: Boolean indicating if the source is a news domain.
-- `news_domain_type`: Type of news domain (e.g., "Original Content").
-- `news_type`: Category of news (e.g., "General News Outlets").
+**include_additional_info:** `typing.Optional[IncludeAdditionalInfo]` 
     
 </dd>
 </dl>
@@ -5500,7 +3954,7 @@ If true, returns the following additional datapoints about each news source:
 <dl>
 <dd>
 
-**is_news_domain:** `typing.Optional[bool]` — If true, filters results to include only news domains.
+**is_news_domain:** `typing.Optional[IsNewsDomain]` 
     
 </dd>
 </dl>
@@ -5508,14 +3962,7 @@ If true, returns the following additional datapoints about each news source:
 <dl>
 <dd>
 
-**news_domain_type:** `typing.Optional[SourcesGetRequestNewsDomainType]` 
-
-Filters results based on the news domain type. Possible values are:
-- `Original Content`: Sources that produce their own content.
-- `Aggregator`: Sources that collect content from various other sources.
-- `Press Releases`: Sources primarily publishing press releases.
-- `Republisher`: Sources that republish content from other sources.
-- `Other`: Sources that don't fit into main categories.
+**news_domain_type:** `typing.Optional[NewsDomainType]` 
     
 </dd>
 </dl>
@@ -5527,9 +3974,7 @@ Filters results based on the news domain type. Possible values are:
 
 Filters results based on the news type. Multiple types can be specified using a comma-separated string.
 
-Example: `"General News Outlets,Tech News and Updates"`
-
-For a complete list of available news types, see [Enumerated parameters > News type](/docs/v3/api-reference/overview/enumerated-parameters#news-type-news-type).
+For a complete list of available news types, see [Enumerated parameters > News type](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#news-type-news-type).
     
 </dd>
 </dl>
@@ -5537,7 +3982,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 <dl>
 <dd>
 
-**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+**from_rank:** `typing.Optional[FromRank]` 
     
 </dd>
 </dl>
@@ -5545,7 +3990,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 <dl>
 <dd>
 
-**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+**to_rank:** `typing.Optional[ToRank]` 
     
 </dd>
 </dl>
@@ -5565,7 +4010,7 @@ For a complete list of available news types, see [Enumerated parameters > News t
 </dl>
 </details>
 
-<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.sources.<a href="src/newscatcher/sources/client.py">post</a>(...) -> SourcesResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -5593,16 +4038,15 @@ Retrieves the list of sources available in the database. You can filter the sour
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.sources.post(
-    predefined_sources=["top 50 US"],
-    include_additional_info=True,
-    is_news_domain=True,
-    news_domain_type="Original Content",
-    news_type="General News Outlets",
+    predefined_sources="top 10 US",
 )
 
 ```
@@ -5720,7 +4164,7 @@ client.sources.post(
 </details>
 
 ## Aggregation
-<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">get</a>(...)</code></summary>
+<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">count_get</a>(...) -> AggregationCountGetResponse</code></summary>
 <dl>
 <dd>
 
@@ -5747,29 +4191,59 @@ Retrieves the count of articles aggregated by day or hour based on various searc
 <dd>
 
 ```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 import datetime
 
-from newscatcher import NewscatcherApi
-
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.aggregation.get(
-    q="technology AND (Apple OR Microsoft) NOT Google",
+
+client.aggregation.count_get(
+    q="\"supply chain\" AND Amazon NOT China",
     search_in="title_content, title_content_translated",
-    predefined_sources="top 100 US, top 5 GB",
-    from_=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-07-01 00:00:00+00:00",
-    ),
+    predefined_sources="top 50 US, top 20 GB",
+    sources="nytimes.com,finance.yahoo.com",
+    not_sources="cnn.com,wsj.com",
+    lang="en,es",
+    not_lang="fr,de",
+    countries="US,CA",
+    not_countries="UK,FR",
+    not_author_name="John Doe, Jane Doe",
+    from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
+    to=datetime.datetime.fromisoformat("2024-01-01T00:00:00+00:00"),
+    published_date_precision="full",
+    by_parse_date=True,
+    ranked_only=True,
+    from_rank=100,
+    to_rank=100,
+    is_headline=True,
+    is_opinion=True,
+    is_paid_content=False,
+    parent_url="wsj.com/politics,wsj.com/tech",
+    all_links="https://aiindex.stanford.edu/report,https://www.stateof.ai",
+    all_domain_links="who.int,nih.gov",
+    all_links_text="Nvidia,Tesla",
+    word_count_min=300,
+    word_count_max=1000,
+    page=2,
+    page_size=50,
     include_nlp_data=True,
     has_nlp=True,
-    theme="Business,Finance",
-    not_theme="Crime",
+    theme="Finance,Tech",
+    not_theme="Crime,Sports",
+    org_entity_name="\"Apple Inc\" OR Microsoft",
+    per_entity_name="\"Elon Musk\" OR \"Jeff Bezos\"",
+    loc_entity_name="\"San Francisco\" OR \"New York City\"",
+    misc_entity_name="AWS OR \"Microsoft Azure\"",
+    title_sentiment_min=-0.5,
+    title_sentiment_max=0.5,
+    content_sentiment_min=-0.5,
+    content_sentiment_max=0.5,
     iptc_tags="20000199,20000209",
     not_iptc_tags="20000205,20000209",
+    robots_compliant=True,
 )
 
 ```
@@ -5786,18 +4260,7 @@ client.aggregation.get(
 <dl>
 <dd>
 
-**q:** `str` 
-
-The keyword(s) to search for in articles. Query syntax supports logical operators (`AND`, `OR`, `NOT`) and wildcards:
-
-- For an exact match, use double quotes. For example, `"technology news"`.
-- Use `*` to search for any keyword.
-- Use `+` to include and `-` to exclude specific words or phrases. 
-  For example, `+Apple`, `-Google`.
-- Use `AND`, `OR`, and `NOT` to refine search results. 
-  For example, `technology AND (Apple OR Microsoft) NOT Google`.
-
-For more details, see [Advanced querying](/docs/v3/documentation/guides-and-concepts/advanced-querying).
+**q:** `Q` 
     
 </dd>
 </dl>
@@ -5825,13 +4288,9 @@ For more details, see [Advanced querying](/docs/v3/documentation/guides-and-conc
 
 Predefined top news sources per country. 
 
-Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). 
 
-Examples: 
-- `"top 100 US"`
-- `"top 33 AT"`
-- `"top 50 US, top 20 GB"`
-- `"top 33 AT, top 50 IT"`
+Multiple countries with the number of top sources can be specified as a comma-separated string.
     
 </dd>
 </dl>
@@ -5839,13 +4298,7 @@ Examples:
 <dl>
 <dd>
 
-**sources:** `typing.Optional[str]` 
-
-One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
-
-Examples:
-- `"nytimes.com"`
-- `"theguardian.com, finance.yahoo.com"`
+**sources:** `typing.Optional[str]` — One or more news sources to narrow down the search. The format must be a domain URL. Subdomains, such as `finance.yahoo.com`, are also acceptable.To specify multiple sources, use a comma-separated string.
     
 </dd>
 </dl>
@@ -5853,11 +4306,7 @@ Examples:
 <dl>
 <dd>
 
-**not_sources:** `typing.Optional[str]` 
-
-The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string. 
-
-Example: `"cnn.com, wsj.com"`
+**not_sources:** `typing.Optional[str]` — The news sources to exclude from the search. To exclude multiple sources, use a comma-separated string.
     
 </dd>
 </dl>
@@ -5867,11 +4316,9 @@ Example: `"cnn.com, wsj.com"`
 
 **lang:** `typing.Optional[str]` 
 
-The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string. 
+The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-Example: `"en, es"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -5883,9 +4330,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The language(s) to exclude from the search. The accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To exclude multiple languages, use a comma-separated string. 
 
-Example: `"fr, de"`
-
-To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
     
 </dd>
 </dl>
@@ -5897,9 +4342,7 @@ To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/ove
 
 The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-Example: `"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -5911,9 +4354,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 
 The publisher location countries to exclude from the search. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To exclude multiple countries, use a comma-separated string. 
 
-Example:`"US, CA"`
-
-To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
     
 </dd>
 </dl>
@@ -5921,11 +4362,7 @@ To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/over
 <dl>
 <dd>
 
-**not_author_name:** `typing.Optional[str]` 
-
-The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
-
-Example: `"John Doe, Jane Doe"`
+**not_author_name:** `typing.Optional[str]` — The list of author names to exclude from your search. To exclude articles by specific authors, use a comma-separated string.
     
 </dd>
 </dl>
@@ -5933,18 +4370,7 @@ Example: `"John Doe, Jane Doe"`
 <dl>
 <dd>
 
-**from_:** `typing.Optional[dt.datetime]` 
-
-The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `7 day ago`, `today`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -5952,18 +4378,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**to:** `typing.Optional[dt.datetime]` 
-
-The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `now`
-
-**Note**: By default, applied to the publication date of the article. To use the article's parse date instead, set the `by_parse_date` parameter to `true`.
+**to:** `typing.Optional[To]` 
     
 </dd>
 </dl>
@@ -5971,12 +4386,7 @@ Formats with examples:
 <dl>
 <dd>
 
-**published_date_precision:** `typing.Optional[AggregationGetRequestPublishedDatePrecision]` 
-
-The precision of the published date. There are three types:
-- `full`: The day and time of an article is correctly identified with the appropriate timezone.
-- `timezone unknown`: The day and time of an article is correctly identified without timezone.
-- `date`: Only the day is identified without an exact time.
+**published_date_precision:** `typing.Optional[PublishedDatePrecision]` 
     
 </dd>
 </dl>
@@ -5984,7 +4394,7 @@ The precision of the published date. There are three types:
 <dl>
 <dd>
 
-**by_parse_date:** `typing.Optional[bool]` — If true, the `from_` and `to_` parameters use article parse dates instead of published dates. Additionally, the `parse_date` variable is added to the output for each article object.
+**by_parse_date:** `typing.Optional[ByParseDate]` 
     
 </dd>
 </dl>
@@ -5992,12 +4402,7 @@ The precision of the published date. There are three types:
 <dl>
 <dd>
 
-**sort_by:** `typing.Optional[AggregationGetRequestSortBy]` 
-
-The sorting order of the results. Possible values are:
-- `relevancy`: The most relevant results first.
-- `date`: The most recently published results first.
-- `rank`: The results from the highest-ranked sources first.
+**sort_by:** `typing.Optional[SortBy]` 
     
 </dd>
 </dl>
@@ -6005,7 +4410,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**ranked_only:** `typing.Optional[bool]` — If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
+**ranked_only:** `typing.Optional[RankedOnly]` 
     
 </dd>
 </dl>
@@ -6013,7 +4418,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**from_rank:** `typing.Optional[int]` — The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+**from_rank:** `typing.Optional[FromRank]` 
     
 </dd>
 </dl>
@@ -6021,7 +4426,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**to_rank:** `typing.Optional[int]` — The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+**to_rank:** `typing.Optional[ToRank]` 
     
 </dd>
 </dl>
@@ -6029,7 +4434,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**is_headline:** `typing.Optional[bool]` — If true, only returns articles that were posted on the home page of a given news domain.
+**is_headline:** `typing.Optional[IsHeadline]` 
     
 </dd>
 </dl>
@@ -6037,7 +4442,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**is_opinion:** `typing.Optional[bool]` — If true, returns only opinion pieces. If false, excludes opinion-based articles and returns news only.
+**is_opinion:** `typing.Optional[IsOpinion]` 
     
 </dd>
 </dl>
@@ -6045,7 +4450,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**is_paid_content:** `typing.Optional[bool]` — If false, returns only articles that have publicly available complete content. Some publishers partially block content, so this setting ensures that only full articles are retrieved.
+**is_paid_content:** `typing.Optional[IsPaidContent]` 
     
 </dd>
 </dl>
@@ -6053,11 +4458,7 @@ The sorting order of the results. Possible values are:
 <dl>
 <dd>
 
-**parent_url:** `typing.Optional[str]` 
-
-The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
-
-Example: `"wsj.com/politics, wsj.com/tech"`
+**parent_url:** `typing.Optional[str]` — The categorical URL(s) to filter your search. To filter your search by multiple categorical URLs, use a comma-separated string.
     
 </dd>
 </dl>
@@ -6069,9 +4470,7 @@ Example: `"wsj.com/politics, wsj.com/tech"`
 
 The complete URL(s) mentioned in the article. For multiple URLs, use a comma-separated string.
 
-Example: `"https://aiindex.stanford.edu/report, https://www.stateof.ai"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -6083,9 +4482,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 
 The domain(s) mentioned in the article. For multiple domains, use a comma-separated string.
 
-Example: `"who.int, nih.gov"`
-
-For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-url).
+For more details, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -6093,7 +4490,13 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**word_count_min:** `typing.Optional[int]` — The minimum number of words an article must contain. To be used for avoiding articles with small content.
+**all_links_text:** `typing.Optional[str]` 
+
+The text content of links mentioned in the article. Searches for links where the anchor text contains the specified terms. For multiple terms, use a comma-separated string.
+
+**Note**: When this parameter is used, the response includes the `all_links_data` field with detailed link information.
+
+To learn more, see [Search by URL](https://www.newscatcherapi.com/docs/news-api/how-to/search-by-url).
     
 </dd>
 </dl>
@@ -6101,7 +4504,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**word_count_max:** `typing.Optional[int]` — The maximum number of words an article can contain. To be used for avoiding articles with large content.
+**word_count_min:** `typing.Optional[WordCountMin]` 
     
 </dd>
 </dl>
@@ -6109,11 +4512,7 @@ For more details, see [Search by URL](/docs/v3/documentation/how-to/search-by-ur
 <dl>
 <dd>
 
-**page:** `typing.Optional[int]` 
-
-The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles. 
-
-For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
+**word_count_max:** `typing.Optional[WordCountMax]` 
     
 </dd>
 </dl>
@@ -6121,7 +4520,15 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**page_size:** `typing.Optional[int]` — The number of articles to return per page.
+**page:** `typing.Optional[Page]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[PageSize]` 
     
 </dd>
 </dl>
@@ -6145,17 +4552,7 @@ For details, see [How to paginate large datasets](https://www.newscatcherapi.com
 <dl>
 <dd>
 
-**theme:** `typing.Optional[str]` 
-
-Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
-
-Example: `"Finance, Tech"`
-
-**Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+**theme:** `typing.Optional[Theme]` 
     
 </dd>
 </dl>
@@ -6163,15 +4560,7 @@ Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`
 <dl>
 <dd>
 
-**not_theme:** `typing.Optional[str]` 
-
-Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string. 
-
-Example: `"Crime, Tech"`
-
-**Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**not_theme:** `typing.Optional[NotTheme]` 
     
 </dd>
 </dl>
@@ -6179,15 +4568,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**org_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Apple, Microsoft"`
-
-**Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**org_entity_name:** `typing.Optional[OrgEntityName]` 
     
 </dd>
 </dl>
@@ -6195,15 +4576,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**per_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Elon Musk, Jeff Bezos"`
-
-**Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**per_entity_name:** `typing.Optional[PerEntityName]` 
     
 </dd>
 </dl>
@@ -6211,15 +4584,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**loc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"California, New York"`
-
-**Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**loc_entity_name:** `typing.Optional[LocEntityName]` 
     
 </dd>
 </dl>
@@ -6227,15 +4592,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**misc_entity_name:** `typing.Optional[str]` 
-
-Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-Example: `"Bitcoin, Blockchain"`
-
-**Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
+**misc_entity_name:** `typing.Optional[MiscEntityName]` 
     
 </dd>
 </dl>
@@ -6243,18 +4600,7 @@ To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-en
 <dl>
 <dd>
 
-**title_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_min:** `typing.Optional[TitleSentimentMin]` 
     
 </dd>
 </dl>
@@ -6262,18 +4608,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**title_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their titles.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**title_sentiment_max:** `typing.Optional[TitleSentimentMax]` 
     
 </dd>
 </dl>
@@ -6281,18 +4616,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_min:** `typing.Optional[float]` 
-
-Filters articles based on the minimum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**content_sentiment_min:** `typing.Optional[ContentSentimentMin]` 
     
 </dd>
 </dl>
@@ -6300,18 +4624,7 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 <dl>
 <dd>
 
-**content_sentiment_max:** `typing.Optional[float]` 
-
-Filters articles based on the maximum sentiment score of their content.
-
-Range is `-1.0` to `1.0`, where:
-- Negative values indicate negative sentiment.
-- Positive values indicate positive sentiment.
-- Values close to 0 indicate neutral sentiment.
-
-**Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+**content_sentiment_max:** `typing.Optional[ContentSentimentMax]` 
     
 </dd>
 </dl>
@@ -6322,8 +4635,6 @@ To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp
 **iptc_tags:** `typing.Optional[str]` 
 
 Filters articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags, use a comma-separated string of tag IDs. 
-
-Example: `"20000199, 20000209"`
 
 **Note**: The `iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -6337,9 +4648,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 
 **not_iptc_tags:** `typing.Optional[str]` 
 
-Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs. 
-
-Example: `"20000205, 20000209"`
+Inverse of the `iptc_tags` parameter. Excludes articles based on International Press Telecommunications Council (IPTC) media topic tags. To specify multiple IPTC tags to exclude, use a comma-separated string of tag IDs.
 
 **Note**: The `not_iptc_tags` parameter is only available in the `v3_nlp_iptc_tags` subscription plan.
 
@@ -6351,7 +4660,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 <dl>
 <dd>
 
-**robots_compliant:** `typing.Optional[bool]` — If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+**robots_compliant:** `typing.Optional[RobotsCompliant]` 
     
 </dd>
 </dl>
@@ -6371,7 +4680,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 </dl>
 </details>
 
-<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">post</a>(...)</code></summary>
+<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">count_post</a>(...) -> AggregationCountPostResponse</code></summary>
 <dl>
 <dd>
 
@@ -6398,23 +4707,17 @@ Retrieves the count of articles aggregated by day or hour based on various searc
 <dd>
 
 ```python
-import datetime
-
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
-client.aggregation.post(
-    q="renewable energy",
+
+client.aggregation.count_post(
+    q="\"supply chain\" AND Amazon NOT China",
     aggregation_by="day",
-    predefined_sources="top 50 US",
-    from_=datetime.datetime.fromisoformat(
-        "2024-01-01 00:00:00+00:00",
-    ),
-    to=datetime.datetime.fromisoformat(
-        "2024-06-30 00:00:00+00:00",
-    ),
 )
 
 ```
@@ -6519,7 +4822,7 @@ client.aggregation.post(
 <dl>
 <dd>
 
-**from_:** `typing.Optional[From]` 
+**from:** `typing.Optional[From]` 
     
 </dd>
 </dl>
@@ -6624,6 +4927,14 @@ client.aggregation.post(
 <dd>
 
 **all_domain_links:** `typing.Optional[AllDomainLinks]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**all_links_text:** `typing.Optional[AllLinksText]` 
     
 </dd>
 </dl>
@@ -6796,7 +5107,7 @@ client.aggregation.post(
 </details>
 
 ## Subscription
-<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">get</a>()</code></summary>
+<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">get</a>() -> SubscriptionResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -6824,10 +5135,13 @@ Retrieves information about your subscription plan.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.subscription.get()
 
 ```
@@ -6856,7 +5170,7 @@ client.subscription.get()
 </dl>
 </details>
 
-<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">post</a>()</code></summary>
+<details><summary><code>client.subscription.<a href="src/newscatcher/subscription/client.py">post</a>() -> SubscriptionResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -6884,10 +5198,13 @@ Retrieves information about your subscription plan.
 
 ```python
 from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
 
 client = NewscatcherApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
+
 client.subscription.post()
 
 ```
