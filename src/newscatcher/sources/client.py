@@ -17,7 +17,6 @@ from ..types.source_url import SourceUrl
 from ..types.sources_response_dto import SourcesResponseDto
 from ..types.to_rank import ToRank
 from .raw_client import AsyncRawSourcesClient, RawSourcesClient
-from .types.sources_get_request_news_domain_type import SourcesGetRequestNewsDomainType
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -46,12 +45,12 @@ class SourcesClient:
         predefined_sources: typing.Optional[str] = None,
         source_name: typing.Optional[str] = None,
         source_url: typing.Optional[str] = None,
-        include_additional_info: typing.Optional[bool] = None,
-        is_news_domain: typing.Optional[bool] = None,
-        news_domain_type: typing.Optional[SourcesGetRequestNewsDomainType] = None,
+        include_additional_info: typing.Optional[IncludeAdditionalInfo] = None,
+        is_news_domain: typing.Optional[IsNewsDomain] = None,
+        news_domain_type: typing.Optional[NewsDomainType] = None,
         news_type: typing.Optional[str] = None,
-        from_rank: typing.Optional[int] = None,
-        to_rank: typing.Optional[int] = None,
+        from_rank: typing.Optional[FromRank] = None,
+        to_rank: typing.Optional[ToRank] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SourcesResponseDto:
         """
@@ -62,32 +61,22 @@ class SourcesClient:
         lang : typing.Optional[str]
             The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-            Example: `"en, es"`
-
-            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+            To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
 
         countries : typing.Optional[str]
             The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-            Example: `"US, CA"`
-
-            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+            To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
 
         predefined_sources : typing.Optional[str]
             Predefined top news sources per country.
 
-            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
 
-            Examples:
-            - `"top 100 US"`
-            - `"top 33 AT"`
-            - `"top 50 US, top 20 GB"`
-            - `"top 33 AT, top 50 IT"`
+            Multiple countries with the number of top sources can be specified as a comma-separated string.
 
         source_name : typing.Optional[str]
             Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
-
-            Example: `"sport, tech"`
 
             **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
 
@@ -97,38 +86,20 @@ class SourcesClient:
             **Caution**:  When specifying the `source_url` parameter,
             you can only use `include_additional_info` as an extra parameter.
 
-        include_additional_info : typing.Optional[bool]
-            If true, returns the following additional datapoints about each news source:
-            - `nb_articles_for_7d`: The number of articles published by the source in the last week.
-            - `country`: Source country of origin.
-            - `rank`: SEO rank.
-            - `is_news_domain`: Boolean indicating if the source is a news domain.
-            - `news_domain_type`: Type of news domain (e.g., "Original Content").
-            - `news_type`: Category of news (e.g., "General News Outlets").
+        include_additional_info : typing.Optional[IncludeAdditionalInfo]
 
-        is_news_domain : typing.Optional[bool]
-            If true, filters results to include only news domains.
+        is_news_domain : typing.Optional[IsNewsDomain]
 
-        news_domain_type : typing.Optional[SourcesGetRequestNewsDomainType]
-            Filters results based on the news domain type. Possible values are:
-            - `Original Content`: Sources that produce their own content.
-            - `Aggregator`: Sources that collect content from various other sources.
-            - `Press Releases`: Sources primarily publishing press releases.
-            - `Republisher`: Sources that republish content from other sources.
-            - `Other`: Sources that don't fit into main categories.
+        news_domain_type : typing.Optional[NewsDomainType]
 
         news_type : typing.Optional[str]
             Filters results based on the news type. Multiple types can be specified using a comma-separated string.
 
-            Example: `"General News Outlets,Tech News and Updates"`
+            For a complete list of available news types, see [Enumerated parameters > News type](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#news-type-news-type).
 
-            For a complete list of available news types, see [Enumerated parameters > News type](/docs/v3/api-reference/overview/enumerated-parameters#news-type-news-type).
+        from_rank : typing.Optional[FromRank]
 
-        from_rank : typing.Optional[int]
-            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-
-        to_rank : typing.Optional[int]
-            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+        to_rank : typing.Optional[ToRank]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -146,8 +117,16 @@ class SourcesClient:
             api_key="YOUR_API_KEY",
         )
         client.sources.get(
-            predefined_sources="top 100 US, top 5 GB",
+            lang="en,es",
+            countries="US,CA",
+            predefined_sources="top 50 US, top 20 GB",
+            source_name="sport,tech",
             source_url="bbc.com",
+            include_additional_info=True,
+            is_news_domain=True,
+            news_type="General News Outlets,Tech News and Updates",
+            from_rank=100,
+            to_rank=100,
         )
         """
         _response = self._raw_client.get(
@@ -225,11 +204,7 @@ class SourcesClient:
             api_key="YOUR_API_KEY",
         )
         client.sources.post(
-            predefined_sources=["top 50 US"],
-            include_additional_info=True,
-            is_news_domain=True,
-            news_domain_type="Original Content",
-            news_type="General News Outlets",
+            predefined_sources="top 10 US",
         )
         """
         _response = self._raw_client.post(
@@ -272,12 +247,12 @@ class AsyncSourcesClient:
         predefined_sources: typing.Optional[str] = None,
         source_name: typing.Optional[str] = None,
         source_url: typing.Optional[str] = None,
-        include_additional_info: typing.Optional[bool] = None,
-        is_news_domain: typing.Optional[bool] = None,
-        news_domain_type: typing.Optional[SourcesGetRequestNewsDomainType] = None,
+        include_additional_info: typing.Optional[IncludeAdditionalInfo] = None,
+        is_news_domain: typing.Optional[IsNewsDomain] = None,
+        news_domain_type: typing.Optional[NewsDomainType] = None,
         news_type: typing.Optional[str] = None,
-        from_rank: typing.Optional[int] = None,
-        to_rank: typing.Optional[int] = None,
+        from_rank: typing.Optional[FromRank] = None,
+        to_rank: typing.Optional[ToRank] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SourcesResponseDto:
         """
@@ -288,32 +263,22 @@ class AsyncSourcesClient:
         lang : typing.Optional[str]
             The language(s) of the search. The only accepted format is the two-letter [ISO 639-1](https://en.wikipedia.org/wiki/ISO_639-1) code. To select multiple languages, use a comma-separated string.
 
-            Example: `"en, es"`
-
-            To learn more, see [Enumerated parameters > Language](/docs/v3/api-reference/overview/enumerated-parameters#language-lang-and-not-lang).
+            To learn more, see [Enumerated parameters > Language](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#language-lang-and-not-lang).
 
         countries : typing.Optional[str]
             The countries where the news publisher is located. The accepted format is the two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code. To select multiple countries, use a comma-separated string.
 
-            Example: `"US, CA"`
-
-            To learn more, see [Enumerated parameters > Country](/docs/v3/api-reference/overview/enumerated-parameters#country-country-and-not-country).
+            To learn more, see [Enumerated parameters > Country](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#country-country-and-not-country).
 
         predefined_sources : typing.Optional[str]
             Predefined top news sources per country.
 
-            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Multiple countries with the number of top sources can be specified as a comma-separated string.
+            Format: start with the word `top`, followed by the number of desired sources, and then the two-letter country code [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
 
-            Examples:
-            - `"top 100 US"`
-            - `"top 33 AT"`
-            - `"top 50 US, top 20 GB"`
-            - `"top 33 AT, top 50 IT"`
+            Multiple countries with the number of top sources can be specified as a comma-separated string.
 
         source_name : typing.Optional[str]
             Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
-
-            Example: `"sport, tech"`
 
             **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
 
@@ -323,38 +288,20 @@ class AsyncSourcesClient:
             **Caution**:  When specifying the `source_url` parameter,
             you can only use `include_additional_info` as an extra parameter.
 
-        include_additional_info : typing.Optional[bool]
-            If true, returns the following additional datapoints about each news source:
-            - `nb_articles_for_7d`: The number of articles published by the source in the last week.
-            - `country`: Source country of origin.
-            - `rank`: SEO rank.
-            - `is_news_domain`: Boolean indicating if the source is a news domain.
-            - `news_domain_type`: Type of news domain (e.g., "Original Content").
-            - `news_type`: Category of news (e.g., "General News Outlets").
+        include_additional_info : typing.Optional[IncludeAdditionalInfo]
 
-        is_news_domain : typing.Optional[bool]
-            If true, filters results to include only news domains.
+        is_news_domain : typing.Optional[IsNewsDomain]
 
-        news_domain_type : typing.Optional[SourcesGetRequestNewsDomainType]
-            Filters results based on the news domain type. Possible values are:
-            - `Original Content`: Sources that produce their own content.
-            - `Aggregator`: Sources that collect content from various other sources.
-            - `Press Releases`: Sources primarily publishing press releases.
-            - `Republisher`: Sources that republish content from other sources.
-            - `Other`: Sources that don't fit into main categories.
+        news_domain_type : typing.Optional[NewsDomainType]
 
         news_type : typing.Optional[str]
             Filters results based on the news type. Multiple types can be specified using a comma-separated string.
 
-            Example: `"General News Outlets,Tech News and Updates"`
+            For a complete list of available news types, see [Enumerated parameters > News type](https://www.newscatcherapi.com/docs/news-api/api-reference/enumerated-parameters#news-type-news-type).
 
-            For a complete list of available news types, see [Enumerated parameters > News type](/docs/v3/api-reference/overview/enumerated-parameters#news-type-news-type).
+        from_rank : typing.Optional[FromRank]
 
-        from_rank : typing.Optional[int]
-            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
-
-        to_rank : typing.Optional[int]
-            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+        to_rank : typing.Optional[ToRank]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -377,8 +324,16 @@ class AsyncSourcesClient:
 
         async def main() -> None:
             await client.sources.get(
-                predefined_sources="top 100 US, top 5 GB",
+                lang="en,es",
+                countries="US,CA",
+                predefined_sources="top 50 US, top 20 GB",
+                source_name="sport,tech",
                 source_url="bbc.com",
+                include_additional_info=True,
+                is_news_domain=True,
+                news_type="General News Outlets,Tech News and Updates",
+                from_rank=100,
+                to_rank=100,
             )
 
 
@@ -464,11 +419,7 @@ class AsyncSourcesClient:
 
         async def main() -> None:
             await client.sources.post(
-                predefined_sources=["top 50 US"],
-                include_additional_info=True,
-                is_news_domain=True,
-                news_domain_type="Original Content",
-                news_type="General News Outlets",
+                predefined_sources="top 10 US",
             )
 
 

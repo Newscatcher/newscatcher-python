@@ -2,14 +2,37 @@
 
 # isort: skip_file
 
-from .aggregation_get_request_published_date_precision import AggregationGetRequestPublishedDatePrecision
-from .aggregation_get_request_sort_by import AggregationGetRequestSortBy
-from .aggregation_get_response import AggregationGetResponse
-from .aggregation_post_response import AggregationPostResponse
+import typing
+from importlib import import_module
 
-__all__ = [
-    "AggregationGetRequestPublishedDatePrecision",
-    "AggregationGetRequestSortBy",
-    "AggregationGetResponse",
-    "AggregationPostResponse",
-]
+if typing.TYPE_CHECKING:
+    from .aggregation_count_get_response import AggregationCountGetResponse
+    from .aggregation_count_post_response import AggregationCountPostResponse
+_dynamic_imports: typing.Dict[str, str] = {
+    "AggregationCountGetResponse": ".aggregation_count_get_response",
+    "AggregationCountPostResponse": ".aggregation_count_post_response",
+}
+
+
+def __getattr__(attr_name: str) -> typing.Any:
+    module_name = _dynamic_imports.get(attr_name)
+    if module_name is None:
+        raise AttributeError(f"No {attr_name} found in _dynamic_imports for module name -> {__name__}")
+    try:
+        module = import_module(module_name, __package__)
+        if module_name == f".{attr_name}":
+            return module
+        else:
+            return getattr(module, attr_name)
+    except ImportError as e:
+        raise ImportError(f"Failed to import {attr_name} from {module_name}: {e}") from e
+    except AttributeError as e:
+        raise AttributeError(f"Failed to get {attr_name} from {module_name}: {e}") from e
+
+
+def __dir__():
+    lazy_attrs = list(_dynamic_imports.keys())
+    return sorted(lazy_attrs)
+
+
+__all__ = ["AggregationCountGetResponse", "AggregationCountPostResponse"]

@@ -5,10 +5,11 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .additional_domain_info_entity import AdditionalDomainInfoEntity
+from .all_links_data_item import AllLinksDataItem
 from .article_entity_all_domain_links import ArticleEntityAllDomainLinks
 from .article_entity_all_links import ArticleEntityAllLinks
-from .authors import Authors
-from .journalists import Journalists
+from .article_entity_authors import ArticleEntityAuthors
+from .article_entity_journalists import ArticleEntityJournalists
 from .nlp_data_entity import NlpDataEntity
 
 
@@ -27,12 +28,12 @@ class ArticleEntity(UniversalBaseModel):
     The primary author of the article.
     """
 
-    authors: typing.Optional[Authors] = pydantic.Field(default=None)
+    authors: typing.Optional[ArticleEntityAuthors] = pydantic.Field(default=None)
     """
     A list of authors of the article.
     """
 
-    journalists: typing.Optional[Journalists] = pydantic.Field(default=None)
+    journalists: typing.Optional[ArticleEntityJournalists] = pydantic.Field(default=None)
     """
     A list of journalists associated with the article.
     """
@@ -89,7 +90,7 @@ class ArticleEntity(UniversalBaseModel):
 
     paid_content: typing.Optional[bool] = pydantic.Field(default=None)
     """
-    Indicates if the article is paid content.
+    Indicates whether the source labels the article as paywalled or requiring a subscription for full access.
     """
 
     parent_url: str = pydantic.Field()
@@ -127,7 +128,7 @@ class ArticleEntity(UniversalBaseModel):
     A brief description of the article.
     """
 
-    content: str = pydantic.Field()
+    content: typing.Optional[str] = pydantic.Field(default=None)
     """
     The content of the article.
     """
@@ -165,6 +166,11 @@ class ArticleEntity(UniversalBaseModel):
     all_domain_links: typing.Optional[ArticleEntityAllDomainLinks] = pydantic.Field(default=None)
     """
     A list of all domain URLs mentioned in the article.
+    """
+
+    all_links_data: typing.Optional[typing.List[AllLinksDataItem]] = pydantic.Field(default=None)
+    """
+    Detailed information about all links mentioned in the article, including link URL, domain, and anchor text. Only present when the `all_links_text` parameter is used in the request.
     """
 
     nlp: typing.Optional[NlpDataEntity] = None

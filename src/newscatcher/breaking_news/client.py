@@ -19,7 +19,6 @@ from ..types.page import Page
 from ..types.page_size import PageSize
 from ..types.per_entity_name import PerEntityName
 from ..types.ranked_only import RankedOnly
-from ..types.robots_compliant import RobotsCompliant
 from ..types.sort_by import SortBy
 from ..types.theme import Theme
 from ..types.title_sentiment_max import TitleSentimentMax
@@ -27,7 +26,6 @@ from ..types.title_sentiment_min import TitleSentimentMin
 from ..types.to_rank import ToRank
 from ..types.top_n_articles import TopNArticles
 from .raw_client import AsyncRawBreakingNewsClient, RawBreakingNewsClient
-from .types.breaking_news_get_request_sort_by import BreakingNewsGetRequestSortBy
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -51,27 +49,26 @@ class BreakingNewsClient:
     def breaking_news_get(
         self,
         *,
-        sort_by: typing.Optional[BreakingNewsGetRequestSortBy] = None,
-        ranked_only: typing.Optional[bool] = None,
-        from_rank: typing.Optional[int] = None,
-        to_rank: typing.Optional[int] = None,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
+        sort_by: typing.Optional[SortBy] = None,
+        ranked_only: typing.Optional[RankedOnly] = None,
+        from_rank: typing.Optional[FromRank] = None,
+        to_rank: typing.Optional[ToRank] = None,
+        page: typing.Optional[Page] = None,
+        page_size: typing.Optional[PageSize] = None,
         top_n_articles: typing.Optional[TopNArticles] = None,
         include_translation_fields: typing.Optional[IncludeTranslationFields] = None,
         include_nlp_data: typing.Optional[IncludeNlpData] = None,
         has_nlp: typing.Optional[HasNlp] = None,
-        theme: typing.Optional[str] = None,
-        not_theme: typing.Optional[str] = None,
-        org_entity_name: typing.Optional[str] = None,
-        per_entity_name: typing.Optional[str] = None,
-        loc_entity_name: typing.Optional[str] = None,
-        misc_entity_name: typing.Optional[str] = None,
-        title_sentiment_min: typing.Optional[float] = None,
-        title_sentiment_max: typing.Optional[float] = None,
-        content_sentiment_min: typing.Optional[float] = None,
-        content_sentiment_max: typing.Optional[float] = None,
-        robots_compliant: typing.Optional[bool] = None,
+        theme: typing.Optional[Theme] = None,
+        not_theme: typing.Optional[NotTheme] = None,
+        org_entity_name: typing.Optional[OrgEntityName] = None,
+        per_entity_name: typing.Optional[PerEntityName] = None,
+        loc_entity_name: typing.Optional[LocEntityName] = None,
+        misc_entity_name: typing.Optional[MiscEntityName] = None,
+        title_sentiment_min: typing.Optional[TitleSentimentMin] = None,
+        title_sentiment_max: typing.Optional[TitleSentimentMax] = None,
+        content_sentiment_min: typing.Optional[ContentSentimentMin] = None,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> BreakingNewsResponseDto:
         """
@@ -79,28 +76,17 @@ class BreakingNewsClient:
 
         Parameters
         ----------
-        sort_by : typing.Optional[BreakingNewsGetRequestSortBy]
-            The sorting order of the results. Possible values are:
-            - `relevancy`: The most relevant results first.
-            - `date`: The most recently published results first.
-            - `rank`: The results from the highest-ranked sources first.
+        sort_by : typing.Optional[SortBy]
 
-        ranked_only : typing.Optional[bool]
-            If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
+        ranked_only : typing.Optional[RankedOnly]
 
-        from_rank : typing.Optional[int]
-            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+        from_rank : typing.Optional[FromRank]
 
-        to_rank : typing.Optional[int]
-            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+        to_rank : typing.Optional[ToRank]
 
-        page : typing.Optional[int]
-            The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles.
+        page : typing.Optional[Page]
 
-            For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
-
-        page_size : typing.Optional[int]
-            The number of articles to return per page.
+        page_size : typing.Optional[PageSize]
 
         top_n_articles : typing.Optional[TopNArticles]
 
@@ -110,112 +96,25 @@ class BreakingNewsClient:
 
         has_nlp : typing.Optional[HasNlp]
 
-        theme : typing.Optional[str]
-            Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
+        theme : typing.Optional[Theme]
 
-            Example: `"Finance, Tech"`
+        not_theme : typing.Optional[NotTheme]
 
-            **Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
+        org_entity_name : typing.Optional[OrgEntityName]
 
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+        per_entity_name : typing.Optional[PerEntityName]
 
-            Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+        loc_entity_name : typing.Optional[LocEntityName]
 
-        not_theme : typing.Optional[str]
-            Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string.
+        misc_entity_name : typing.Optional[MiscEntityName]
 
-            Example: `"Crime, Tech"`
+        title_sentiment_min : typing.Optional[TitleSentimentMin]
 
-            **Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
+        title_sentiment_max : typing.Optional[TitleSentimentMax]
 
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+        content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        org_entity_name : typing.Optional[str]
-            Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"Apple, Microsoft"`
-
-            **Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        per_entity_name : typing.Optional[str]
-            Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"Elon Musk, Jeff Bezos"`
-
-            **Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        loc_entity_name : typing.Optional[str]
-            Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"California, New York"`
-
-            **Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        misc_entity_name : typing.Optional[str]
-            Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"Bitcoin, Blockchain"`
-
-            **Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        title_sentiment_min : typing.Optional[float]
-            Filters articles based on the minimum sentiment score of their titles.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        title_sentiment_max : typing.Optional[float]
-            Filters articles based on the maximum sentiment score of their titles.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        content_sentiment_min : typing.Optional[float]
-            Filters articles based on the minimum sentiment score of their content.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        content_sentiment_max : typing.Optional[float]
-            Filters articles based on the maximum sentiment score of their content.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        robots_compliant : typing.Optional[bool]
-            If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -233,12 +132,25 @@ class BreakingNewsClient:
             api_key="YOUR_API_KEY",
         )
         client.breaking_news.breaking_news_get(
+            ranked_only=True,
+            from_rank=100,
+            to_rank=100,
+            page=2,
+            page_size=50,
             top_n_articles=5,
             include_translation_fields=True,
             include_nlp_data=True,
             has_nlp=True,
-            theme="Business,Finance",
-            not_theme="Crime",
+            theme="Finance,Tech",
+            not_theme="Crime,Sports",
+            org_entity_name='"Apple Inc" OR Microsoft',
+            per_entity_name='"Elon Musk" OR "Jeff Bezos"',
+            loc_entity_name='"San Francisco" OR "New York City"',
+            misc_entity_name='AWS OR "Microsoft Azure"',
+            title_sentiment_min=-0.5,
+            title_sentiment_max=0.5,
+            content_sentiment_min=-0.5,
+            content_sentiment_max=0.5,
         )
         """
         _response = self._raw_client.breaking_news_get(
@@ -262,7 +174,6 @@ class BreakingNewsClient:
             title_sentiment_max=title_sentiment_max,
             content_sentiment_min=content_sentiment_min,
             content_sentiment_max=content_sentiment_max,
-            robots_compliant=robots_compliant,
             request_options=request_options,
         )
         return _response.data
@@ -289,8 +200,7 @@ class BreakingNewsClient:
         title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
         title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
         content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
-        content_sentient_max: typing.Optional[ContentSentimentMax] = OMIT,
-        robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> BreakingNewsResponseDto:
         """
@@ -336,9 +246,7 @@ class BreakingNewsClient:
 
         content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        content_sentient_max : typing.Optional[ContentSentimentMax]
-
-        robots_compliant : typing.Optional[RobotsCompliant]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -357,9 +265,8 @@ class BreakingNewsClient:
         )
         client.breaking_news.breaking_news_post(
             sort_by="relevancy",
-            page=1,
-            page_size=100,
-            include_nlp_data=True,
+            ranked_only=True,
+            top_n_articles=1,
         )
         """
         _response = self._raw_client.breaking_news_post(
@@ -382,8 +289,7 @@ class BreakingNewsClient:
             title_sentiment_min=title_sentiment_min,
             title_sentiment_max=title_sentiment_max,
             content_sentiment_min=content_sentiment_min,
-            content_sentient_max=content_sentient_max,
-            robots_compliant=robots_compliant,
+            content_sentiment_max=content_sentiment_max,
             request_options=request_options,
         )
         return _response.data
@@ -407,27 +313,26 @@ class AsyncBreakingNewsClient:
     async def breaking_news_get(
         self,
         *,
-        sort_by: typing.Optional[BreakingNewsGetRequestSortBy] = None,
-        ranked_only: typing.Optional[bool] = None,
-        from_rank: typing.Optional[int] = None,
-        to_rank: typing.Optional[int] = None,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
+        sort_by: typing.Optional[SortBy] = None,
+        ranked_only: typing.Optional[RankedOnly] = None,
+        from_rank: typing.Optional[FromRank] = None,
+        to_rank: typing.Optional[ToRank] = None,
+        page: typing.Optional[Page] = None,
+        page_size: typing.Optional[PageSize] = None,
         top_n_articles: typing.Optional[TopNArticles] = None,
         include_translation_fields: typing.Optional[IncludeTranslationFields] = None,
         include_nlp_data: typing.Optional[IncludeNlpData] = None,
         has_nlp: typing.Optional[HasNlp] = None,
-        theme: typing.Optional[str] = None,
-        not_theme: typing.Optional[str] = None,
-        org_entity_name: typing.Optional[str] = None,
-        per_entity_name: typing.Optional[str] = None,
-        loc_entity_name: typing.Optional[str] = None,
-        misc_entity_name: typing.Optional[str] = None,
-        title_sentiment_min: typing.Optional[float] = None,
-        title_sentiment_max: typing.Optional[float] = None,
-        content_sentiment_min: typing.Optional[float] = None,
-        content_sentiment_max: typing.Optional[float] = None,
-        robots_compliant: typing.Optional[bool] = None,
+        theme: typing.Optional[Theme] = None,
+        not_theme: typing.Optional[NotTheme] = None,
+        org_entity_name: typing.Optional[OrgEntityName] = None,
+        per_entity_name: typing.Optional[PerEntityName] = None,
+        loc_entity_name: typing.Optional[LocEntityName] = None,
+        misc_entity_name: typing.Optional[MiscEntityName] = None,
+        title_sentiment_min: typing.Optional[TitleSentimentMin] = None,
+        title_sentiment_max: typing.Optional[TitleSentimentMax] = None,
+        content_sentiment_min: typing.Optional[ContentSentimentMin] = None,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> BreakingNewsResponseDto:
         """
@@ -435,28 +340,17 @@ class AsyncBreakingNewsClient:
 
         Parameters
         ----------
-        sort_by : typing.Optional[BreakingNewsGetRequestSortBy]
-            The sorting order of the results. Possible values are:
-            - `relevancy`: The most relevant results first.
-            - `date`: The most recently published results first.
-            - `rank`: The results from the highest-ranked sources first.
+        sort_by : typing.Optional[SortBy]
 
-        ranked_only : typing.Optional[bool]
-            If true, limits the search to sources ranked in the top 1 million online websites. If false, includes unranked sources which are assigned a rank of 999999.
+        ranked_only : typing.Optional[RankedOnly]
 
-        from_rank : typing.Optional[int]
-            The lowest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+        from_rank : typing.Optional[FromRank]
 
-        to_rank : typing.Optional[int]
-            The highest boundary of the rank of a news website to filter by. A lower rank indicates a more popular source.
+        to_rank : typing.Optional[ToRank]
 
-        page : typing.Optional[int]
-            The page number to scroll through the results. Use for pagination, as a single API response can return up to 1,000 articles.
+        page : typing.Optional[Page]
 
-            For details, see [How to paginate large datasets](https://www.newscatcherapi.com/docs/v3/documentation/how-to/paginate-large-datasets).
-
-        page_size : typing.Optional[int]
-            The number of articles to return per page.
+        page_size : typing.Optional[PageSize]
 
         top_n_articles : typing.Optional[TopNArticles]
 
@@ -466,112 +360,25 @@ class AsyncBreakingNewsClient:
 
         has_nlp : typing.Optional[HasNlp]
 
-        theme : typing.Optional[str]
-            Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
+        theme : typing.Optional[Theme]
 
-            Example: `"Finance, Tech"`
+        not_theme : typing.Optional[NotTheme]
 
-            **Note**: The `theme` parameter is only available if NLP is included in your subscription plan.
+        org_entity_name : typing.Optional[OrgEntityName]
 
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+        per_entity_name : typing.Optional[PerEntityName]
 
-            Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
+        loc_entity_name : typing.Optional[LocEntityName]
 
-        not_theme : typing.Optional[str]
-            Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string.
+        misc_entity_name : typing.Optional[MiscEntityName]
 
-            Example: `"Crime, Tech"`
+        title_sentiment_min : typing.Optional[TitleSentimentMin]
 
-            **Note**: The `not_theme` parameter is only available if NLP is included in your subscription plan.
+        title_sentiment_max : typing.Optional[TitleSentimentMax]
 
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
+        content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        org_entity_name : typing.Optional[str]
-            Filters articles that mention specific organization names, as identified by NLP analysis. To specify multiple organizations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"Apple, Microsoft"`
-
-            **Note**: The `ORG_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        per_entity_name : typing.Optional[str]
-            Filters articles that mention specific person names, as identified by NLP analysis. To specify multiple names, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"Elon Musk, Jeff Bezos"`
-
-            **Note**: The `PER_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        loc_entity_name : typing.Optional[str]
-            Filters articles that mention specific location names, as identified by NLP analysis. To specify multiple locations, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"California, New York"`
-
-            **Note**: The `LOC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        misc_entity_name : typing.Optional[str]
-            Filters articles that mention other named entities not falling under person, organization, or location categories. Includes events, nationalities, products, works of art, and more. To specify multiple entities, use a comma-separated string. To search named entities in translations, combine with the translation options of the `search_in` parameter (e.g., `title_content_translated`).
-
-            Example: `"Bitcoin, Blockchain"`
-
-            **Note**: The `MISC_entity_name` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [Search by entity](/docs/v3/documentation/how-to/search-by-entity).
-
-        title_sentiment_min : typing.Optional[float]
-            Filters articles based on the minimum sentiment score of their titles.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `title_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        title_sentiment_max : typing.Optional[float]
-            Filters articles based on the maximum sentiment score of their titles.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `title_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        content_sentiment_min : typing.Optional[float]
-            Filters articles based on the minimum sentiment score of their content.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `content_sentiment_min` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        content_sentiment_max : typing.Optional[float]
-            Filters articles based on the maximum sentiment score of their content.
-
-            Range is `-1.0` to `1.0`, where:
-            - Negative values indicate negative sentiment.
-            - Positive values indicate positive sentiment.
-            - Values close to 0 indicate neutral sentiment.
-
-            **Note**: The `content_sentiment_max` parameter is only available if NLP is included in your subscription plan.
-
-            To learn more, see [NLP features](/docs/v3/documentation/guides-and-concepts/nlp-features).
-
-        robots_compliant : typing.Optional[bool]
-            If true, returns only articles/sources that comply with the publisher's robots.txt rules. If false, returns only articles/sources that do not comply with robots.txt rules. If omitted, returns all articles/sources regardless of compliance status.
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -594,12 +401,25 @@ class AsyncBreakingNewsClient:
 
         async def main() -> None:
             await client.breaking_news.breaking_news_get(
+                ranked_only=True,
+                from_rank=100,
+                to_rank=100,
+                page=2,
+                page_size=50,
                 top_n_articles=5,
                 include_translation_fields=True,
                 include_nlp_data=True,
                 has_nlp=True,
-                theme="Business,Finance",
-                not_theme="Crime",
+                theme="Finance,Tech",
+                not_theme="Crime,Sports",
+                org_entity_name='"Apple Inc" OR Microsoft',
+                per_entity_name='"Elon Musk" OR "Jeff Bezos"',
+                loc_entity_name='"San Francisco" OR "New York City"',
+                misc_entity_name='AWS OR "Microsoft Azure"',
+                title_sentiment_min=-0.5,
+                title_sentiment_max=0.5,
+                content_sentiment_min=-0.5,
+                content_sentiment_max=0.5,
             )
 
 
@@ -626,7 +446,6 @@ class AsyncBreakingNewsClient:
             title_sentiment_max=title_sentiment_max,
             content_sentiment_min=content_sentiment_min,
             content_sentiment_max=content_sentiment_max,
-            robots_compliant=robots_compliant,
             request_options=request_options,
         )
         return _response.data
@@ -653,8 +472,7 @@ class AsyncBreakingNewsClient:
         title_sentiment_min: typing.Optional[TitleSentimentMin] = OMIT,
         title_sentiment_max: typing.Optional[TitleSentimentMax] = OMIT,
         content_sentiment_min: typing.Optional[ContentSentimentMin] = OMIT,
-        content_sentient_max: typing.Optional[ContentSentimentMax] = OMIT,
-        robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
+        content_sentiment_max: typing.Optional[ContentSentimentMax] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> BreakingNewsResponseDto:
         """
@@ -700,9 +518,7 @@ class AsyncBreakingNewsClient:
 
         content_sentiment_min : typing.Optional[ContentSentimentMin]
 
-        content_sentient_max : typing.Optional[ContentSentimentMax]
-
-        robots_compliant : typing.Optional[RobotsCompliant]
+        content_sentiment_max : typing.Optional[ContentSentimentMax]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -726,9 +542,8 @@ class AsyncBreakingNewsClient:
         async def main() -> None:
             await client.breaking_news.breaking_news_post(
                 sort_by="relevancy",
-                page=1,
-                page_size=100,
-                include_nlp_data=True,
+                ranked_only=True,
+                top_n_articles=1,
             )
 
 
@@ -754,8 +569,7 @@ class AsyncBreakingNewsClient:
             title_sentiment_min=title_sentiment_min,
             title_sentiment_max=title_sentiment_max,
             content_sentiment_min=content_sentiment_min,
-            content_sentient_max=content_sentient_max,
-            robots_compliant=robots_compliant,
+            content_sentiment_max=content_sentiment_max,
             request_options=request_options,
         )
         return _response.data
