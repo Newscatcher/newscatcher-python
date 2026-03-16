@@ -4,10 +4,10 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .authors import Authors
 from .breaking_news_article_entity_all_domain_links import BreakingNewsArticleEntityAllDomainLinks
 from .breaking_news_article_entity_all_links import BreakingNewsArticleEntityAllLinks
-from .journalists import Journalists
+from .breaking_news_article_entity_authors import BreakingNewsArticleEntityAuthors
+from .breaking_news_article_entity_journalists import BreakingNewsArticleEntityJournalists
 from .nlp_data_entity import NlpDataEntity
 
 
@@ -26,12 +26,12 @@ class BreakingNewsArticleEntity(UniversalBaseModel):
     The primary author of the article.
     """
 
-    authors: typing.Optional[Authors] = pydantic.Field(default=None)
+    authors: typing.Optional[BreakingNewsArticleEntityAuthors] = pydantic.Field(default=None)
     """
     A list of authors of the article.
     """
 
-    journalists: typing.Optional[Journalists] = pydantic.Field(default=None)
+    journalists: typing.Optional[BreakingNewsArticleEntityJournalists] = pydantic.Field(default=None)
     """
     A list of journalists associated with the article.
     """
@@ -88,7 +88,7 @@ class BreakingNewsArticleEntity(UniversalBaseModel):
 
     paid_content: typing.Optional[bool] = pydantic.Field(default=None)
     """
-    Indicates if the article is paid content.
+    Indicates whether the source labels the article as paywalled or requiring a subscription for full access.
     """
 
     parent_url: str = pydantic.Field()
@@ -126,9 +126,19 @@ class BreakingNewsArticleEntity(UniversalBaseModel):
     A brief description of the article.
     """
 
-    content: str = pydantic.Field()
+    content: typing.Optional[str] = pydantic.Field(default=None)
     """
     The content of the article.
+    """
+
+    title_translated_en: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    English translation of the article title. Available when setting the `include_translation_fields` parameter to `true`.
+    """
+
+    content_translated_en: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    English translation of the article content. Available when setting the `include_translation_fields` parameter to `true`.
     """
 
     word_count: typing.Optional[int] = pydantic.Field(default=None)
@@ -165,11 +175,6 @@ class BreakingNewsArticleEntity(UniversalBaseModel):
     score: float = pydantic.Field()
     """
     The relevance score of the article.
-    """
-
-    robots_compliant: typing.Optional[bool] = pydantic.Field(default=None)
-    """
-    True if the article content can be safely accessed according to the publisher's robots.txt rules; false otherwise.
     """
 
     if IS_PYDANTIC_V2:

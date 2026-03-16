@@ -1,6 +1,9 @@
 name: ci
+on: [push]
 
-on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   compile:
@@ -11,28 +14,14 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Bootstrap poetry
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
-        run: |
-          poetry install
-          # Install additional dependencies if they exist in pyproject.toml or requirements
-          pip install types-tqdm python-dotenv python-dateutil tqdm types-python-dateutil || echo "Optional dependencies not installed"
+        run: poetry install
       - name: Compile
-        run: |
-          # Check if we have custom mypy config and custom files
-          if [ -f "mypy.ini" ] && [ -f "src/newscatcher/client.py" ] && [ -f "src/newscatcher/utils.py" ]; then
-            # Use custom configuration for custom files
-            poetry run mypy --config-file=mypy.ini src/newscatcher/client.py src/newscatcher/utils.py tests/ || echo "Custom mypy check completed with warnings"
-            # Check core files with relaxed settings
-            poetry run mypy --config-file=mypy.ini --disable-error-code=no-any-return src/newscatcher/core/ || echo "Core mypy check completed with warnings"
-          else
-            # Use default Fern approach - check everything
-            poetry run mypy . || echo "Default mypy check completed with warnings"
-          fi
-
+        run: poetry run mypy .
   test:
     runs-on: ubuntu-latest
     steps:
@@ -41,61 +30,15 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Bootstrap poetry
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
       - name: Install dependencies
-        run: |
-          poetry install
-          # Ensure all required dependencies are installed
-          poetry install --with dev || echo "Dev dependencies not available"
-          # Install the package in development mode
-          pip install -e .
-          # Install additional test dependencies for custom tests
-          pip install pytest pytest-asyncio python-dateutil tqdm python-dotenv httpx || echo "Optional test dependencies not installed"
-      - name: Generate mock data
-        run: |
-          # Only run if mock script exists
-          if [ -f "test-mock-mode.sh" ]; then
-            mkdir -p tests/mocks
-            python -c "$(cat test-mock-mode.sh | sed -n '/python -c/,/EOF/p' | grep -v 'python -c' | grep -v EOF)" || echo "Mock generation skipped"
-          fi
+        run: poetry install
+
       - name: Test
-        env:
-          NEWSCATCHER_API_KEY: ${{ secrets.NEWSCATCHER_API_KEY }}
-          TEST_MODE: "mock"
-        run: |
-          # Run different test strategies based on what exists
-          if [ -d "tests/utils" ] || [ -d "tests/custom" ] || [ -d "tests/integration" ]; then
-            echo "Running custom test suite"
-            # Run utils tests
-            if [ -d "tests/utils" ]; then
-              poetry run pytest -rP tests/utils || echo "Utils tests completed with issues"
-            fi
-            # Run custom tests  
-            if [ -d "tests/custom" ] || [ -d "tests/integration" ]; then
-              pytest tests/custom tests/integration -v || echo "Custom tests completed with issues"
-            fi
-          else
-            echo "Running default Fern test approach"
-            poetry run pytest -rP . || echo "Default tests completed with issues"
-          fi
-      - name: SDK validation test
-        run: |
-          # Install package in development mode for validation
-          pip install -e .
-          # Always run basic SDK validation
-          python -c "
-          try:
-              from newscatcher import NewscatcherApi
-              print('SDK import successful')
-              client = NewscatcherApi(api_key='test-key')
-              print('SDK instantiation successful')
-          except Exception as e:
-              print(f'SDK validation failed: {e}')
-              exit(1)
-          "
+        run: poetry run pytest -rP -n auto .
 
   publish:
     needs: [compile, test]
@@ -107,7 +50,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Bootstrap poetry
         run: |
           curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1

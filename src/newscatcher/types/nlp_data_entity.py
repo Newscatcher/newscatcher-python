@@ -35,65 +35,72 @@ class NlpDataEntity(UniversalBaseModel):
     """
     A dense 1024-dimensional vector representation of the article content, generated using  the [multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large) model.
     
-    **Note**: The `new_embedding` field is only available in the `v3_local_news_nlp_embeddings` subscription plan.
+    **Note**: The `new_embedding` field is only available in the `v3_nlp_embeddings` subscription plan.
     """
 
-    ner_per: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_PER")] = (
-        pydantic.Field(default=None)
-    )
-    """
-    Named Entity Recognition for person entities (individuals' names).
-    """
-
-    ner_org: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_ORG")] = (
-        pydantic.Field(default=None)
-    )
-    """
-    Named Entity Recognition for organization entities (company names, institutions).
-    """
-
-    ner_misc: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_MISC")] = (
-        pydantic.Field(default=None)
-    )
-    """
-    Named Entity Recognition for miscellaneous entities (events, nationalities, products).
-    """
-
-    ner_loc: typing_extensions.Annotated[typing.Optional[NamedEntityList], FieldMetadata(alias="ner_LOC")] = (
-        pydantic.Field(default=None)
-    )
-    """
-    Named Entity Recognition for location entities (cities, countries, geographic features).
-    """
-
+    ner_per: typing_extensions.Annotated[
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="ner_PER"),
+        pydantic.Field(
+            alias="ner_PER", description="Named Entity Recognition for person entities (individuals' names)."
+        ),
+    ] = None
+    ner_org: typing_extensions.Annotated[
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="ner_ORG"),
+        pydantic.Field(
+            alias="ner_ORG",
+            description="Named Entity Recognition for organization entities (company names, institutions).",
+        ),
+    ] = None
+    ner_misc: typing_extensions.Annotated[
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="ner_MISC"),
+        pydantic.Field(
+            alias="ner_MISC",
+            description="Named Entity Recognition for miscellaneous entities (events, nationalities, products).",
+        ),
+    ] = None
+    ner_loc: typing_extensions.Annotated[
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="ner_LOC"),
+        pydantic.Field(
+            alias="ner_LOC",
+            description="Named Entity Recognition for location entities (cities, countries, geographic features).",
+        ),
+    ] = None
     translation_ner_per: typing_extensions.Annotated[
-        typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_PER")
-    ] = pydantic.Field(default=None)
-    """
-    Named Entity Recognition for person entities (individuals' names) extracted from the English translation of the article.
-    """
-
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="translation_ner_PER"),
+        pydantic.Field(
+            alias="translation_ner_PER",
+            description="Named Entity Recognition for person entities (individuals' names) extracted from the English translation of the article.",
+        ),
+    ] = None
     translation_ner_org: typing_extensions.Annotated[
-        typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_ORG")
-    ] = pydantic.Field(default=None)
-    """
-    Named Entity Recognition for organization entities (company names, institutions) extracted from the English translation of the article.
-    """
-
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="translation_ner_ORG"),
+        pydantic.Field(
+            alias="translation_ner_ORG",
+            description="Named Entity Recognition for organization entities (company names, institutions) extracted from the English translation of the article.",
+        ),
+    ] = None
     translation_ner_misc: typing_extensions.Annotated[
-        typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_MISC")
-    ] = pydantic.Field(default=None)
-    """
-    Named Entity Recognition for miscellaneous entities (events, nationalities, products) extracted from the English translation of the article.
-    """
-
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="translation_ner_MISC"),
+        pydantic.Field(
+            alias="translation_ner_MISC",
+            description="Named Entity Recognition for miscellaneous entities (events, nationalities, products) extracted from the English translation of the article.",
+        ),
+    ] = None
     translation_ner_loc: typing_extensions.Annotated[
-        typing.Optional[NamedEntityList], FieldMetadata(alias="translation_ner_LOC")
-    ] = pydantic.Field(default=None)
-    """
-    Named Entity Recognition for location entities (cities, countries, geographic features) extracted from the English translation of the article.
-    """
-
+        typing.Optional[NamedEntityList],
+        FieldMetadata(alias="translation_ner_LOC"),
+        pydantic.Field(
+            alias="translation_ner_LOC",
+            description="Named Entity Recognition for location entities (cities, countries, geographic features) extracted from the English translation of the article.",
+        ),
+    ] = None
     iptc_tags_name: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
     """
     IPTC media topic taxonomy paths identified in the article content. Each path represents a hierarchical category following the IPTC standard.
