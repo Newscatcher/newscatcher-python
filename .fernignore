@@ -1,6 +1,6 @@
 LICENSE
 .gitignore
-README.md
+# README.md
 
 # Ignore custom SDK code
 src/newscatcher/client.py
@@ -15,4 +15,4 @@ test-mock-mode.sh
 mypy.ini
 
 # CI/CD
-.github/workflows/ci.yml
+# .github/workflows/ci.yml
