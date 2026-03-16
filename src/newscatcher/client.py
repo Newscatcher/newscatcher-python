@@ -6,7 +6,6 @@ import re
 from typing import Optional, Union, List, Set, Tuple, Any
 
 from .base_client import BaseNewscatcherApi, AsyncBaseNewscatcherApi
-from .types.articles import Articles
 from .utils import (
     parse_time_parameters,
     create_time_chunks,
@@ -719,7 +718,7 @@ class NewscatcherApi(BaseNewscatcherApi, NewscatcherMixin):
         show_progress: bool = False,
         deduplicate: bool = True,
         **kwargs,
-    ) -> Articles:
+    ) -> List[Any]:
         """
         Fetch all latest headlines by splitting the request into
         multiple time-based chunks to overcome the 10,000 article limit.
@@ -1003,7 +1002,7 @@ class AsyncNewscatcherApi(AsyncBaseNewscatcherApi, NewscatcherMixin):
         deduplicate: bool = True,
         concurrency: int = 3,  # Default concurrency for page fetching
         **kwargs,
-    ) -> Articles:
+    ) -> List[Any]:
         """
         Async version: Fetch all latest headlines by splitting the request into
         multiple time-based chunks to overcome the 10,000 article limit.
