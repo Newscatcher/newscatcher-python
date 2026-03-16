@@ -36,7 +36,7 @@ class RawSearchByLinkClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def search_by_link_get(
+    def get(
         self,
         *,
         ids: typing.Optional[str] = None,
@@ -191,7 +191,7 @@ class RawSearchByLinkClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def search_by_link_post(
+    def post(
         self,
         *,
         ids: typing.Optional[Ids] = OMIT,
@@ -365,7 +365,7 @@ class AsyncRawSearchByLinkClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def search_by_link_get(
+    async def get(
         self,
         *,
         ids: typing.Optional[str] = None,
@@ -520,7 +520,7 @@ class AsyncRawSearchByLinkClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def search_by_link_post(
+    async def post(
         self,
         *,
         ids: typing.Optional[Ids] = OMIT,

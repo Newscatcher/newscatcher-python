@@ -1,6 +1,6 @@
 # Reference
 ## Search
-<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">get</a>(...) -> SearchGetResponse</code></summary>
+<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">get</a>(...) -> GetSearchResponse</code></summary>
 <dl>
 <dd>
 
@@ -651,7 +651,7 @@ To learn more, see the [Custom tags](https://www.newscatcherapi.com/docs/news-ap
 </dl>
 </details>
 
-<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">post</a>(...) -> SearchPostResponse</code></summary>
+<details><summary><code>client.search.<a href="src/newscatcher/search/client.py">post</a>(...) -> PostSearchResponse</code></summary>
 <dl>
 <dd>
 
@@ -1174,7 +1174,7 @@ client.search.post(
 </details>
 
 ## LatestHeadlines
-<details><summary><code>client.latest_headlines.<a href="src/newscatcher/latest_headlines/client.py">latest_headlines_get</a>(...) -> LatestHeadlinesGetResponse</code></summary>
+<details><summary><code>client.latest_headlines.<a href="src/newscatcher/latest_headlines/client.py">get</a>(...) -> GetLatestHeadlinesResponse</code></summary>
 <dl>
 <dd>
 
@@ -1209,7 +1209,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.latest_headlines.latest_headlines_get(
+client.latest_headlines.get(
     when="7d",
     by_parse_date=True,
     lang="en,es",
@@ -1709,7 +1709,7 @@ To learn more, see the [Custom tags](https://www.newscatcherapi.com/docs/news-ap
 </dl>
 </details>
 
-<details><summary><code>client.latest_headlines.<a href="src/newscatcher/latest_headlines/client.py">latest_headlines_post</a>(...) -> LatestHeadlinesPostResponse</code></summary>
+<details><summary><code>client.latest_headlines.<a href="src/newscatcher/latest_headlines/client.py">post</a>(...) -> PostLatestHeadlinesResponse</code></summary>
 <dl>
 <dd>
 
@@ -1744,7 +1744,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.latest_headlines.latest_headlines_post(
+client.latest_headlines.post(
     when="7d",
     page_size=1,
 )
@@ -2128,7 +2128,7 @@ client.latest_headlines.latest_headlines_post(
 </details>
 
 ## BreakingNews
-<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_get</a>(...) -> BreakingNewsResponseDto</code></summary>
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">get</a>(...) -> BreakingNewsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -2163,7 +2163,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.breaking_news.breaking_news_get(
+client.breaking_news.get(
     ranked_only=True,
     from_rank=100,
     to_rank=100,
@@ -2371,7 +2371,7 @@ client.breaking_news.breaking_news_get(
 </dl>
 </details>
 
-<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">breaking_news_post</a>(...) -> BreakingNewsResponseDto</code></summary>
+<details><summary><code>client.breaking_news.<a href="src/newscatcher/breaking_news/client.py">post</a>(...) -> BreakingNewsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -2406,7 +2406,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.breaking_news.breaking_news_post(
+client.breaking_news.post(
     sort_by="relevancy",
     ranked_only=True,
     top_n_articles=1,
@@ -2599,7 +2599,7 @@ client.breaking_news.breaking_news_post(
 </details>
 
 ## Authors
-<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">get</a>(...) -> AuthorsGetResponse</code></summary>
+<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">get</a>(...) -> GetAuthorsResponse</code></summary>
 <dl>
 <dd>
 
@@ -3127,7 +3127,7 @@ To learn more, see the [Custom tags](https://www.newscatcherapi.com/docs/news-ap
 </dl>
 </details>
 
-<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">post</a>(...) -> AuthorsPostResponse</code></summary>
+<details><summary><code>client.authors.<a href="src/newscatcher/authors/client.py">post</a>(...) -> PostAuthorsResponse</code></summary>
 <dl>
 <dd>
 
@@ -3545,7 +3545,7 @@ client.authors.post(
 </details>
 
 ## SearchByLink
-<details><summary><code>client.search_by_link.<a href="src/newscatcher/search_by_link/client.py">search_by_link_get</a>(...) -> SearchResponseDto</code></summary>
+<details><summary><code>client.search_by_link.<a href="src/newscatcher/search_by_link/client.py">get</a>(...) -> SearchResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -3581,7 +3581,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.search_by_link.search_by_link_get(
+client.search_by_link.get(
     ids="5f8d0d55b6e45e00179c6e7e",
     links="https://nytimes.com/article1,https://bbc.com/article2",
     from_=datetime.datetime.fromisoformat("2024-07-01T00:00:00+00:00"),
@@ -3681,7 +3681,7 @@ The article link or list of article links to search for. To specify multiple lin
 </dl>
 </details>
 
-<details><summary><code>client.search_by_link.<a href="src/newscatcher/search_by_link/client.py">search_by_link_post</a>(...) -> SearchResponseDto</code></summary>
+<details><summary><code>client.search_by_link.<a href="src/newscatcher/search_by_link/client.py">post</a>(...) -> SearchResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -3716,7 +3716,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.search_by_link.search_by_link_post(
+client.search_by_link.post(
     links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
 )
 
@@ -4163,8 +4163,8 @@ client.sources.post(
 </dl>
 </details>
 
-## Aggregation
-<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">count_get</a>(...) -> AggregationCountGetResponse</code></summary>
+## AggregationCount
+<details><summary><code>client.aggregation_count.<a href="src/newscatcher/aggregation_count/client.py">get</a>(...) -> GetAggregationCountResponse</code></summary>
 <dl>
 <dd>
 
@@ -4200,7 +4200,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.aggregation.count_get(
+client.aggregation_count.get(
     q="\"supply chain\" AND Amazon NOT China",
     search_in="title_content, title_content_translated",
     predefined_sources="top 50 US, top 20 GB",
@@ -4680,7 +4680,7 @@ To learn more, see [IPTC Media Topic NewsCodes](https://www.iptc.org/std/NewsCod
 </dl>
 </details>
 
-<details><summary><code>client.aggregation.<a href="src/newscatcher/aggregation/client.py">count_post</a>(...) -> AggregationCountPostResponse</code></summary>
+<details><summary><code>client.aggregation_count.<a href="src/newscatcher/aggregation_count/client.py">post</a>(...) -> PostAggregationCountResponse</code></summary>
 <dl>
 <dd>
 
@@ -4715,7 +4715,7 @@ client = NewscatcherApi(
     environment=NewscatcherApiEnvironment.DEFAULT,
 )
 
-client.aggregation.count_post(
+client.aggregation_count.post(
     q="\"supply chain\" AND Amazon NOT China",
     aggregation_by="day",
 )

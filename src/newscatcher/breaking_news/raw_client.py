@@ -48,7 +48,7 @@ class RawBreakingNewsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def breaking_news_get(
+    def get(
         self,
         *,
         sort_by: typing.Optional[SortBy] = None,
@@ -249,7 +249,7 @@ class RawBreakingNewsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def breaking_news_post(
+    def post(
         self,
         *,
         sort_by: typing.Optional[SortBy] = OMIT,
@@ -459,7 +459,7 @@ class AsyncRawBreakingNewsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def breaking_news_get(
+    async def get(
         self,
         *,
         sort_by: typing.Optional[SortBy] = None,
@@ -660,7 +660,7 @@ class AsyncRawBreakingNewsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def breaking_news_post(
+    async def post(
         self,
         *,
         sort_by: typing.Optional[SortBy] = OMIT,

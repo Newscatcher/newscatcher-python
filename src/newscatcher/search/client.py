@@ -62,8 +62,8 @@ from ..types.to_rank import ToRank
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
 from .raw_client import AsyncRawSearchClient, RawSearchClient
-from .types.search_get_response import SearchGetResponse
-from .types.search_post_response import SearchPostResponse
+from .types.get_search_response import GetSearchResponse
+from .types.post_search_response import PostSearchResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -145,7 +145,7 @@ class SearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchGetResponse:
+    ) -> GetSearchResponse:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -335,7 +335,7 @@ class SearchClient:
 
         Returns
         -------
-        SearchGetResponse
+        GetSearchResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -531,7 +531,7 @@ class SearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchPostResponse:
+    ) -> PostSearchResponse:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -656,7 +656,7 @@ class SearchClient:
 
         Returns
         -------
-        SearchPostResponse
+        PostSearchResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -810,7 +810,7 @@ class AsyncSearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchGetResponse:
+    ) -> GetSearchResponse:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -1000,7 +1000,7 @@ class AsyncSearchClient:
 
         Returns
         -------
-        SearchGetResponse
+        GetSearchResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -1203,7 +1203,7 @@ class AsyncSearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SearchPostResponse:
+    ) -> PostSearchResponse:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -1328,7 +1328,7 @@ class AsyncSearchClient:
 
         Returns
         -------
-        SearchPostResponse
+        PostSearchResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples

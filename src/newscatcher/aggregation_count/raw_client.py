@@ -63,19 +63,19 @@ from ..types.to import To
 from ..types.to_rank import ToRank
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
-from .types.aggregation_count_get_response import AggregationCountGetResponse
-from .types.aggregation_count_post_response import AggregationCountPostResponse
+from .types.get_aggregation_count_response import GetAggregationCountResponse
+from .types.post_aggregation_count_response import PostAggregationCountResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawAggregationClient:
+class RawAggregationCountClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def count_get(
+    def get(
         self,
         *,
         q: Q,
@@ -124,7 +124,7 @@ class RawAggregationClient:
         not_iptc_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[AggregationCountGetResponse]:
+    ) -> HttpResponse[GetAggregationCountResponse]:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -267,7 +267,7 @@ class RawAggregationClient:
 
         Returns
         -------
-        HttpResponse[AggregationCountGetResponse]
+        HttpResponse[GetAggregationCountResponse]
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -325,9 +325,9 @@ class RawAggregationClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AggregationCountGetResponse,
+                    GetAggregationCountResponse,
                     parse_obj_as(
-                        type_=AggregationCountGetResponse,  # type: ignore
+                        type_=GetAggregationCountResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -418,7 +418,7 @@ class RawAggregationClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def count_post(
+    def post(
         self,
         *,
         q: Q,
@@ -467,7 +467,7 @@ class RawAggregationClient:
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[AggregationCountPostResponse]:
+    ) -> HttpResponse[PostAggregationCountResponse]:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -568,7 +568,7 @@ class RawAggregationClient:
 
         Returns
         -------
-        HttpResponse[AggregationCountPostResponse]
+        HttpResponse[PostAggregationCountResponse]
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -656,9 +656,9 @@ class RawAggregationClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AggregationCountPostResponse,
+                    PostAggregationCountResponse,
                     parse_obj_as(
-                        type_=AggregationCountPostResponse,  # type: ignore
+                        type_=PostAggregationCountResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -750,11 +750,11 @@ class RawAggregationClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
-class AsyncRawAggregationClient:
+class AsyncRawAggregationCountClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def count_get(
+    async def get(
         self,
         *,
         q: Q,
@@ -803,7 +803,7 @@ class AsyncRawAggregationClient:
         not_iptc_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[AggregationCountGetResponse]:
+    ) -> AsyncHttpResponse[GetAggregationCountResponse]:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -946,7 +946,7 @@ class AsyncRawAggregationClient:
 
         Returns
         -------
-        AsyncHttpResponse[AggregationCountGetResponse]
+        AsyncHttpResponse[GetAggregationCountResponse]
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1004,9 +1004,9 @@ class AsyncRawAggregationClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AggregationCountGetResponse,
+                    GetAggregationCountResponse,
                     parse_obj_as(
-                        type_=AggregationCountGetResponse,  # type: ignore
+                        type_=GetAggregationCountResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1097,7 +1097,7 @@ class AsyncRawAggregationClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def count_post(
+    async def post(
         self,
         *,
         q: Q,
@@ -1146,7 +1146,7 @@ class AsyncRawAggregationClient:
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[AggregationCountPostResponse]:
+    ) -> AsyncHttpResponse[PostAggregationCountResponse]:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -1247,7 +1247,7 @@ class AsyncRawAggregationClient:
 
         Returns
         -------
-        AsyncHttpResponse[AggregationCountPostResponse]
+        AsyncHttpResponse[PostAggregationCountResponse]
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1335,9 +1335,9 @@ class AsyncRawAggregationClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AggregationCountPostResponse,
+                    PostAggregationCountResponse,
                     parse_obj_as(
-                        type_=AggregationCountPostResponse,  # type: ignore
+                        type_=PostAggregationCountResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
