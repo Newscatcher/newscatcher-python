@@ -33,7 +33,7 @@ class SearchByLinkClient:
         """
         return self._raw_client
 
-    def search_by_link_get(
+    def get(
         self,
         *,
         ids: typing.Optional[str] = None,
@@ -87,7 +87,7 @@ class SearchByLinkClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.search_by_link.search_by_link_get(
+        client.search_by_link.get(
             ids="5f8d0d55b6e45e00179c6e7e",
             links="https://nytimes.com/article1,https://bbc.com/article2",
             from_=datetime.datetime.fromisoformat(
@@ -101,7 +101,7 @@ class SearchByLinkClient:
             robots_compliant=True,
         )
         """
-        _response = self._raw_client.search_by_link_get(
+        _response = self._raw_client.get(
             ids=ids,
             links=links,
             from_=from_,
@@ -113,7 +113,7 @@ class SearchByLinkClient:
         )
         return _response.data
 
-    def search_by_link_post(
+    def post(
         self,
         *,
         ids: typing.Optional[Ids] = OMIT,
@@ -175,11 +175,11 @@ class SearchByLinkClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.search_by_link.search_by_link_post(
+        client.search_by_link.post(
             links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
         )
         """
-        _response = self._raw_client.search_by_link_post(
+        _response = self._raw_client.post(
             ids=ids,
             links=links,
             from_=from_,
@@ -207,7 +207,7 @@ class AsyncSearchByLinkClient:
         """
         return self._raw_client
 
-    async def search_by_link_get(
+    async def get(
         self,
         *,
         ids: typing.Optional[str] = None,
@@ -265,7 +265,7 @@ class AsyncSearchByLinkClient:
 
 
         async def main() -> None:
-            await client.search_by_link.search_by_link_get(
+            await client.search_by_link.get(
                 ids="5f8d0d55b6e45e00179c6e7e",
                 links="https://nytimes.com/article1,https://bbc.com/article2",
                 from_=datetime.datetime.fromisoformat(
@@ -282,7 +282,7 @@ class AsyncSearchByLinkClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.search_by_link_get(
+        _response = await self._raw_client.get(
             ids=ids,
             links=links,
             from_=from_,
@@ -294,7 +294,7 @@ class AsyncSearchByLinkClient:
         )
         return _response.data
 
-    async def search_by_link_post(
+    async def post(
         self,
         *,
         ids: typing.Optional[Ids] = OMIT,
@@ -361,14 +361,14 @@ class AsyncSearchByLinkClient:
 
 
         async def main() -> None:
-            await client.search_by_link.search_by_link_post(
+            await client.search_by_link.post(
                 links="https://www.reuters.com/business/energy/oil-prices-up-after-israeli-attacks-oversupply-caps-gains-2025-09-10/",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.search_by_link_post(
+        _response = await self._raw_client.post(
             ids=ids,
             links=links,
             from_=from_,

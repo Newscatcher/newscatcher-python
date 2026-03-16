@@ -5,4 +5,4 @@ import typing
 from ...types.failed_authors_response_dto import FailedAuthorsResponseDto
 from ...types.search_response_dto import SearchResponseDto
 
-AuthorsPostResponse = typing.Union[SearchResponseDto, FailedAuthorsResponseDto]
+PostAuthorsResponse = typing.Union[SearchResponseDto, FailedAuthorsResponseDto]

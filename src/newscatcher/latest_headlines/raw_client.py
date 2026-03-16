@@ -63,8 +63,8 @@ from ..types.title_sentiment_min import TitleSentimentMin
 from ..types.when import When
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
-from .types.latest_headlines_get_response import LatestHeadlinesGetResponse
-from .types.latest_headlines_post_response import LatestHeadlinesPostResponse
+from .types.get_latest_headlines_response import GetLatestHeadlinesResponse
+from .types.post_latest_headlines_response import PostLatestHeadlinesResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -75,7 +75,7 @@ class RawLatestHeadlinesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def latest_headlines_get(
+    def get(
         self,
         *,
         when: typing.Optional[When] = None,
@@ -124,7 +124,7 @@ class RawLatestHeadlinesClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[LatestHeadlinesGetResponse]:
+    ) -> HttpResponse[GetLatestHeadlinesResponse]:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -284,7 +284,7 @@ class RawLatestHeadlinesClient:
 
         Returns
         -------
-        HttpResponse[LatestHeadlinesGetResponse]
+        HttpResponse[GetLatestHeadlinesResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -342,9 +342,9 @@ class RawLatestHeadlinesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    LatestHeadlinesGetResponse,
+                    GetLatestHeadlinesResponse,
                     parse_obj_as(
-                        type_=LatestHeadlinesGetResponse,  # type: ignore
+                        type_=GetLatestHeadlinesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -435,7 +435,7 @@ class RawLatestHeadlinesClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def latest_headlines_post(
+    def post(
         self,
         *,
         when: typing.Optional[When] = OMIT,
@@ -483,7 +483,7 @@ class RawLatestHeadlinesClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[LatestHeadlinesPostResponse]:
+    ) -> HttpResponse[PostLatestHeadlinesResponse]:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -582,7 +582,7 @@ class RawLatestHeadlinesClient:
 
         Returns
         -------
-        HttpResponse[LatestHeadlinesPostResponse]
+        HttpResponse[PostLatestHeadlinesResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -675,9 +675,9 @@ class RawLatestHeadlinesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    LatestHeadlinesPostResponse,
+                    PostLatestHeadlinesResponse,
                     parse_obj_as(
-                        type_=LatestHeadlinesPostResponse,  # type: ignore
+                        type_=PostLatestHeadlinesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -773,7 +773,7 @@ class AsyncRawLatestHeadlinesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def latest_headlines_get(
+    async def get(
         self,
         *,
         when: typing.Optional[When] = None,
@@ -822,7 +822,7 @@ class AsyncRawLatestHeadlinesClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[LatestHeadlinesGetResponse]:
+    ) -> AsyncHttpResponse[GetLatestHeadlinesResponse]:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -982,7 +982,7 @@ class AsyncRawLatestHeadlinesClient:
 
         Returns
         -------
-        AsyncHttpResponse[LatestHeadlinesGetResponse]
+        AsyncHttpResponse[GetLatestHeadlinesResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1040,9 +1040,9 @@ class AsyncRawLatestHeadlinesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    LatestHeadlinesGetResponse,
+                    GetLatestHeadlinesResponse,
                     parse_obj_as(
-                        type_=LatestHeadlinesGetResponse,  # type: ignore
+                        type_=GetLatestHeadlinesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1133,7 +1133,7 @@ class AsyncRawLatestHeadlinesClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def latest_headlines_post(
+    async def post(
         self,
         *,
         when: typing.Optional[When] = OMIT,
@@ -1181,7 +1181,7 @@ class AsyncRawLatestHeadlinesClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[LatestHeadlinesPostResponse]:
+    ) -> AsyncHttpResponse[PostLatestHeadlinesResponse]:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -1280,7 +1280,7 @@ class AsyncRawLatestHeadlinesClient:
 
         Returns
         -------
-        AsyncHttpResponse[LatestHeadlinesPostResponse]
+        AsyncHttpResponse[PostLatestHeadlinesResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1373,9 +1373,9 @@ class AsyncRawLatestHeadlinesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    LatestHeadlinesPostResponse,
+                    PostLatestHeadlinesResponse,
                     parse_obj_as(
-                        type_=LatestHeadlinesPostResponse,  # type: ignore
+                        type_=PostLatestHeadlinesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

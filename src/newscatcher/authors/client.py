@@ -49,8 +49,8 @@ from ..types.to_rank import ToRank
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
 from .raw_client import AsyncRawAuthorsClient, RawAuthorsClient
-from .types.authors_get_response import AuthorsGetResponse
-from .types.authors_post_response import AuthorsPostResponse
+from .types.get_authors_response import GetAuthorsResponse
+from .types.post_authors_response import PostAuthorsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -119,7 +119,7 @@ class AuthorsClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthorsGetResponse:
+    ) -> GetAuthorsResponse:
         """
         Searches for articles written by a specified author. You can filter results by language, country, source, and more.
 
@@ -277,7 +277,7 @@ class AuthorsClient:
 
         Returns
         -------
-        AuthorsGetResponse
+        GetAuthorsResponse
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
@@ -436,7 +436,7 @@ class AuthorsClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthorsPostResponse:
+    ) -> PostAuthorsResponse:
         """
         Searches for articles by author. You can filter results by language, country, source, and more.
 
@@ -535,7 +535,7 @@ class AuthorsClient:
 
         Returns
         -------
-        AuthorsPostResponse
+        PostAuthorsResponse
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
@@ -662,7 +662,7 @@ class AsyncAuthorsClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthorsGetResponse:
+    ) -> GetAuthorsResponse:
         """
         Searches for articles written by a specified author. You can filter results by language, country, source, and more.
 
@@ -820,7 +820,7 @@ class AsyncAuthorsClient:
 
         Returns
         -------
-        AuthorsGetResponse
+        GetAuthorsResponse
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples
@@ -986,7 +986,7 @@ class AsyncAuthorsClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthorsPostResponse:
+    ) -> PostAuthorsResponse:
         """
         Searches for articles by author. You can filter results by language, country, source, and more.
 
@@ -1085,7 +1085,7 @@ class AsyncAuthorsClient:
 
         Returns
         -------
-        AuthorsPostResponse
+        PostAuthorsResponse
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
 
         Examples

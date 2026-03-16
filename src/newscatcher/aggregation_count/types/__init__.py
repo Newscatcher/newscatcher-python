@@ -6,10 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import AggregationCountGetResponse, AggregationCountPostResponse
+    from .get_aggregation_count_response import GetAggregationCountResponse
+    from .post_aggregation_count_response import PostAggregationCountResponse
 _dynamic_imports: typing.Dict[str, str] = {
-    "AggregationCountGetResponse": ".types",
-    "AggregationCountPostResponse": ".types",
+    "GetAggregationCountResponse": ".get_aggregation_count_response",
+    "PostAggregationCountResponse": ".post_aggregation_count_response",
 }
 
 
@@ -34,4 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["AggregationCountGetResponse", "AggregationCountPostResponse"]
+__all__ = ["GetAggregationCountResponse", "PostAggregationCountResponse"]

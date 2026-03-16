@@ -75,8 +75,8 @@ from ..types.to import To
 from ..types.to_rank import ToRank
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
-from .types.search_get_response import SearchGetResponse
-from .types.search_post_response import SearchPostResponse
+from .types.get_search_response import GetSearchResponse
+from .types.post_search_response import PostSearchResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -148,7 +148,7 @@ class RawSearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[SearchGetResponse]:
+    ) -> HttpResponse[GetSearchResponse]:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -338,7 +338,7 @@ class RawSearchClient:
 
         Returns
         -------
-        HttpResponse[SearchGetResponse]
+        HttpResponse[GetSearchResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -408,9 +408,9 @@ class RawSearchClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SearchGetResponse,
+                    GetSearchResponse,
                     parse_obj_as(
-                        type_=SearchGetResponse,  # type: ignore
+                        type_=GetSearchResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -562,7 +562,7 @@ class RawSearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[SearchPostResponse]:
+    ) -> HttpResponse[PostSearchResponse]:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -687,7 +687,7 @@ class RawSearchClient:
 
         Returns
         -------
-        HttpResponse[SearchPostResponse]
+        HttpResponse[PostSearchResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -797,9 +797,9 @@ class RawSearchClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SearchPostResponse,
+                    PostSearchResponse,
                     parse_obj_as(
-                        type_=SearchPostResponse,  # type: ignore
+                        type_=PostSearchResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -956,7 +956,7 @@ class AsyncRawSearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[SearchGetResponse]:
+    ) -> AsyncHttpResponse[GetSearchResponse]:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -1146,7 +1146,7 @@ class AsyncRawSearchClient:
 
         Returns
         -------
-        AsyncHttpResponse[SearchGetResponse]
+        AsyncHttpResponse[GetSearchResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1216,9 +1216,9 @@ class AsyncRawSearchClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SearchGetResponse,
+                    GetSearchResponse,
                     parse_obj_as(
-                        type_=SearchGetResponse,  # type: ignore
+                        type_=GetSearchResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1370,7 +1370,7 @@ class AsyncRawSearchClient:
         exclude_duplicates: typing.Optional[ExcludeDuplicates] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[SearchPostResponse]:
+    ) -> AsyncHttpResponse[PostSearchResponse]:
         """
         Searches for articles based on specified criteria such as keywords, language, country, source, and more.
 
@@ -1495,7 +1495,7 @@ class AsyncRawSearchClient:
 
         Returns
         -------
-        AsyncHttpResponse[SearchPostResponse]
+        AsyncHttpResponse[PostSearchResponse]
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1605,9 +1605,9 @@ class AsyncRawSearchClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SearchPostResponse,
+                    PostSearchResponse,
                     parse_obj_as(
-                        type_=SearchPostResponse,  # type: ignore
+                        type_=PostSearchResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

@@ -62,8 +62,8 @@ from ..types.to import To
 from ..types.to_rank import ToRank
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
-from .types.authors_get_response import AuthorsGetResponse
-from .types.authors_post_response import AuthorsPostResponse
+from .types.get_authors_response import GetAuthorsResponse
+from .types.post_authors_response import PostAuthorsResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -122,7 +122,7 @@ class RawAuthorsClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[AuthorsGetResponse]:
+    ) -> HttpResponse[GetAuthorsResponse]:
         """
         Searches for articles written by a specified author. You can filter results by language, country, source, and more.
 
@@ -280,7 +280,7 @@ class RawAuthorsClient:
 
         Returns
         -------
-        HttpResponse[AuthorsGetResponse]
+        HttpResponse[GetAuthorsResponse]
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -337,9 +337,9 @@ class RawAuthorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AuthorsGetResponse,
+                    GetAuthorsResponse,
                     parse_obj_as(
-                        type_=AuthorsGetResponse,  # type: ignore
+                        type_=GetAuthorsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -478,7 +478,7 @@ class RawAuthorsClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[AuthorsPostResponse]:
+    ) -> HttpResponse[PostAuthorsResponse]:
         """
         Searches for articles by author. You can filter results by language, country, source, and more.
 
@@ -577,7 +577,7 @@ class RawAuthorsClient:
 
         Returns
         -------
-        HttpResponse[AuthorsPostResponse]
+        HttpResponse[PostAuthorsResponse]
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -670,9 +670,9 @@ class RawAuthorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AuthorsPostResponse,
+                    PostAuthorsResponse,
                     parse_obj_as(
-                        type_=AuthorsPostResponse,  # type: ignore
+                        type_=PostAuthorsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -816,7 +816,7 @@ class AsyncRawAuthorsClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[AuthorsGetResponse]:
+    ) -> AsyncHttpResponse[GetAuthorsResponse]:
         """
         Searches for articles written by a specified author. You can filter results by language, country, source, and more.
 
@@ -974,7 +974,7 @@ class AsyncRawAuthorsClient:
 
         Returns
         -------
-        AsyncHttpResponse[AuthorsGetResponse]
+        AsyncHttpResponse[GetAuthorsResponse]
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1031,9 +1031,9 @@ class AsyncRawAuthorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AuthorsGetResponse,
+                    GetAuthorsResponse,
                     parse_obj_as(
-                        type_=AuthorsGetResponse,  # type: ignore
+                        type_=GetAuthorsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1172,7 +1172,7 @@ class AsyncRawAuthorsClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[AuthorsPostResponse]:
+    ) -> AsyncHttpResponse[PostAuthorsResponse]:
         """
         Searches for articles by author. You can filter results by language, country, source, and more.
 
@@ -1271,7 +1271,7 @@ class AsyncRawAuthorsClient:
 
         Returns
         -------
-        AsyncHttpResponse[AuthorsPostResponse]
+        AsyncHttpResponse[PostAuthorsResponse]
             Authors search response containing a list of authors that match the search criteria. If no matches, returns a failed search response according to the defined schema.
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1364,9 +1364,9 @@ class AsyncRawAuthorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AuthorsPostResponse,
+                    PostAuthorsResponse,
                     parse_obj_as(
-                        type_=AuthorsPostResponse,  # type: ignore
+                        type_=PostAuthorsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

@@ -6,11 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .search_get_response import SearchGetResponse
-    from .search_post_response import SearchPostResponse
+    from .get_search_response import GetSearchResponse
+    from .post_search_response import PostSearchResponse
 _dynamic_imports: typing.Dict[str, str] = {
-    "SearchGetResponse": ".search_get_response",
-    "SearchPostResponse": ".search_post_response",
+    "GetSearchResponse": ".get_search_response",
+    "PostSearchResponse": ".post_search_response",
 }
 
 
@@ -35,4 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["SearchGetResponse", "SearchPostResponse"]
+__all__ = ["GetSearchResponse", "PostSearchResponse"]

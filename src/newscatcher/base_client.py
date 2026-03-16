@@ -10,7 +10,7 @@ from .core.logging import LogConfig, Logger
 from .environment import NewscatcherApiEnvironment
 
 if typing.TYPE_CHECKING:
-    from .aggregation.client import AggregationClient, AsyncAggregationClient
+    from .aggregation_count.client import AggregationCountClient, AsyncAggregationCountClient
     from .authors.client import AsyncAuthorsClient, AuthorsClient
     from .breaking_news.client import AsyncBreakingNewsClient, BreakingNewsClient
     from .latest_headlines.client import AsyncLatestHeadlinesClient, LatestHeadlinesClient
@@ -96,7 +96,7 @@ class BaseNewscatcherApi:
         self._authors: typing.Optional[AuthorsClient] = None
         self._search_by_link: typing.Optional[SearchByLinkClient] = None
         self._sources: typing.Optional[SourcesClient] = None
-        self._aggregation: typing.Optional[AggregationClient] = None
+        self._aggregation_count: typing.Optional[AggregationCountClient] = None
         self._subscription: typing.Optional[SubscriptionClient] = None
 
     @property
@@ -148,12 +148,12 @@ class BaseNewscatcherApi:
         return self._sources
 
     @property
-    def aggregation(self):
-        if self._aggregation is None:
-            from .aggregation.client import AggregationClient  # noqa: E402
+    def aggregation_count(self):
+        if self._aggregation_count is None:
+            from .aggregation_count.client import AggregationCountClient  # noqa: E402
 
-            self._aggregation = AggregationClient(client_wrapper=self._client_wrapper)
-        return self._aggregation
+            self._aggregation_count = AggregationCountClient(client_wrapper=self._client_wrapper)
+        return self._aggregation_count
 
     @property
     def subscription(self):
@@ -240,7 +240,7 @@ class AsyncBaseNewscatcherApi:
         self._authors: typing.Optional[AsyncAuthorsClient] = None
         self._search_by_link: typing.Optional[AsyncSearchByLinkClient] = None
         self._sources: typing.Optional[AsyncSourcesClient] = None
-        self._aggregation: typing.Optional[AsyncAggregationClient] = None
+        self._aggregation_count: typing.Optional[AsyncAggregationCountClient] = None
         self._subscription: typing.Optional[AsyncSubscriptionClient] = None
 
     @property
@@ -292,12 +292,12 @@ class AsyncBaseNewscatcherApi:
         return self._sources
 
     @property
-    def aggregation(self):
-        if self._aggregation is None:
-            from .aggregation.client import AsyncAggregationClient  # noqa: E402
+    def aggregation_count(self):
+        if self._aggregation_count is None:
+            from .aggregation_count.client import AsyncAggregationCountClient  # noqa: E402
 
-            self._aggregation = AsyncAggregationClient(client_wrapper=self._client_wrapper)
-        return self._aggregation
+            self._aggregation_count = AsyncAggregationCountClient(client_wrapper=self._client_wrapper)
+        return self._aggregation_count
 
     @property
     def subscription(self):
