@@ -49,30 +49,30 @@ from ..types.to import To
 from ..types.to_rank import ToRank
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
-from .raw_client import AsyncRawAggregationClient, RawAggregationClient
-from .types.aggregation_count_get_response import AggregationCountGetResponse
-from .types.aggregation_count_post_response import AggregationCountPostResponse
+from .raw_client import AsyncRawAggregationCountClient, RawAggregationCountClient
+from .types.get_aggregation_count_response import GetAggregationCountResponse
+from .types.post_aggregation_count_response import PostAggregationCountResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class AggregationClient:
+class AggregationCountClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
-        self._raw_client = RawAggregationClient(client_wrapper=client_wrapper)
+        self._raw_client = RawAggregationCountClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> RawAggregationClient:
+    def with_raw_response(self) -> RawAggregationCountClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        RawAggregationClient
+        RawAggregationCountClient
         """
         return self._raw_client
 
-    def count_get(
+    def get(
         self,
         *,
         q: Q,
@@ -121,7 +121,7 @@ class AggregationClient:
         not_iptc_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AggregationCountGetResponse:
+    ) -> GetAggregationCountResponse:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -264,7 +264,7 @@ class AggregationClient:
 
         Returns
         -------
-        AggregationCountGetResponse
+        GetAggregationCountResponse
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
@@ -276,7 +276,7 @@ class AggregationClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.aggregation.count_get(
+        client.aggregation_count.get(
             q='"supply chain" AND Amazon NOT China',
             search_in="title_content, title_content_translated",
             predefined_sources="top 50 US, top 20 GB",
@@ -326,7 +326,7 @@ class AggregationClient:
             robots_compliant=True,
         )
         """
-        _response = self._raw_client.count_get(
+        _response = self._raw_client.get(
             q=q,
             aggregation_by=aggregation_by,
             search_in=search_in,
@@ -376,7 +376,7 @@ class AggregationClient:
         )
         return _response.data
 
-    def count_post(
+    def post(
         self,
         *,
         q: Q,
@@ -425,7 +425,7 @@ class AggregationClient:
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AggregationCountPostResponse:
+    ) -> PostAggregationCountResponse:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -526,7 +526,7 @@ class AggregationClient:
 
         Returns
         -------
-        AggregationCountPostResponse
+        PostAggregationCountResponse
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
@@ -536,12 +536,12 @@ class AggregationClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.aggregation.count_post(
+        client.aggregation_count.post(
             q='"supply chain" AND Amazon NOT China',
             aggregation_by="day",
         )
         """
-        _response = self._raw_client.count_post(
+        _response = self._raw_client.post(
             q=q,
             aggregation_by=aggregation_by,
             search_in=search_in,
@@ -592,22 +592,22 @@ class AggregationClient:
         return _response.data
 
 
-class AsyncAggregationClient:
+class AsyncAggregationCountClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
-        self._raw_client = AsyncRawAggregationClient(client_wrapper=client_wrapper)
+        self._raw_client = AsyncRawAggregationCountClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> AsyncRawAggregationClient:
+    def with_raw_response(self) -> AsyncRawAggregationCountClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        AsyncRawAggregationClient
+        AsyncRawAggregationCountClient
         """
         return self._raw_client
 
-    async def count_get(
+    async def get(
         self,
         *,
         q: Q,
@@ -656,7 +656,7 @@ class AsyncAggregationClient:
         not_iptc_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AggregationCountGetResponse:
+    ) -> GetAggregationCountResponse:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -799,7 +799,7 @@ class AsyncAggregationClient:
 
         Returns
         -------
-        AggregationCountGetResponse
+        GetAggregationCountResponse
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
@@ -815,7 +815,7 @@ class AsyncAggregationClient:
 
 
         async def main() -> None:
-            await client.aggregation.count_get(
+            await client.aggregation_count.get(
                 q='"supply chain" AND Amazon NOT China',
                 search_in="title_content, title_content_translated",
                 predefined_sources="top 50 US, top 20 GB",
@@ -868,7 +868,7 @@ class AsyncAggregationClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.count_get(
+        _response = await self._raw_client.get(
             q=q,
             aggregation_by=aggregation_by,
             search_in=search_in,
@@ -918,7 +918,7 @@ class AsyncAggregationClient:
         )
         return _response.data
 
-    async def count_post(
+    async def post(
         self,
         *,
         q: Q,
@@ -967,7 +967,7 @@ class AsyncAggregationClient:
         not_iptc_tags: typing.Optional[NotIptcTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AggregationCountPostResponse:
+    ) -> PostAggregationCountResponse:
         """
         Retrieves the count of articles aggregated by day or hour based on various search criteria, such as keyword, language, country, and source.
 
@@ -1068,7 +1068,7 @@ class AsyncAggregationClient:
 
         Returns
         -------
-        AggregationCountPostResponse
+        PostAggregationCountResponse
             A successful response containing aggregation count results that match the search criteria. If no matches, returns a failed aggregation response according to the defined schema.
 
         Examples
@@ -1083,7 +1083,7 @@ class AsyncAggregationClient:
 
 
         async def main() -> None:
-            await client.aggregation.count_post(
+            await client.aggregation_count.post(
                 q='"supply chain" AND Amazon NOT China',
                 aggregation_by="day",
             )
@@ -1091,7 +1091,7 @@ class AsyncAggregationClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.count_post(
+        _response = await self._raw_client.post(
             q=q,
             aggregation_by=aggregation_by,
             search_in=search_in,

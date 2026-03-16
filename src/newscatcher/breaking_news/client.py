@@ -46,7 +46,7 @@ class BreakingNewsClient:
         """
         return self._raw_client
 
-    def breaking_news_get(
+    def get(
         self,
         *,
         sort_by: typing.Optional[SortBy] = None,
@@ -131,7 +131,7 @@ class BreakingNewsClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.breaking_news.breaking_news_get(
+        client.breaking_news.get(
             ranked_only=True,
             from_rank=100,
             to_rank=100,
@@ -153,7 +153,7 @@ class BreakingNewsClient:
             content_sentiment_max=0.5,
         )
         """
-        _response = self._raw_client.breaking_news_get(
+        _response = self._raw_client.get(
             sort_by=sort_by,
             ranked_only=ranked_only,
             from_rank=from_rank,
@@ -178,7 +178,7 @@ class BreakingNewsClient:
         )
         return _response.data
 
-    def breaking_news_post(
+    def post(
         self,
         *,
         sort_by: typing.Optional[SortBy] = OMIT,
@@ -263,13 +263,13 @@ class BreakingNewsClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.breaking_news.breaking_news_post(
+        client.breaking_news.post(
             sort_by="relevancy",
             ranked_only=True,
             top_n_articles=1,
         )
         """
-        _response = self._raw_client.breaking_news_post(
+        _response = self._raw_client.post(
             sort_by=sort_by,
             ranked_only=ranked_only,
             from_rank=from_rank,
@@ -310,7 +310,7 @@ class AsyncBreakingNewsClient:
         """
         return self._raw_client
 
-    async def breaking_news_get(
+    async def get(
         self,
         *,
         sort_by: typing.Optional[SortBy] = None,
@@ -400,7 +400,7 @@ class AsyncBreakingNewsClient:
 
 
         async def main() -> None:
-            await client.breaking_news.breaking_news_get(
+            await client.breaking_news.get(
                 ranked_only=True,
                 from_rank=100,
                 to_rank=100,
@@ -425,7 +425,7 @@ class AsyncBreakingNewsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.breaking_news_get(
+        _response = await self._raw_client.get(
             sort_by=sort_by,
             ranked_only=ranked_only,
             from_rank=from_rank,
@@ -450,7 +450,7 @@ class AsyncBreakingNewsClient:
         )
         return _response.data
 
-    async def breaking_news_post(
+    async def post(
         self,
         *,
         sort_by: typing.Optional[SortBy] = OMIT,
@@ -540,7 +540,7 @@ class AsyncBreakingNewsClient:
 
 
         async def main() -> None:
-            await client.breaking_news.breaking_news_post(
+            await client.breaking_news.post(
                 sort_by="relevancy",
                 ranked_only=True,
                 top_n_articles=1,
@@ -549,7 +549,7 @@ class AsyncBreakingNewsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.breaking_news_post(
+        _response = await self._raw_client.post(
             sort_by=sort_by,
             ranked_only=ranked_only,
             from_rank=from_rank,

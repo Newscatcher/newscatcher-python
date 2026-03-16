@@ -5,4 +5,4 @@ import typing
 from ...types.aggregation_count_response_dto import AggregationCountResponseDto
 from ...types.failed_aggregation_count_response_dto import FailedAggregationCountResponseDto
 
-AggregationCountPostResponse = typing.Union[AggregationCountResponseDto, FailedAggregationCountResponseDto]
+PostAggregationCountResponse = typing.Union[AggregationCountResponseDto, FailedAggregationCountResponseDto]

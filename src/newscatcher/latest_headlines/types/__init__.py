@@ -6,11 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .latest_headlines_get_response import LatestHeadlinesGetResponse
-    from .latest_headlines_post_response import LatestHeadlinesPostResponse
+    from .get_latest_headlines_response import GetLatestHeadlinesResponse
+    from .post_latest_headlines_response import PostLatestHeadlinesResponse
 _dynamic_imports: typing.Dict[str, str] = {
-    "LatestHeadlinesGetResponse": ".latest_headlines_get_response",
-    "LatestHeadlinesPostResponse": ".latest_headlines_post_response",
+    "GetLatestHeadlinesResponse": ".get_latest_headlines_response",
+    "PostLatestHeadlinesResponse": ".post_latest_headlines_response",
 }
 
 
@@ -35,4 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["LatestHeadlinesGetResponse", "LatestHeadlinesPostResponse"]
+__all__ = ["GetLatestHeadlinesResponse", "PostLatestHeadlinesResponse"]

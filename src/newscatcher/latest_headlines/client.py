@@ -50,8 +50,8 @@ from ..types.when import When
 from ..types.word_count_max import WordCountMax
 from ..types.word_count_min import WordCountMin
 from .raw_client import AsyncRawLatestHeadlinesClient, RawLatestHeadlinesClient
-from .types.latest_headlines_get_response import LatestHeadlinesGetResponse
-from .types.latest_headlines_post_response import LatestHeadlinesPostResponse
+from .types.get_latest_headlines_response import GetLatestHeadlinesResponse
+from .types.post_latest_headlines_response import PostLatestHeadlinesResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -72,7 +72,7 @@ class LatestHeadlinesClient:
         """
         return self._raw_client
 
-    def latest_headlines_get(
+    def get(
         self,
         *,
         when: typing.Optional[When] = None,
@@ -121,7 +121,7 @@ class LatestHeadlinesClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> LatestHeadlinesGetResponse:
+    ) -> GetLatestHeadlinesResponse:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -281,7 +281,7 @@ class LatestHeadlinesClient:
 
         Returns
         -------
-        LatestHeadlinesGetResponse
+        GetLatestHeadlinesResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -291,7 +291,7 @@ class LatestHeadlinesClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.latest_headlines.latest_headlines_get(
+        client.latest_headlines.get(
             when="7d",
             by_parse_date=True,
             lang="en,es",
@@ -337,7 +337,7 @@ class LatestHeadlinesClient:
             robots_compliant=True,
         )
         """
-        _response = self._raw_client.latest_headlines_get(
+        _response = self._raw_client.get(
             when=when,
             by_parse_date=by_parse_date,
             sort_by=sort_by,
@@ -387,7 +387,7 @@ class LatestHeadlinesClient:
         )
         return _response.data
 
-    def latest_headlines_post(
+    def post(
         self,
         *,
         when: typing.Optional[When] = OMIT,
@@ -435,7 +435,7 @@ class LatestHeadlinesClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> LatestHeadlinesPostResponse:
+    ) -> PostLatestHeadlinesResponse:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -534,7 +534,7 @@ class LatestHeadlinesClient:
 
         Returns
         -------
-        LatestHeadlinesPostResponse
+        PostLatestHeadlinesResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -544,12 +544,12 @@ class LatestHeadlinesClient:
         client = NewscatcherApi(
             api_key="YOUR_API_KEY",
         )
-        client.latest_headlines.latest_headlines_post(
+        client.latest_headlines.post(
             when="7d",
             page_size=1,
         )
         """
-        _response = self._raw_client.latest_headlines_post(
+        _response = self._raw_client.post(
             when=when,
             by_parse_date=by_parse_date,
             lang=lang,
@@ -614,7 +614,7 @@ class AsyncLatestHeadlinesClient:
         """
         return self._raw_client
 
-    async def latest_headlines_get(
+    async def get(
         self,
         *,
         when: typing.Optional[When] = None,
@@ -663,7 +663,7 @@ class AsyncLatestHeadlinesClient:
         custom_tags: typing.Optional[str] = None,
         robots_compliant: typing.Optional[RobotsCompliant] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> LatestHeadlinesGetResponse:
+    ) -> GetLatestHeadlinesResponse:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -823,7 +823,7 @@ class AsyncLatestHeadlinesClient:
 
         Returns
         -------
-        LatestHeadlinesGetResponse
+        GetLatestHeadlinesResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -838,7 +838,7 @@ class AsyncLatestHeadlinesClient:
 
 
         async def main() -> None:
-            await client.latest_headlines.latest_headlines_get(
+            await client.latest_headlines.get(
                 when="7d",
                 by_parse_date=True,
                 lang="en,es",
@@ -887,7 +887,7 @@ class AsyncLatestHeadlinesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.latest_headlines_get(
+        _response = await self._raw_client.get(
             when=when,
             by_parse_date=by_parse_date,
             sort_by=sort_by,
@@ -937,7 +937,7 @@ class AsyncLatestHeadlinesClient:
         )
         return _response.data
 
-    async def latest_headlines_post(
+    async def post(
         self,
         *,
         when: typing.Optional[When] = OMIT,
@@ -985,7 +985,7 @@ class AsyncLatestHeadlinesClient:
         custom_tags: typing.Optional[CustomTags] = OMIT,
         robots_compliant: typing.Optional[RobotsCompliant] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> LatestHeadlinesPostResponse:
+    ) -> PostLatestHeadlinesResponse:
         """
         Retrieves the latest headlines for the specified time period. You can filter results by language, country, source, and more.
 
@@ -1084,7 +1084,7 @@ class AsyncLatestHeadlinesClient:
 
         Returns
         -------
-        LatestHeadlinesPostResponse
+        PostLatestHeadlinesResponse
             A successful response containing articles that match the search criteria. When `clustering_enabled` is `true`, returns a Clustered Articles Response. Otherwise, returns a Search Response.
 
         Examples
@@ -1099,7 +1099,7 @@ class AsyncLatestHeadlinesClient:
 
 
         async def main() -> None:
-            await client.latest_headlines.latest_headlines_post(
+            await client.latest_headlines.post(
                 when="7d",
                 page_size=1,
             )
@@ -1107,7 +1107,7 @@ class AsyncLatestHeadlinesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.latest_headlines_post(
+        _response = await self._raw_client.post(
             when=when,
             by_parse_date=by_parse_date,
             lang=lang,

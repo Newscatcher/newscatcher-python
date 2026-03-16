@@ -5,4 +5,4 @@ import typing
 from ...types.clustered_search_response_dto import ClusteredSearchResponseDto
 from ...types.search_response_dto import SearchResponseDto
 
-LatestHeadlinesPostResponse = typing.Union[SearchResponseDto, ClusteredSearchResponseDto]
+GetSearchResponse = typing.Union[SearchResponseDto, ClusteredSearchResponseDto]
