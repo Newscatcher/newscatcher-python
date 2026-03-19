@@ -5,3 +5,6 @@ import typing
 from .named_entity_list_item import NamedEntityListItem
 
 NamedEntityList = typing.List[NamedEntityListItem]
+"""
+A list of named entities identified in the article.
+"""
