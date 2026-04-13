@@ -5,3 +5,6 @@ import typing
 from .article_entity import ArticleEntity
 
 ArticlesDto = typing.List[ArticleEntity]
+"""
+A list of articles matching the search criteria.
+"""

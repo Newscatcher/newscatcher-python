@@ -1,0 +1,3 @@
+## 2.1.0 - 2026-04-13
+* The SDK now supports an optional `aiohttp` transport backend for async clients. Install it with `pip install newscatcher-sdk[aiohttp]` and use the new `DefaultAioHttpClient` class as the `httpx_client` argument, or let the SDK select it automatically when the extra is present. Two new public client classes are available: `DefaultAioHttpClient` and `DefaultAsyncHttpxClient`. The async and sync HTTP clients now also automatically retry on connection-level errors (`ConnectError`, `RemoteProtocolError`) using the same exponential-backoff strategy as HTTP 5xx retries. Additionally, `encode_path_param` is now exported from `newscatcher.core` for correct URL path encoding of boolean values.
+
