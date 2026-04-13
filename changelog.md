@@ -1,0 +1,3 @@
+## 2.1.0 - 2026-04-13
+* The SDK now supports an optional `aiohttp` transport backend for async clients. Install it with `pip install newscatcher-sdk[aiohttp]` and use the new `DefaultAioHttpClient` class as your async HTTP client. Two new convenience classes, `DefaultAioHttpClient` and `DefaultAsyncHttpxClient`, are exported from the top-level package with sensible defaults (60 s timeout, redirects enabled). The async and sync HTTP clients now automatically retry requests that fail with connection-level errors (`ConnectError`, `RemoteProtocolError`) using exponential backoff, in addition to the existing server-error retry logic. Note: Python 3.8 and 3.9 are no longer supported; the minimum required version is now Python 3.10.
+

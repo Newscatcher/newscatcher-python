@@ -1,7 +1,7 @@
 {
-  "cliVersion": "4.29.0",
+  "cliVersion": "4.68.0",
   "generatorName": "fernapi/fern-python-sdk",
-  "generatorVersion": "4.64.0",
+  "generatorVersion": "5.3.13",
   "generatorConfig": {
     "client": {
       "class_name": "BaseNewscatcherApi",
@@ -10,6 +10,6 @@
       "exported_filename": "client.py"
     }
   },
-  "originGitCommit": "bbd2054c67ad246b017399f96faf58cf6737bf01",
-  "sdkVersion": "2.0.2"
+  "originGitCommit": "e6e039aeca5c5b1f34982fd1ca7d3ec3ae6e1a02",
+  "sdkVersion": "2.1.0"
 }
