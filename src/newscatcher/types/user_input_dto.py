@@ -3,3 +3,6 @@
 import typing
 
 UserInputDto = typing.Dict[str, typing.Any]
+"""
+The user input parameters for the request.
+"""
