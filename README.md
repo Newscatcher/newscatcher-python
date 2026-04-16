@@ -11,6 +11,7 @@ The Newscatcher Python library provides convenient access to the Newscatcher API
 - [Installation](#installation)
 - [Reference](#reference)
 - [Usage](#usage)
+- [Environments](#environments)
 - [Async Client](#async-client)
 - [Exception Handling](#exception-handling)
 - [Retrieving More Articles](#retrieving-more-articles)
@@ -50,6 +51,19 @@ client = NewscatcherApi(
 client.search.post(
     q="\"supply chain\" AND Amazon NOT China",
     page_size=1,
+)
+```
+
+## Environments
+
+This SDK allows you to configure different environments for API requests.
+
+```python
+from newscatcher import NewscatcherApi
+from newscatcher.environment import NewscatcherApiEnvironment
+
+client = NewscatcherApi(
+    environment=NewscatcherApiEnvironment.DEFAULT,
 )
 ```
 

@@ -130,6 +130,7 @@ if typing.TYPE_CHECKING:
         sources,
         subscription,
     )
+    from ._default_clients import DefaultAioHttpClient, DefaultAsyncHttpxClient
     from .aggregation_count import GetAggregationCountResponse, PostAggregationCountResponse
     from .authors import GetAuthorsResponse, PostAuthorsResponse
     from .client import AsyncNewscatcherApi, NewscatcherApi
@@ -177,6 +178,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ContentSentimentMin": ".types",
     "Countries": ".types",
     "CustomTags": ".types",
+    "DefaultAioHttpClient": "._default_clients",
+    "DefaultAsyncHttpxClient": "._default_clients",
     "Error": ".types",
     "ExcludeDuplicates": ".types",
     "FailedAggregationCountResponseDto": ".types",
@@ -332,6 +335,8 @@ __all__ = [
     "ContentSentimentMin",
     "Countries",
     "CustomTags",
+    "DefaultAioHttpClient",
+    "DefaultAsyncHttpxClient",
     "Error",
     "ExcludeDuplicates",
     "FailedAggregationCountResponseDto",
