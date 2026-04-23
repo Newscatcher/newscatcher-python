@@ -269,8 +269,6 @@ class AggregationCountClient:
 
         Examples
         --------
-        import datetime
-
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
@@ -287,12 +285,8 @@ class AggregationCountClient:
             countries="US,CA",
             not_countries="UK,FR",
             not_author_name="John Doe, Jane Doe",
-            from_=datetime.datetime.fromisoformat(
-                "2024-07-01 00:00:00+00:00",
-            ),
-            to=datetime.datetime.fromisoformat(
-                "2024-01-01 00:00:00+00:00",
-            ),
+            from_="1 day ago",
+            to="1 day ago",
             published_date_precision="full",
             by_parse_date=True,
             ranked_only=True,
@@ -805,7 +799,6 @@ class AsyncAggregationCountClient:
         Examples
         --------
         import asyncio
-        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
@@ -826,12 +819,8 @@ class AsyncAggregationCountClient:
                 countries="US,CA",
                 not_countries="UK,FR",
                 not_author_name="John Doe, Jane Doe",
-                from_=datetime.datetime.fromisoformat(
-                    "2024-07-01 00:00:00+00:00",
-                ),
-                to=datetime.datetime.fromisoformat(
-                    "2024-01-01 00:00:00+00:00",
-                ),
+                from_="1 day ago",
+                to="1 day ago",
                 published_date_precision="full",
                 by_parse_date=True,
                 ranked_only=True,

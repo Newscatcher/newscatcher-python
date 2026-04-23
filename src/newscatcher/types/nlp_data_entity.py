@@ -33,9 +33,16 @@ class NlpDataEntity(UniversalBaseModel):
     sentiment: typing.Optional[SentimentScores] = None
     new_embedding: typing.Optional[typing.List[float]] = pydantic.Field(default=None)
     """
-    A dense 1024-dimensional vector representation of the article content, generated using  the [multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large) model.
+    A dense 1024-dimensional vector representation of the article content, generated using the [multilingual-e5-large](https://huggingface.co/intfloat/multilingual-e5-large) model. Available for articles indexed before January 1, 2026.
     
     **Note**: The `new_embedding` field is only available in the `v3_nlp_embeddings` subscription plan.
+    """
+
+    qwen_embedding: typing.Optional[typing.List[float]] = pydantic.Field(default=None)
+    """
+    A dense 1024-dimensional vector representation of the article content, generated using the [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding) model. Available for articles indexed from January 1, 2026 onward. Embeddings are computed from a combination of the article `title` and `content` fields.
+    
+    **Note**: The `qwen_embedding` field is only available in the `v3_nlp_embeddings` subscription plan.
     """
 
     ner_per: typing_extensions.Annotated[
