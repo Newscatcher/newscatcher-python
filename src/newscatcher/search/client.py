@@ -340,8 +340,6 @@ class SearchClient:
 
         Examples
         --------
-        import datetime
-
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
@@ -360,12 +358,8 @@ class SearchClient:
             countries="US,CA",
             not_countries="UK,FR",
             not_author_name="John Doe, Jane Doe",
-            from_=datetime.datetime.fromisoformat(
-                "2024-07-01 00:00:00+00:00",
-            ),
-            to=datetime.datetime.fromisoformat(
-                "2024-01-01 00:00:00+00:00",
-            ),
+            from_="1 day ago",
+            to="1 day ago",
             published_date_precision="full",
             by_parse_date=True,
             ranked_only=True,
@@ -386,7 +380,7 @@ class SearchClient:
             page=2,
             page_size=50,
             clustering_enabled=True,
-            clustering_threshold=0.6,
+            clustering_threshold=0.7,
             include_nlp_data=True,
             has_nlp=True,
             theme="Finance,Tech",
@@ -1006,7 +1000,6 @@ class AsyncSearchClient:
         Examples
         --------
         import asyncio
-        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
@@ -1029,12 +1022,8 @@ class AsyncSearchClient:
                 countries="US,CA",
                 not_countries="UK,FR",
                 not_author_name="John Doe, Jane Doe",
-                from_=datetime.datetime.fromisoformat(
-                    "2024-07-01 00:00:00+00:00",
-                ),
-                to=datetime.datetime.fromisoformat(
-                    "2024-01-01 00:00:00+00:00",
-                ),
+                from_="1 day ago",
+                to="1 day ago",
                 published_date_precision="full",
                 by_parse_date=True,
                 ranked_only=True,
@@ -1055,7 +1044,7 @@ class AsyncSearchClient:
                 page=2,
                 page_size=50,
                 clustering_enabled=True,
-                clustering_threshold=0.6,
+                clustering_threshold=0.7,
                 include_nlp_data=True,
                 has_nlp=True,
                 theme="Finance,Tech",
