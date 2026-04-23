@@ -80,8 +80,6 @@ class SearchByLinkClient:
 
         Examples
         --------
-        import datetime
-
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
@@ -90,12 +88,8 @@ class SearchByLinkClient:
         client.search_by_link.get(
             ids="5f8d0d55b6e45e00179c6e7e",
             links="https://nytimes.com/article1,https://bbc.com/article2",
-            from_=datetime.datetime.fromisoformat(
-                "2024-07-01 00:00:00+00:00",
-            ),
-            to=datetime.datetime.fromisoformat(
-                "2024-01-01 00:00:00+00:00",
-            ),
+            from_="1 day ago",
+            to="1 day ago",
             page=2,
             page_size=50,
             robots_compliant=True,
@@ -255,7 +249,6 @@ class AsyncSearchByLinkClient:
         Examples
         --------
         import asyncio
-        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
@@ -268,12 +261,8 @@ class AsyncSearchByLinkClient:
             await client.search_by_link.get(
                 ids="5f8d0d55b6e45e00179c6e7e",
                 links="https://nytimes.com/article1,https://bbc.com/article2",
-                from_=datetime.datetime.fromisoformat(
-                    "2024-07-01 00:00:00+00:00",
-                ),
-                to=datetime.datetime.fromisoformat(
-                    "2024-01-01 00:00:00+00:00",
-                ),
+                from_="1 day ago",
+                to="1 day ago",
                 page=2,
                 page_size=50,
                 robots_compliant=True,

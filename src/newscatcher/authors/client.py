@@ -282,8 +282,6 @@ class AuthorsClient:
 
         Examples
         --------
-        import datetime
-
         from newscatcher import NewscatcherApi
 
         client = NewscatcherApi(
@@ -299,12 +297,8 @@ class AuthorsClient:
             not_lang="fr,de",
             countries="US,CA",
             not_countries="UK,FR",
-            from_=datetime.datetime.fromisoformat(
-                "2024-07-01 00:00:00+00:00",
-            ),
-            to=datetime.datetime.fromisoformat(
-                "2024-01-01 00:00:00+00:00",
-            ),
+            from_="1 day ago",
+            to="1 day ago",
             published_date_precision="full",
             by_parse_date=True,
             ranked_only=True,
@@ -826,7 +820,6 @@ class AsyncAuthorsClient:
         Examples
         --------
         import asyncio
-        import datetime
 
         from newscatcher import AsyncNewscatcherApi
 
@@ -846,12 +839,8 @@ class AsyncAuthorsClient:
                 not_lang="fr,de",
                 countries="US,CA",
                 not_countries="UK,FR",
-                from_=datetime.datetime.fromisoformat(
-                    "2024-07-01 00:00:00+00:00",
-                ),
-                to=datetime.datetime.fromisoformat(
-                    "2024-01-01 00:00:00+00:00",
-                ),
+                from_="1 day ago",
+                to="1 day ago",
                 published_date_precision="full",
                 by_parse_date=True,
                 ranked_only=True,

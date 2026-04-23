@@ -4,5 +4,7 @@ HasNlp = bool
 """
 If true, filters results to include only articles that have NLP data.
 
+**Note**: NLP data is only available for articles indexed from July 2023 onward. Applying this filter to a date range that predates July 2023 returns zero results.
+
 To learn more, see [NLP features](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-features).
 """
