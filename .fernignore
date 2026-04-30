@@ -16,3 +16,4 @@ mypy.ini
 
 # CI/CD
 .github/workflows/ci.yml
+changelog.md
