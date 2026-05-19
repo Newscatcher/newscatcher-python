@@ -15,7 +15,7 @@ class NlpDataEntity(UniversalBaseModel):
     Natural Language Processing data for the article.
     """
 
-    summary_translated: typing.Optional[str] = pydantic.Field(default=None)
+    translation_summary: typing.Optional[str] = pydantic.Field(default=None)
     """
     A brief AI-generated summary of the article's English translation.
     """

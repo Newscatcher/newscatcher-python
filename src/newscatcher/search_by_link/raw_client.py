@@ -213,24 +213,8 @@ class RawSearchByLinkClient:
         links : typing.Optional[Links]
 
         from_ : typing.Optional[From]
-            The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
-
-            Formats with examples:
-            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-            - YYYY-MM-dd: `2024-07-01`
-            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-            - YYYY/mm/dd: `2024/07/01`
-            - English phrases: `1 day ago`, `today`
 
         to : typing.Optional[To]
-            The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
-
-            Formats with examples:
-            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-            - YYYY-MM-dd: `2024-07-01`
-            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-            - YYYY/mm/dd: `2024/07/01`
-            - English phrases: `1 day ago`, `now`
 
         page : typing.Optional[Page]
 
@@ -542,24 +526,8 @@ class AsyncRawSearchByLinkClient:
         links : typing.Optional[Links]
 
         from_ : typing.Optional[From]
-            The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
-
-            Formats with examples:
-            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-            - YYYY-MM-dd: `2024-07-01`
-            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-            - YYYY/mm/dd: `2024/07/01`
-            - English phrases: `1 day ago`, `today`
 
         to : typing.Optional[To]
-            The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC.
-
-            Formats with examples:
-            - YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-            - YYYY-MM-dd: `2024-07-01`
-            - YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-            - YYYY/mm/dd: `2024/07/01`
-            - English phrases: `1 day ago`, `now`
 
         page : typing.Optional[Page]
 
