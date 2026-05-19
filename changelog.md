@@ -1,3 +1,13 @@
+## 3.0.0 - 2026-05-19
+### Breaking Changes
+* **`NlpDataEntity.summary_translated`** — renamed to `translation_summary`; update all attribute access to use the new name (the JSON wire alias `summary_translated` is unchanged).
+* **`AdditionalSourceInfo.nb_articles_for7d`** — renamed to `nb_articles_for_7_d`; update all attribute access to use the new name (the JSON wire alias `nb_articles_for_7d` is unchanged).
+### Added
+* **`max_retries`** — new optional constructor parameter on `BaseNewscatcherApi` and `AsyncBaseNewscatcherApi` to configure the default number of HTTP retries (defaults to 2); per-request `max_retries` in `RequestOptions` still takes precedence.
+### Changed
+* **`pydantic-core`** dependency upper bound widened from `<2.44.0` to `<3.0.0`, allowing use of newer pydantic-core releases.
+* **`To` type alias** — union member order changed from `Union[dt.datetime, str]` to `Union[str, dt.datetime]`; no runtime impact for most callers.
+
 ## 2.1.1 - 2026-04-30
 * fix: improve SSE line-ending normalization and incremental decoding
 * Refactor the SSE event source to use Python's incremental codec decoder

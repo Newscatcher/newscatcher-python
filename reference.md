@@ -50,7 +50,7 @@ client.search.get(
     not_countries="UK,FR",
     not_author_name="John Doe, Jane Doe",
     from_=datetime.datetime.fromisoformat("1 day ago"),
-    to=datetime.datetime.fromisoformat("1 day ago"),
+    to="now",
     published_date_precision="full",
     by_parse_date=True,
     ranked_only=True,
@@ -149,7 +149,9 @@ Multiple countries with the number of top sources can be specified as a comma-se
 
 Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
 
-**Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
+**Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. 
+
+For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
     
 </dd>
 </dl>
@@ -2646,7 +2648,7 @@ client.authors.get(
     countries="US,CA",
     not_countries="UK,FR",
     from_=datetime.datetime.fromisoformat("1 day ago"),
-    to=datetime.datetime.fromisoformat("1 day ago"),
+    to="now",
     published_date_precision="full",
     by_parse_date=True,
     ranked_only=True,
@@ -3585,7 +3587,7 @@ client.search_by_link.get(
     ids="5f8d0d55b6e45e00179c6e7e",
     links="https://nytimes.com/article1,https://bbc.com/article2",
     from_=datetime.datetime.fromisoformat("1 day ago"),
-    to=datetime.datetime.fromisoformat("1 day ago"),
+    to="now",
     page=2,
     page_size=50,
     robots_compliant=True,
@@ -3751,15 +3753,6 @@ client.search_by_link.post(
 <dd>
 
 **from:** `typing.Optional[From]` 
-
-The starting point in time to search from. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `today`
     
 </dd>
 </dl>
@@ -3768,15 +3761,6 @@ Formats with examples:
 <dd>
 
 **to:** `typing.Optional[To]` 
-
-The ending point in time to search up to. Accepts date-time strings in ISO 8601 format and plain text strings. The default time zone is UTC. 
-
-Formats with examples:
-- YYYY-mm-ddTHH:MM:SS: `2024-07-01T00:00:00`
-- YYYY-MM-dd: `2024-07-01`
-- YYYY/mm/dd HH:MM:SS: `2024/07/01 00:00:00`
-- YYYY/mm/dd: `2024/07/01`
-- English phrases: `1 day ago`, `now`
     
 </dd>
 </dl>
@@ -3925,7 +3909,9 @@ Multiple countries with the number of top sources can be specified as a comma-se
 
 Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
 
-**Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
+**Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. 
+
+For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
     
 </dd>
 </dl>
@@ -4212,7 +4198,7 @@ client.aggregation_count.get(
     not_countries="UK,FR",
     not_author_name="John Doe, Jane Doe",
     from_=datetime.datetime.fromisoformat("1 day ago"),
-    to=datetime.datetime.fromisoformat("1 day ago"),
+    to="now",
     published_date_precision="full",
     by_parse_date=True,
     ranked_only=True,

@@ -3,4 +3,4 @@
 import datetime as dt
 import typing
 
-To = typing.Union[dt.datetime, str]
+To = typing.Union[str, dt.datetime]

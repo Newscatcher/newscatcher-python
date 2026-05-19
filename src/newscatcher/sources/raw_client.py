@@ -81,7 +81,9 @@ class RawSourcesClient:
         source_name : typing.Optional[str]
             Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
 
-            **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
+            **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`.
+
+            For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
 
         source_url : typing.Optional[str]
             The domain(s) of the news publication to search for.
@@ -451,7 +453,9 @@ class AsyncRawSourcesClient:
         source_name : typing.Optional[str]
             Word or phrase to search within the source names. To specify multiple values, use a comma-separated string.
 
-            **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`. For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
+            **Note**: The search doesn't require an exact match and returns sources containing the specified terms in their names. You can use any word or phrase, like `"sport"` or `"new york times"`.
+
+            For example, `"sport"` returns sources such as `"Motorsport"`, `"Dot Esport"`, and `"Tuttosport"`.
 
         source_url : typing.Optional[str]
             The domain(s) of the news publication to search for.
