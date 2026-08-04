@@ -1,3 +1,16 @@
+## [3.1.0] - 2026-08-04
+### Added
+- **`stream_reconnection_enabled`** and **`max_stream_reconnection_attempts`** — new optional constructor parameters on `BaseNewscatcherApi` and `AsyncBaseNewscatcherApi` (and per-request fields in `RequestOptions`) to configure automatic SSE stream reconnection with exponential backoff.
+- **`RequestOptions.timeout`** — new `float` field for per-request timeouts in seconds; supersedes the now-deprecated `timeout_in_seconds` alias when both are provided.
+- **`get_keepalive_socket_options()`** — new helper that builds cross-platform TCP keepalive socket options for use with httpx transports to keep long-lived connections alive through firewalls and NAT.
+- **`quote_path_param()`** — new utility in `jsonable_encoder` that percent-encodes path segment values to prevent path-traversal issues.
+
+### Changed
+- **`EventSource`** — `iter_sse` and `aiter_sse` now automatically reconnect resumable streams on transport errors, tracking the last dispatched event id and resetting the attempt counter on each successfully dispatched event.
+- **`parse_sse_obj`** — simplified to data-level discrimination only; protocol-level SSE `event:` field discrimination is now handled at code-generation time, removing internal `_get_discriminator_and_variants` helpers.
+- **Serialization performance** — `convert_and_respect_annotation_metadata` now caches resolved type hints and short-circuits recursive walks when no `FieldMetadata` aliases are present, reducing overhead on SSE streaming hot paths.
+- **`aiohttp` / `httpx-aiohttp` dependencies** — minimum `aiohttp` raised to `>=3.14.1`, `httpx-aiohttp` widened to `^0.1.8`, both now requiring Python `>=3.10`.
+
 ## 3.0.0 - 2026-05-19
 ### Breaking Changes
 * **`NlpDataEntity.summary_translated`** — renamed to `translation_summary`; update all attribute access to use the new name (the JSON wire alias `summary_translated` is unchanged).
