@@ -4,5 +4,5 @@ NotTheme = str
 """
 Inverse of the `theme` parameter. Excludes articles based on their general topic, as determined by NLP analysis. To exclude multiple themes, use a comma-separated string.
 
-To learn more, see [NLP features](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-features).
+To learn more, see [NLP Enrichments](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-enrichments).
 """
