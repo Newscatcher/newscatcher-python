@@ -9,5 +9,5 @@ Range is `-1.0` to `1.0`, where:
 - Positive values indicate positive sentiment.
 - Values close to 0 indicate neutral sentiment.
 
-To learn more, see [NLP features](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-features).
+To learn more, see [NLP Enrichments](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-enrichments).
 """

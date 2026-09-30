@@ -1,3 +1,17 @@
+## [3.1.0] - 2026-09-30
+### Added
+- **`stream_reconnection_enabled`** and **`max_stream_reconnection_attempts`** — new optional constructor parameters on `BaseNewscatcherApi` and `AsyncBaseNewscatcherApi` (and matching fields on `RequestOptions`) to control automatic SSE stream reconnection with exponential backoff.
+- **`get_keepalive_socket_options()`** — new helper that builds platform-appropriate TCP keepalive socket options to maintain long-lived connections through firewalls and NAT devices.
+- **`RequestOptions.timeout`** — new `float` field as the preferred way to set per-request timeout in seconds; `timeout_in_seconds` is retained as a deprecated alias.
+- **`BaseHttpResponse.response`** — new property exposing the underlying `httpx.Response` object for low-level response access.
+
+### Changed
+- **`EventSource`** — `iter_sse()` and `aiter_sse()` now automatically reconnect dropped SSE streams using the last event id, server-supplied `retry:` delay, and a configurable attempt budget; a 1 MiB per-line size guard prevents unbounded memory growth.
+- **SSE parsing performance** — type-hint resolution, field-alias lookups, and `pydantic.TypeAdapter` construction are now cached per type, reducing overhead on high-throughput streaming paths; `parse_sse_obj` simplified to handle data-level discrimination only.
+- **`Content-Type` header** — stripped from requests whose optional body resolves to empty, preventing spurious media-type headers on bodyless calls.
+- **`aiohttp` / `httpx-aiohttp` dependencies** — minimum `aiohttp` raised to `>=3.14.1` and `httpx-aiohttp` widened to `^0.1.8`; both now require Python `>=3.10`.
+- **NLP documentation links** — updated from "NLP features" to "NLP Enrichments" across `Theme`, `NotTheme`, `HasNlp`, `IncludeNlpData`, and sentiment type modules.
+
 ## 3.0.0 - 2026-05-19
 ### Breaking Changes
 * **`NlpDataEntity.summary_translated`** — renamed to `translation_summary`; update all attribute access to use the new name (the JSON wire alias `summary_translated` is unchanged).
