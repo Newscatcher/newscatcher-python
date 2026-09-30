@@ -4,7 +4,7 @@ Theme = str
 """
 Filters articles based on their general topic, as determined by NLP analysis. To select multiple themes, use a comma-separated string.
 
-To learn more, see [NLP features](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-features).
+To learn more, see [NLP Enrichments](https://www.newscatcherapi.com/docs/news-api/guides-and-concepts/nlp-enrichments).
 
 Available options: `Business`, `Economics`, `Entertainment`, `Finance`, `Health`, `Politics`, `Science`, `Sports`, `Tech`, `Crime`, `Financial Crime`, `Lifestyle`, `Automotive`, `Travel`, `Weather`, `General`.
 """
