@@ -52,6 +52,10 @@ class NlpDataEntity(UniversalBaseModel):
             alias="ner_PER", description="Named Entity Recognition for person entities (individuals' names)."
         ),
     ] = None
+    """
+    Named Entity Recognition for person entities (individuals' names).
+    """
+
     ner_org: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="ner_ORG"),
@@ -60,6 +64,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for organization entities (company names, institutions).",
         ),
     ] = None
+    """
+    Named Entity Recognition for organization entities (company names, institutions).
+    """
+
     ner_misc: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="ner_MISC"),
@@ -68,6 +76,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for miscellaneous entities (events, nationalities, products).",
         ),
     ] = None
+    """
+    Named Entity Recognition for miscellaneous entities (events, nationalities, products).
+    """
+
     ner_loc: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="ner_LOC"),
@@ -76,6 +88,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for location entities (cities, countries, geographic features).",
         ),
     ] = None
+    """
+    Named Entity Recognition for location entities (cities, countries, geographic features).
+    """
+
     translation_ner_per: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="translation_ner_PER"),
@@ -84,6 +100,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for person entities (individuals' names) extracted from the English translation of the article.",
         ),
     ] = None
+    """
+    Named Entity Recognition for person entities (individuals' names) extracted from the English translation of the article.
+    """
+
     translation_ner_org: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="translation_ner_ORG"),
@@ -92,6 +112,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for organization entities (company names, institutions) extracted from the English translation of the article.",
         ),
     ] = None
+    """
+    Named Entity Recognition for organization entities (company names, institutions) extracted from the English translation of the article.
+    """
+
     translation_ner_misc: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="translation_ner_MISC"),
@@ -100,6 +124,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for miscellaneous entities (events, nationalities, products) extracted from the English translation of the article.",
         ),
     ] = None
+    """
+    Named Entity Recognition for miscellaneous entities (events, nationalities, products) extracted from the English translation of the article.
+    """
+
     translation_ner_loc: typing_extensions.Annotated[
         typing.Optional[NamedEntityList],
         FieldMetadata(alias="translation_ner_LOC"),
@@ -108,6 +136,10 @@ class NlpDataEntity(UniversalBaseModel):
             description="Named Entity Recognition for location entities (cities, countries, geographic features) extracted from the English translation of the article.",
         ),
     ] = None
+    """
+    Named Entity Recognition for location entities (cities, countries, geographic features) extracted from the English translation of the article.
+    """
+
     iptc_tags_name: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
     """
     IPTC media topic taxonomy paths identified in the article content. Each path represents a hierarchical category following the IPTC standard.
