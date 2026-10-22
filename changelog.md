@@ -1,3 +1,20 @@
+## [3.1.0] - 2026-10-22
+### Added
+- **`get_keepalive_socket_options()`** — new helper that builds cross-platform TCP keepalive socket options for use with `httpx.HTTPTransport` to keep idle connections alive through firewalls and NAT.
+- **`quote_path_param()`** — new URL-encoding helper that percent-encodes path parameters and rejects dot-segments to prevent path-traversal issues.
+- **SSE auto-reconnect** — `EventSource` now supports automatic stream reconnection with configurable max attempts, exponential backoff, and `Last-Event-ID` resumption for both sync and async consumers.
+- **`stream_reconnection_enabled`**, **`max_stream_reconnection_attempts`**, **`retry_remote_protocol_errors`**, and **`timeout`** — new per-request fields on `RequestOptions` and optional constructor parameters on `BaseNewscatcherApi` / `AsyncBaseNewscatcherApi` for fine-grained retry and reconnection control.
+- **`NewsDomainTypeOneItem`** and **`BaseHttpResponse.response`** — new exported type for `news_domain_type` literals and new property exposing the underlying `httpx.Response` object directly.
+
+### Changed
+- **`RemoteProtocolError` retry behavior** — `RemoteProtocolError` is no longer retried automatically; opt in by setting `retry_remote_protocol_errors: True` in `RequestOptions`.
+- **Header merging** — `additional_headers` in `RequestOptions` now uses case-insensitive merging, preventing duplicate headers when keys differ only by case.
+- **`x-api-token` redaction** — the `x-api-token` header is now redacted in debug logs alongside other sensitive headers.
+- **SSE line size limit** — SSE streams now raise `SSEError` when a single line exceeds 1 MiB, preventing unbounded memory growth on malformed streams.
+
+### Fixed
+- **`news_domain_type` serialization** — the `news_domain_type` parameter in search and sources endpoints now correctly serializes enum values via `convert_and_respect_annotation_metadata`, matching the behavior of `news_type`.
+
 ## 3.0.0 - 2026-05-19
 ### Breaking Changes
 * **`NlpDataEntity.summary_translated`** — renamed to `translation_summary`; update all attribute access to use the new name (the JSON wire alias `summary_translated` is unchanged).

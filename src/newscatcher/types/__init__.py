@@ -68,6 +68,7 @@ if typing.TYPE_CHECKING:
     from .named_entity_list_item import NamedEntityListItem
     from .ner_name import NerName
     from .news_domain_type import NewsDomainType
+    from .news_domain_type_one_item import NewsDomainTypeOneItem
     from .news_type import NewsType
     from .nlp_data_entity import NlpDataEntity
     from .not_author_name import NotAuthorName
@@ -172,6 +173,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NamedEntityListItem": ".named_entity_list_item",
     "NerName": ".ner_name",
     "NewsDomainType": ".news_domain_type",
+    "NewsDomainTypeOneItem": ".news_domain_type_one_item",
     "NewsType": ".news_type",
     "NlpDataEntity": ".nlp_data_entity",
     "NotAuthorName": ".not_author_name",
@@ -300,6 +302,7 @@ __all__ = [
     "NamedEntityListItem",
     "NerName",
     "NewsDomainType",
+    "NewsDomainTypeOneItem",
     "NewsType",
     "NlpDataEntity",
     "NotAuthorName",
