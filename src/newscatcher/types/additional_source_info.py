@@ -21,6 +21,10 @@ class AdditionalSourceInfo(UniversalBaseModel):
             description="The number of articles published by the source in the last seven days.",
         ),
     ] = None
+    """
+    The number of articles published by the source in the last seven days.
+    """
+
     country: typing.Optional[str] = pydantic.Field(default=None)
     """
     The country of origin of the news source.

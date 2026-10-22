@@ -376,7 +376,9 @@ class RawSearchClient:
                 "all_links_text": all_links_text,
                 "additional_domain_info": additional_domain_info,
                 "is_news_domain": is_news_domain,
-                "news_domain_type": news_domain_type,
+                "news_domain_type": convert_and_respect_annotation_metadata(
+                    object_=news_domain_type, annotation=NewsDomainType, direction="write"
+                ),
                 "news_type": news_type,
                 "word_count_min": word_count_min,
                 "word_count_max": word_count_max,
@@ -749,7 +751,9 @@ class RawSearchClient:
                 ),
                 "additional_domain_info": additional_domain_info,
                 "is_news_domain": is_news_domain,
-                "news_domain_type": news_domain_type,
+                "news_domain_type": convert_and_respect_annotation_metadata(
+                    object_=news_domain_type, annotation=NewsDomainType, direction="write"
+                ),
                 "news_type": convert_and_respect_annotation_metadata(
                     object_=news_type, annotation=NewsType, direction="write"
                 ),
@@ -1186,7 +1190,9 @@ class AsyncRawSearchClient:
                 "all_links_text": all_links_text,
                 "additional_domain_info": additional_domain_info,
                 "is_news_domain": is_news_domain,
-                "news_domain_type": news_domain_type,
+                "news_domain_type": convert_and_respect_annotation_metadata(
+                    object_=news_domain_type, annotation=NewsDomainType, direction="write"
+                ),
                 "news_type": news_type,
                 "word_count_min": word_count_min,
                 "word_count_max": word_count_max,
@@ -1559,7 +1565,9 @@ class AsyncRawSearchClient:
                 ),
                 "additional_domain_info": additional_domain_info,
                 "is_news_domain": is_news_domain,
-                "news_domain_type": news_domain_type,
+                "news_domain_type": convert_and_respect_annotation_metadata(
+                    object_=news_domain_type, annotation=NewsDomainType, direction="write"
+                ),
                 "news_type": convert_and_respect_annotation_metadata(
                     object_=news_type, annotation=NewsType, direction="write"
                 ),

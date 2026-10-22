@@ -2,6 +2,6 @@
 
 import typing
 
-NewsDomainType = typing.Union[
-    typing.Literal["Original Content", "Aggregator", "Press Releases", "Republisher", "Other"], typing.Any
-]
+from .news_domain_type_one_item import NewsDomainTypeOneItem
+
+NewsDomainType = typing.Union[str, typing.List[NewsDomainTypeOneItem]]
